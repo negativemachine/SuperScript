@@ -9,12 +9,6 @@ Superscript est un script InDesign conçu pour automatiser les corrections typog
 ➡️ [Download latest release](https://github.com/lab-Spectral/SuperScript/releases/latest)
 
 
-### Editions
-
-SuperScript is available in two editions:
-- Community Edition (CE) released under the AGPL license, free to use and modify.
-- Enterprise Edition (EE) includes additional features and official support. A commercial license is required.
-
 ### Licensing
 See the [LICENSE](LICENSE) file for details on licensing.
 
