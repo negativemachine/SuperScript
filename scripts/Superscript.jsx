@@ -16,7 +16,7 @@
     
     // Vérifier si l'application est disponible
     if (typeof app === "undefined") {
-        alert("Impossible d'accéder à l'application InDesign.");
+        alert("Cannot access InDesign application.");
         return;
     }
     
@@ -45,12 +45,440 @@
             APOSTROPHES_TO_REPLACE: ["'", "&#39;", "&apos;", "&#8217;"]
         },
         SPACE_TYPES: [
-            { label: "Espace fine insécable (~<)", value: "~<" },
-            { label: "Espace insécable (~S)", value: "~S" },
+            { labelKey: "spaceTypeFine", value: "~<" },
+            { labelKey: "spaceTypeNonBreaking", value: "~S" },
         ],
         SCRIPT_TITLE: "Superscript"
     };
-    
+
+    // =========================================================================
+    // safeJSON — ES3-compatible JSON stringify/parse
+    // =========================================================================
+
+    var safeJSON = {
+        /**
+         * Converts an object to a JSON string
+         * @param {Object} obj - The object to stringify
+         * @return {String} The JSON string
+         */
+        stringify: function(obj) {
+            var t = typeof obj;
+            if (t !== "object" || obj === null) {
+                if (t === "string") return '"' + obj.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
+                if (t === "number" || t === "boolean") return String(obj);
+                return "null";
+            }
+            if (obj instanceof Array) {
+                var items = [];
+                for (var i = 0; i < obj.length; i++) {
+                    items.push(safeJSON.stringify(obj[i]));
+                }
+                return "[" + items.join(",") + "]";
+            }
+            var pairs = [];
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    pairs.push('"' + key + '":' + safeJSON.stringify(obj[key]));
+                }
+            }
+            return "{" + pairs.join(",") + "}";
+        },
+
+        /**
+         * Parses a JSON string into an object
+         * @param {String} str - The JSON string to parse
+         * @return {Object} The parsed object
+         */
+        parse: function(str) {
+            if (!/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@')
+                .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+                .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+                throw new Error("Invalid JSON");
+            }
+            try {
+                return (new Function('return ' + str))();
+            } catch (e) {
+                throw new Error("JSON parse error: " + e.message);
+            }
+        }
+    };
+
+    if (typeof JSON === 'undefined') {
+        JSON = safeJSON;
+    }
+
+    // =========================================================================
+    // I18n — Internationalization module
+    // =========================================================================
+
+    var I18n = (function() {
+        var currentLanguage = 'en';
+
+        var translations = {
+            'en': {
+                // App-level
+                'errorInDesignAccess': 'Cannot access the InDesign application.',
+                'errorUnrecoverable': 'An unrecoverable error has occurred.',
+                'errorFatal': 'Fatal error: %s',
+                'errorScriptHalted': 'Script halted due to a fatal error',
+                'errorObjectUndefined': "Object '%s' is undefined or null",
+                'errorInContext': 'Error',
+                'errorContextIn': ' in ',
+                'errorLine': ' (line ',
+                'errorInDesignUnavailable': 'The InDesign application is not accessible',
+                'errorDocumentsUnavailable': 'The documents collection is not accessible',
+                'errorNoDocumentOpen': 'Please open a document before running this script.',
+                'errorInvalidDocument': 'Error: Invalid document',
+                'errorInvalidMasterName': 'Error: Invalid master name',
+                'errorMasterNotFound': "Master '%s' not found in document %s",
+                'errorApplyMaster': 'Error applying master page: %s',
+                'errorRequiredStyles': 'Required character styles are not defined. Please select valid styles.',
+
+                // Dialog
+                'dialogTitle': 'SuperScript',
+                'tabCorrections': 'Corrections',
+                'tabSpaces': 'Spaces & Returns',
+                'tabStyles': 'Styles',
+                'tabFormatting': 'Formatting',
+                'tabPageLayout': 'Page Layout',
+
+                // Corrections tab
+                'moveNotesLabel': 'Move footnote references before punctuation',
+                'convertEllipsisLabel': 'Convert ... to ellipsis character (\u2026)',
+                'replaceApostrophesLabel': 'Replace straight apostrophes with typographic apostrophes',
+                'replaceDashesLabel': 'Replace em dashes with en dashes',
+                'fixIsolatedHyphensLabel': 'Convert isolated hyphens to en dashes',
+                'fixValueRangesLabel': 'Convert hyphens to en dashes in value ranges',
+
+                // Spaces tab
+                'fixTypoSpacesLabel': 'Fix typographic spaces:',
+                'fixDashIncisesLabel': 'Fix spaces around \u2013 parenthetical dashes \u2013 :',
+                'fixDoubleSpacesLabel': 'Fix multiple spaces',
+                'removeDoubleReturnsLabel': 'Remove double returns',
+                'removeSpacesBeforePunctuationLabel': 'Remove spaces before periods, commas and footnotes',
+                'removeSpacesStartParagraphLabel': 'Remove spaces at beginning of paragraphs',
+                'removeSpacesEndParagraphLabel': 'Remove spaces at end of paragraphs',
+                'removeTabsLabel': 'Remove tabs',
+                'formatEspacesLabel': 'Add non-breaking spaces in page references (p.\u00A054)',
+
+                // Styles definition panel
+                'styleDefinitionPanel': 'Style definitions',
+                'noteStyleLabel': 'Footnote references:',
+                'italicStyleLabel': 'Italic:',
+                'smallCapsStyleLabel': 'Small caps:',
+                'capitalStyleLabel': 'Capitals:',
+                'superscriptStyleLabel': 'Superscripts:',
+
+                // Styles application panel
+                'styleApplicationPanel': 'Style application',
+                'applyNoteStyleLabel': 'Apply style to footnote references',
+                'applyItalicStyleLabel': 'Apply style to italic text',
+                'applyExposantStyleLabel': 'Apply style to superscript text',
+
+                // Formatting tab
+                'formatSieclesLabel': 'Format centuries (XIVth century)',
+                'formatOrdinauxLabel': 'Format ordinal expressions (IInd International)',
+                'formatReferencesLabel': 'Format work parts and proper names (Volume III, Louis XIV)',
+                'formatNumbersLabel': 'Format numbers',
+                'numberSettingsPanel': 'Number formatting options',
+                'addSpacesLabel': 'Add spaces between thousands (12345 \u2192 12\u2009345)',
+                'excludeYearsLabel': 'Exclude potential years (numbers between 0 and 2050)',
+                'useCommaLabel': 'Replace dots with commas (3.14 \u2192 3,14)',
+
+                // Page layout tab
+                'enableStyleAfterLabel': 'Conditional style application',
+                'triggerStylesPanel': 'Trigger styles (multiple selection)',
+                'targetStyleLabel': 'Style to apply to the following paragraph:',
+                'applyMasterToLastPageLabel': 'Apply a master to the last facing page',
+                'masterLabel': 'Master to apply:',
+
+                // Space types
+                'spaceTypeFine': 'Thin non-breaking space (~<)',
+                'spaceTypeNonBreaking': 'Non-breaking space (~S)',
+
+                // Default/placeholder
+                'defaultStyle': '[Default style]',
+                'noStylesAvailable': '[No styles available]',
+                'noMastersAvailable': '[No masters available]',
+
+                // Buttons
+                'helpTooltip': 'Show SuperScript help',
+                'cancelButton': 'Cancel',
+                'applyButton': 'Apply',
+                'closeButton': 'Close',
+
+                // Help dialog
+                'helpDialogTitle': 'SuperScript Help',
+                'helpDialogHeader': 'SuperScript - User Guide',
+                'helpContent': 'SUPERSCRIPT USER GUIDE\n\n'
+                    + 'OVERVIEW\n\n'
+                    + 'SuperScript is an InDesign script that automates typographic corrections in layout documents. It quickly fixes spaces, punctuation, quotes, apostrophes, etc.\n\n'
+                    + 'TAB "SPACES & RETURNS"\n\n'
+                    + '\u2022 Fix typographic spaces: Adds thin non-breaking or non-breaking spaces before or after certain characters according to typographic rules.\n'
+                    + '\u2022 Fix multiple spaces: Replaces space sequences with a single space.\n'
+                    + '\u2022 Remove double returns: Eliminates empty paragraphs.\n'
+                    + '\u2022 Remove spaces before periods, commas and footnotes: Removes unwanted spaces.\n\n'
+                    + 'TAB "STYLES"\n\n'
+                    + '\u2022 Style definitions: Select styles to use for formatting footnote references, italic text and superscripts.\n'
+                    + '\u2022 Style application: Enable options to automatically apply these styles.\n\n'
+                    + 'TAB "FORMATTING"\n\n'
+                    + '\u2022 Move footnote references: Places footnotes before punctuation.\n'
+                    + '\u2022 Replace em dashes: Converts em dashes to en dashes.\n'
+                    + '\u2022 Convert ... to ellipsis: Replaces three dots with the typographic ellipsis character.\n'
+                    + '\u2022 Replace straight apostrophes: Uses typographic apostrophes.\n'
+                    + '\u2022 Format centuries, ordinals and references: Options for formatting Roman numerals.\n\n'
+                    + 'TAB "PAGE LAYOUT"\n\n'
+                    + '\u2022 Conditional style application: Automatically applies a style to the paragraph following selected styles.\n'
+                    + '\u2022 Apply master to last page: Useful for chapter or document endings.\n\n'
+                    + 'For more information, visit our website: https://lab.spectral.art',
+
+                // Progress bar
+                'progressTitle': 'Applying typographic corrections',
+                'progressRemoveSpacesBeforePunctuation': 'Removing spaces before punctuation...',
+                'progressFixDoubleSpaces': 'Fixing double spaces...',
+                'progressFixTypoSpaces': 'Fixing typographic spaces...',
+                'progressFixDashIncises': 'Fixing spaces around parenthetical dashes...',
+                'progressRemoveDoubleReturns': 'Removing double returns...',
+                'progressRemoveSpacesStart': 'Removing spaces at beginning of paragraphs...',
+                'progressRemoveSpacesEnd': 'Removing spaces at end of paragraphs...',
+                'progressRemoveTabs': 'Removing tabs...',
+                'progressMoveNotes': 'Moving footnote references...',
+                'progressApplyNoteStyle': 'Applying style to footnote references...',
+                'progressReplaceDashes': 'Replacing em dashes...',
+                'progressFixIsolatedHyphens': 'Fixing isolated hyphens...',
+                'progressFixValueRanges': 'Fixing value ranges...',
+                'progressApplyItalicStyle': 'Applying italic style...',
+                'progressApplyExposantStyle': 'Applying superscript style...',
+                'progressConvertEllipsis': 'Converting ellipsis...',
+                'progressReplaceApostrophes': 'Replacing apostrophes...',
+                'progressApplyConditionalStyles': 'Applying conditional styles...',
+                'progressApplyMasterToLastPage': 'Applying master to last page...',
+                'progressFormatSiecles': 'Formatting centuries and ordinal expressions...',
+                'progressFormatNumbers': 'Formatting numbers...',
+                'progressComplete': 'Done!',
+
+                // Alerts
+                'successCorrectionsApplied': 'Corrections applied to the active document.',
+
+                // SieclesModule errors
+                'errorUnknown': 'Unknown error',
+                'errorReplaceApostrophes': 'Error in replaceApostrophes: %s',
+                'errorFormatSiecles': 'Error formatting centuries: %s',
+                'errorFormatOrdinaux': 'Error formatting ordinal expressions: %s',
+                'errorFormat1er': "Error formatting '1er' occurrences: %s",
+                'errorFormatReferences': 'Error formatting work references and titles: %s',
+                'errorFormatEspaces': 'Error formatting non-breaking spaces for references: %s',
+                'errorMainFunction': 'main function'
+            },
+            'fr': {
+                // App-level
+                'errorInDesignAccess': 'Impossible d\'acc\u00E9der \u00E0 l\'application InDesign.',
+                'errorUnrecoverable': 'Une erreur irr\u00E9cup\u00E9rable s\'est produite.',
+                'errorFatal': 'Erreur fatale\u2009: %s',
+                'errorScriptHalted': 'Arr\u00EAt du script suite \u00E0 une erreur fatale',
+                'errorObjectUndefined': "Objet '%s' est undefined ou null",
+                'errorInContext': 'Erreur',
+                'errorContextIn': ' dans ',
+                'errorLine': ' (ligne ',
+                'errorInDesignUnavailable': 'L\'application InDesign n\'est pas accessible',
+                'errorDocumentsUnavailable': 'La collection de documents n\'est pas accessible',
+                'errorNoDocumentOpen': 'Veuillez ouvrir un document avant d\'ex\u00E9cuter ce script.',
+                'errorInvalidDocument': 'Erreur\u2009: Document invalide',
+                'errorInvalidMasterName': 'Erreur\u2009: Nom de gabarit invalide',
+                'errorMasterNotFound': "Gabarit '%s' introuvable dans le document %s",
+                'errorApplyMaster': 'Erreur lors de l\'application du gabarit\u2009: %s',
+                'errorRequiredStyles': 'Les styles de caract\u00E8re requis ne sont pas d\u00E9finis. Veuillez s\u00E9lectionner des styles valides.',
+
+                // Dialog
+                'dialogTitle': 'SuperScript',
+                'tabCorrections': 'Corrections',
+                'tabSpaces': 'Espaces et retours',
+                'tabStyles': 'Styles',
+                'tabFormatting': 'Formatages',
+                'tabPageLayout': 'Mise en page',
+
+                // Corrections tab
+                'moveNotesLabel': 'D\u00E9placer les appels de notes de bas de page',
+                'convertEllipsisLabel': 'Convertir ... en points de suspension (\u2026)',
+                'replaceApostrophesLabel': 'Remplacer les apostrophes droites par les apostrophes typographiques',
+                'replaceDashesLabel': 'Remplacer les tirets cadratin par des tirets demi-cadratin',
+                'fixIsolatedHyphensLabel': 'Transformer les tirets isol\u00E9s en tirets demi-cadratin',
+                'fixValueRangesLabel': 'Transformer les tirets en tirets demi-cadratin dans les intervalles de valeurs',
+
+                // Spaces tab
+                'fixTypoSpacesLabel': 'Corriger les espaces typographiques\u2009:',
+                'fixDashIncisesLabel': 'Corriger les espaces des \u2013 incises \u2013\u2009:',
+                'fixDoubleSpacesLabel': 'Corriger les espaces multiples',
+                'removeDoubleReturnsLabel': 'Supprimer les doubles retours \u00E0 la ligne',
+                'removeSpacesBeforePunctuationLabel': 'Supprimer les espaces avant les points, virgules et notes',
+                'removeSpacesStartParagraphLabel': 'Supprimer les espaces en d\u00E9but de paragraphe',
+                'removeSpacesEndParagraphLabel': 'Supprimer les espaces en fin de paragraphe',
+                'removeTabsLabel': 'Supprimer les tabulations',
+                'formatEspacesLabel': 'Ajouter espaces ins\u00E9cables dans les r\u00E9f\u00E9rences de page (p.\u00A054)',
+
+                // Styles definition panel
+                'styleDefinitionPanel': 'D\u00E9finition des styles',
+                'noteStyleLabel': 'Appels de notes\u2009:',
+                'italicStyleLabel': 'Italique\u2009:',
+                'smallCapsStyleLabel': 'Petites capitales\u2009:',
+                'capitalStyleLabel': 'Capitales\u2009:',
+                'superscriptStyleLabel': 'Exposants\u2009:',
+
+                // Styles application panel
+                'styleApplicationPanel': 'Application des styles',
+                'applyNoteStyleLabel': 'Appliquer un style aux appels de notes',
+                'applyItalicStyleLabel': 'Appliquer un style au texte en italique',
+                'applyExposantStyleLabel': 'Appliquer un style au texte en exposant',
+
+                // Formatting tab
+                'formatSieclesLabel': 'Formater les si\u00E8cles (XIV\u1D49 si\u00E8cle)',
+                'formatOrdinauxLabel': 'Formater les expressions ordinales (II\u1D49 Internationale)',
+                'formatReferencesLabel': 'Formater parties d\'\u0153uvres et noms propres (Tome III, Louis XIV)',
+                'formatNumbersLabel': 'Formater les nombres',
+                'numberSettingsPanel': 'Options de formatage des nombres',
+                'addSpacesLabel': 'Ajouter des espaces entre les milliers (12345 \u2192 12\u2009345)',
+                'excludeYearsLabel': 'Exclure les ann\u00E9es potentielles (nombres entre 0 et 2050)',
+                'useCommaLabel': 'Remplacer les points par des virgules (3.14 \u2192 3,14)',
+
+                // Page layout tab
+                'enableStyleAfterLabel': 'Application conditionnelle de styles',
+                'triggerStylesPanel': 'Styles d\u00E9clencheurs (s\u00E9lection multiple)',
+                'targetStyleLabel': 'Style \u00E0 appliquer au paragraphe suivant\u2009:',
+                'applyMasterToLastPageLabel': 'Appliquer un gabarit \u00E0 la derni\u00E8re page en vis-\u00E0-vis',
+                'masterLabel': 'Gabarit \u00E0 appliquer\u2009:',
+
+                // Space types
+                'spaceTypeFine': 'Espace fine ins\u00E9cable (~<)',
+                'spaceTypeNonBreaking': 'Espace ins\u00E9cable (~S)',
+
+                // Default/placeholder
+                'defaultStyle': '[Style par d\u00E9faut]',
+                'noStylesAvailable': '[Aucun style disponible]',
+                'noMastersAvailable': '[Aucun gabarit disponible]',
+
+                // Buttons
+                'helpTooltip': 'Afficher l\'aide de SuperScript',
+                'cancelButton': 'Annuler',
+                'applyButton': 'Appliquer',
+                'closeButton': 'Fermer',
+
+                // Help dialog
+                'helpDialogTitle': 'Aide de SuperScript',
+                'helpDialogHeader': 'SuperScript - Guide d\'utilisation',
+                'helpContent': 'GUIDE D\'UTILISATION DE SUPERSCRIPT\n\n'
+                    + 'PR\u00C9SENTATION\n\n'
+                    + 'SuperScript est un script pour InDesign qui automatise les corrections typographiques dans les documents de mise en page. Il permet de corriger rapidement les espaces, les ponctuations, les guillemets, les apostrophes, etc.\n\n'
+                    + 'ONGLET "ESPACES ET RETOURS"\n\n'
+                    + '\u2022 Corriger les espaces typographiques\u2009: Ajoute des espaces fines ins\u00E9cables ou des espaces ins\u00E9cables avant ou apr\u00E8s certains caract\u00E8res selon les r\u00E8gles typographiques fran\u00E7aises.\n'
+                    + '\u2022 Corriger les espaces multiples\u2009: Remplace les s\u00E9quences d\'espaces par une seule espace.\n'
+                    + '\u2022 Supprimer les doubles retours\u2009: \u00C9limine les paragraphes vides.\n'
+                    + '\u2022 Supprimer les espaces avant les points, virgules et notes\u2009: Retire les espaces ind\u00E9sirables.\n\n'
+                    + 'ONGLET "STYLES"\n\n'
+                    + '\u2022 D\u00E9finition des styles\u2009: S\u00E9lectionnez les styles \u00E0 utiliser pour mettre en forme les appels de notes, le texte en italique et les exposants.\n'
+                    + '\u2022 Application des styles\u2009: Activez les options pour appliquer automatiquement ces styles.\n\n'
+                    + 'ONGLET "FORMATAGES"\n\n'
+                    + '\u2022 D\u00E9placer les appels de notes\u2009: Place les notes avant la ponctuation.\n'
+                    + '\u2022 Remplacer les tirets cadratin\u2009: Convertit les tirets cadratin en tirets demi-cadratin.\n'
+                    + '\u2022 Convertir ... en points de suspension\u2009: Remplace trois points par le caract\u00E8re typographique correspondant.\n'
+                    + '\u2022 Remplacer les apostrophes droites\u2009: Utilise des apostrophes typographiques.\n'
+                    + '\u2022 Formatage des si\u00E8cles, ordinaux et r\u00E9f\u00E9rences\u2009: Options pour la mise en forme des chiffres romains.\n\n'
+                    + 'ONGLET "MISE EN PAGE"\n\n'
+                    + '\u2022 Application conditionnelle de styles\u2009: Applique automatiquement un style au paragraphe qui suit les styles s\u00E9lectionn\u00E9s.\n'
+                    + '\u2022 Appliquer un gabarit \u00E0 la derni\u00E8re page\u2009: Utile pour la fin des chapitres ou des documents.\n\n'
+                    + 'Pour plus d\'informations, visitez notre site web\u2009: https://lab.spectral.art',
+
+                // Progress bar
+                'progressTitle': 'Application des corrections typographiques',
+                'progressRemoveSpacesBeforePunctuation': 'Suppression des espaces avant ponctuation...',
+                'progressFixDoubleSpaces': 'Correction des doubles espaces...',
+                'progressFixTypoSpaces': 'Correction des espaces typographiques...',
+                'progressFixDashIncises': 'Correction des espaces autour des incises...',
+                'progressRemoveDoubleReturns': 'Suppression des doubles retours...',
+                'progressRemoveSpacesStart': 'Suppression des espaces en d\u00E9but de paragraphe...',
+                'progressRemoveSpacesEnd': 'Suppression des espaces en fin de paragraphe...',
+                'progressRemoveTabs': 'Suppression des tabulations...',
+                'progressMoveNotes': 'D\u00E9placement des notes de bas de page...',
+                'progressApplyNoteStyle': 'Application du style aux notes de bas de page...',
+                'progressReplaceDashes': 'Remplacement des tirets cadratin...',
+                'progressFixIsolatedHyphens': 'Correction des tirets isol\u00E9s...',
+                'progressFixValueRanges': 'Correction des intervalles de valeurs...',
+                'progressApplyItalicStyle': 'Application du style italique...',
+                'progressApplyExposantStyle': 'Application du style aux exposants...',
+                'progressConvertEllipsis': 'Conversion des points de suspension...',
+                'progressReplaceApostrophes': 'Remplacement des apostrophes...',
+                'progressApplyConditionalStyles': 'Application des styles conditionnels...',
+                'progressApplyMasterToLastPage': 'Application du gabarit \u00E0 la derni\u00E8re page...',
+                'progressFormatSiecles': 'Formatage des si\u00E8cles et expressions ordinales...',
+                'progressFormatNumbers': 'Formatage des nombres...',
+                'progressComplete': 'Termin\u00E9\u2009!',
+
+                // Alerts
+                'successCorrectionsApplied': 'Corrections appliqu\u00E9es au document actif.',
+
+                // SieclesModule errors
+                'errorUnknown': 'Erreur inconnue',
+                'errorReplaceApostrophes': 'Erreur dans replaceApostrophes\u2009: %s',
+                'errorFormatSiecles': 'Erreur lors du formatage des si\u00E8cles\u2009: %s',
+                'errorFormatOrdinaux': 'Erreur lors du formatage des expressions ordinales\u2009: %s',
+                'errorFormat1er': 'Erreur lors du formatage des occurrences de \'1er\'\u2009: %s',
+                'errorFormatReferences': 'Erreur lors du formatage des r\u00E9f\u00E9rences d\'\u0153uvres et titres\u2009: %s',
+                'errorFormatEspaces': 'Erreur lors du formatage des espaces ins\u00E9cables pour les r\u00E9f\u00E9rences\u2009: %s',
+                'errorMainFunction': 'fonction principale'
+            }
+        };
+
+        function __(key) {
+            var lang = currentLanguage;
+            var langDict = translations[lang] || translations['en'];
+            var str = langDict[key] || translations['en'][key] || key;
+            if (arguments.length > 1) {
+                var args = [];
+                for (var i = 1; i < arguments.length; i++) {
+                    args.push(arguments[i]);
+                }
+                str = str.replace(/%[sd]/g, function(match) {
+                    if (!args.length) return match;
+                    var arg = args.shift();
+                    if (match === '%s') return String(arg);
+                    if (match === '%d') return parseInt(arg, 10);
+                    return match;
+                });
+            }
+            return str;
+        }
+
+        function setLanguage(lang) {
+            if (translations[lang]) {
+                currentLanguage = lang;
+            }
+        }
+
+        function getLanguage() {
+            return currentLanguage;
+        }
+
+        function detectInDesignLanguage() {
+            try {
+                var locale = '';
+                if (typeof app !== 'undefined' && app.hasOwnProperty('locale')) {
+                    locale = String(app.locale).toLowerCase();
+                }
+                return (locale.indexOf('fr') !== -1) ? 'fr' : 'en';
+            } catch (e) {
+                return 'en';
+            }
+        }
+
+        currentLanguage = detectInDesignLanguage();
+
+        return {
+            __: __,
+            setLanguage: setLanguage,
+            getLanguage: getLanguage,
+            detectLanguage: detectInDesignLanguage
+        };
+    })();
+
     /**
      * Gestionnaire d'erreurs personnalisé
      * @private
@@ -63,16 +491,16 @@
          * @param {boolean} isFatal - Si true, arrête l'exécution du script
          */
         handleError: function(error, context, isFatal) {
-            var message = "Erreur";
-            
+            var message = I18n.__("errorInContext");
+
             if (context) {
-                message += " dans " + context;
+                message += I18n.__("errorContextIn") + context;
             }
-            
-            message += " : " + (error.message || "Erreur inconnue");
-            
+
+            message += " : " + (error.message || I18n.__("errorUnknown"));
+
             if (error.line) {
-                message += " (ligne " + error.line + ")";
+                message += I18n.__("errorLine") + error.line + ")";
             }
             
             try {
@@ -88,7 +516,7 @@
             
             if (isFatal) {
                 alert(message);
-                throw new Error("Arrêt du script suite à une erreur fatale");
+                throw new Error(I18n.__("errorScriptHalted"));
             }
             
             return message;
@@ -103,7 +531,7 @@
          */
         ensureDefined: function(obj, name, throwError) {
             if (obj === undefined || obj === null) {
-                var message = "Objet '" + name + "' est undefined ou null";
+                var message = I18n.__("errorObjectUndefined", name);
                 
                 if (throwError) {
                     throw new Error(message);
@@ -136,17 +564,17 @@
         validateDocumentOpen: function() {
             try {
                 if (!ErrorHandler.ensureDefined(app, "app", false)) {
-                    alert("L'application InDesign n'est pas accessible");
+                    alert(I18n.__("errorInDesignUnavailable"));
                     return false;
                 }
-                
+
                 if (!ErrorHandler.ensureDefined(app.documents, "app.documents", false)) {
-                    alert("La collection de documents n'est pas accessible");
+                    alert(I18n.__("errorDocumentsUnavailable"));
                     return false;
                 }
-                
+
                 if (app.documents.length === 0) {
-                    alert("Veuillez ouvrir un document avant d'exécuter ce script.");
+                    alert(I18n.__("errorNoDocumentOpen"));
                     return false;
                 }
                 
@@ -176,7 +604,7 @@
                 
                 if (!ErrorHandler.ensureDefined(doc.characterStyles, "document.characterStyles", true)) {
                     // Utiliser des valeurs par défaut
-                    result.styles = ["[Style par défaut]", CONFIG.DEFAULT_STYLES.SUPERSCRIPT, CONFIG.DEFAULT_STYLES.ITALIC];
+                    result.styles = [I18n.__("defaultStyle"), CONFIG.DEFAULT_STYLES.SUPERSCRIPT, CONFIG.DEFAULT_STYLES.ITALIC];
                     return result;
                 }
                 
@@ -184,11 +612,11 @@
                     try {
                         var style = doc.characterStyles[i];
                         
-                        if (!ErrorHandler.ensureDefined(style, "style à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(style, "style at index " + i, false)) {
                             continue;
                         }
                         
-                        if (!ErrorHandler.ensureDefined(style.name, "style.name à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(style.name, "style.name at index " + i, false)) {
                             continue;
                         }
                         
@@ -203,19 +631,19 @@
                             result.italicIndex = i;
                         }
                     } catch (styleError) {
-                        ErrorHandler.handleError(styleError, "boucle getCharacterStyles pour l'index " + i, false);
+                        ErrorHandler.handleError(styleError, "getCharacterStyles loop at index " + i, false);
                         // Continuer avec le style suivant
                     }
                 }
                 
                 // S'assurer qu'au moins un style existe
                 if (result.styles.length === 0) {
-                    result.styles.push("[Style par défaut]");
+                    result.styles.push(I18n.__("defaultStyle"));
                 }
             } catch (error) {
                 ErrorHandler.handleError(error, "getCharacterStyles", false);
                 // Ajouter des styles par défaut en cas d'erreur
-                result.styles = ["[Style par défaut]", CONFIG.DEFAULT_STYLES.SUPERSCRIPT, CONFIG.DEFAULT_STYLES.ITALIC];
+                result.styles = [I18n.__("defaultStyle"), CONFIG.DEFAULT_STYLES.SUPERSCRIPT, CONFIG.DEFAULT_STYLES.ITALIC];
             }
             
             return result;
@@ -251,11 +679,11 @@
                                 try {
                                     var style = group.paragraphStyles[i];
                                     
-                                    if (!ErrorHandler.ensureDefined(style, "style à l'index " + i, false)) {
+                                    if (!ErrorHandler.ensureDefined(style, "style at index " + i, false)) {
                                         continue;
                                     }
                                     
-                                    if (!ErrorHandler.ensureDefined(style.name, "style.name à l'index " + i, false)) {
+                                    if (!ErrorHandler.ensureDefined(style.name, "style.name at index " + i, false)) {
                                         continue;
                                     }
                                     
@@ -264,7 +692,7 @@
                                         styles.push(style);
                                     }
                                 } catch (styleError) {
-                                    ErrorHandler.handleError(styleError, "boucle getParagraphStyles pour l'index " + i, false);
+                                    ErrorHandler.handleError(styleError, "getParagraphStyles loop at index " + i, false);
                                     // Continuer avec le style suivant
                                 }
                             }
@@ -275,13 +703,13 @@
                                 try {
                                     var subgroup = group.paragraphStyleGroups[j];
                                     
-                                    if (!ErrorHandler.ensureDefined(subgroup, "subgroup à l'index " + j, false)) {
+                                    if (!ErrorHandler.ensureDefined(subgroup, "subgroup at index " + j, false)) {
                                         continue;
                                     }
                                     
                                     styles = styles.concat(collectStyles(subgroup));
                                 } catch (groupError) {
-                                    ErrorHandler.handleError(groupError, "boucle de groupe pour l'index " + j, false);
+                                    ErrorHandler.handleError(groupError, "group loop at index " + j, false);
                                     // Continuer avec le groupe suivant
                                 }
                             }
@@ -330,7 +758,7 @@
                     return null;
                 }
                 
-                if (!ErrorHandler.ensureDefined(properties, "propriétés du style", false)) {
+                if (!ErrorHandler.ensureDefined(properties, "style properties", false)) {
                     properties = {}; // Créer un objet vide par défaut
                 }
                 
@@ -344,7 +772,7 @@
                     
                     // Vérifier si le style existe
                     if (!style || !style.isValid) {
-                        throw new Error("Style non trouvé");
+                        throw new Error("Style not found");
                     }
                 } catch (lookupError) {
                     // Créer le style s'il n'existe pas
@@ -358,7 +786,7 @@
                             }
                         }
                     } catch (createError) {
-                        ErrorHandler.handleError(createError, "création du style " + name, false);
+                        ErrorHandler.handleError(createError, "creating style " + name, false);
                         return null;
                     }
                 }
@@ -612,11 +1040,11 @@
                     try {
                         var item = foundItems[i];
                         
-                        if (!ErrorHandler.ensureDefined(item, "item à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(item, "item at index " + i, false)) {
                             continue;
                         }
                         
-                        if (!ErrorHandler.ensureDefined(item.texts, "item.texts à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(item.texts, "item.texts at index " + i, false)) {
                             continue;
                         }
                         
@@ -626,13 +1054,13 @@
                         
                         var t = item.texts[0].characters;
                         
-                        if (!ErrorHandler.ensureDefined(t, "caractères à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(t, "characters at index " + i, false)) {
                             continue;
                         }
                         
                         t[-1].move(LO_BEFORE, t[0]);
                     } catch (itemError) {
-                        ErrorHandler.handleError(itemError, "traitement de l'élément " + i, false);
+                        ErrorHandler.handleError(itemError, "processing item " + i, false);
                         // Continuer avec l'élément suivant
                     }
                 }
@@ -691,7 +1119,7 @@
                     try {
                         var story = stories[i];
                         
-                        if (!ErrorHandler.ensureDefined(story, "story à l'index " + i, false)) {
+                        if (!ErrorHandler.ensureDefined(story, "story at index " + i, false)) {
                             continue;
                         }
                         
@@ -720,13 +1148,13 @@
                             try {
                                 var found = founds[j];
                                 
-                                if (!ErrorHandler.ensureDefined(found, "found à l'index " + j, false)) {
+                                if (!ErrorHandler.ensureDefined(found, "found at index " + j, false)) {
                                     continue;
                                 }
                                 
                                 found.appliedCharacterStyle = style;
                             } catch (foundError) {
-                                ErrorHandler.handleError(foundError, "application du style à found " + j, false);
+                                ErrorHandler.handleError(foundError, "applying style to found " + j, false);
                                 // Continuer avec l'élément suivant
                             }
                         }
@@ -1074,18 +1502,15 @@
                     
                     // Version sans alerte pour production
                     // Si vous préférez conserver l'alerte, décommentez la ligne ci-dessous
-                    // alert("Fonction replaceApostrophes : " + totalReplaced + " apostrophes droites remplacées.");
-                    
-                    // Journalisation pour débogage
                     try {
                         if (typeof console !== "undefined" && console && console.log) {
-                            console.log("Apostrophes remplacées : " + totalReplaced);
+                            console.log("Apostrophes replaced: " + totalReplaced);
                         }
                     } catch (e) {
                         // Ignorer les erreurs de journalisation
                     }
                 } catch (searchError) {
-                    ErrorHandler.handleError(searchError, "replaceApostrophes - opération de recherche", false);
+                    ErrorHandler.handleError(searchError, "replaceApostrophes - search operation", false);
                 }
                 
                 // 6. Restaurer les options originales
@@ -1109,7 +1534,7 @@
             } catch (error) {
                 ErrorHandler.handleError(error, "replaceApostrophes", false);
                 // Alerte seulement en cas d'erreur grave
-                alert("Erreur dans replaceApostrophes : " + error.message);
+                alert(I18n.__("errorReplaceApostrophes", error.message));
                 return 0;
             }
         },
@@ -1135,11 +1560,11 @@
                     try {
                         var story = stories[s];
                         
-                        if (!ErrorHandler.ensureDefined(story, "story à l'index " + s, false)) {
+                        if (!ErrorHandler.ensureDefined(story, "story at index " + s, false)) {
                             continue;
                         }
                         
-                        if (!ErrorHandler.ensureDefined(story.paragraphs, "story.paragraphs à l'index " + s, false)) {
+                        if (!ErrorHandler.ensureDefined(story.paragraphs, "story.paragraphs at index " + s, false)) {
                             continue;
                         }
                         
@@ -1151,11 +1576,11 @@
                             try {
                                 var para = paras[p];
                                 
-                                if (!ErrorHandler.ensureDefined(para, "paragraph à l'index " + p, false)) {
+                                if (!ErrorHandler.ensureDefined(para, "paragraph at index " + p, false)) {
                                     continue;
                                 }
                                 
-                                if (!ErrorHandler.ensureDefined(para.appliedParagraphStyle, "para.appliedParagraphStyle à l'index " + p, false)) {
+                                if (!ErrorHandler.ensureDefined(para.appliedParagraphStyle, "para.appliedParagraphStyle at index " + p, false)) {
                                     continue;
                                 }
                                 
@@ -1669,7 +2094,7 @@
                 this.progressWin.center();
                 this.progressWin.show();
             } catch (e) {
-                ErrorHandler.handleError(e, "création de la barre de progression", false);
+                ErrorHandler.handleError(e, "creating progress bar", false);
                 // Continuer sans barre de progression
                 this.progressWin = null;
             }
@@ -1688,7 +2113,7 @@
                 this.progressWin.status.text = statusText;
                 this.progressWin.update();
             } catch (e) {
-                ErrorHandler.handleError(e, "mise à jour de la barre de progression", false);
+                ErrorHandler.handleError(e, "updating progress bar", false);
             }
         },
         
@@ -1722,7 +2147,7 @@
       createDialog: function(characterStyles, noteStyleIndex, italicStyleIndex) {
         try {
         if (!ErrorHandler.ensureDefined(characterStyles, "characterStyles", true)) {
-          characterStyles = ["[Style par défaut]"];
+          characterStyles = [I18n.__("defaultStyle")];
         }
         
         // Création du dialogue principal
@@ -1742,27 +2167,23 @@
         tpanel.alignChildren = "fill";
         
         // Nouvel onglet des corrections générales
-        var tabCorrections = tpanel.add("tab", undefined, "Corrections");
+        var tabCorrections = tpanel.add("tab", undefined, I18n.__("tabCorrections"));
         tabCorrections.orientation = "column";
         tabCorrections.alignChildren = "left";
-        
-        // Onglet des corrections d'espaces
-        var tabSpaces = tpanel.add("tab", undefined, "Espaces et retours");
+
+        var tabSpaces = tpanel.add("tab", undefined, I18n.__("tabSpaces"));
         tabSpaces.orientation = "column";
         tabSpaces.alignChildren = "left";
-        
-        // Onglet Styles
-        var tabStyle = tpanel.add("tab", undefined, "Styles");
+
+        var tabStyle = tpanel.add("tab", undefined, I18n.__("tabStyles"));
         tabStyle.orientation = "column";
         tabStyle.alignChildren = "left";
-        
-        // Onglet des formatages
-        var tabOther = tpanel.add("tab", undefined, "Formatages");
+
+        var tabOther = tpanel.add("tab", undefined, I18n.__("tabFormatting"));
         tabOther.orientation = "column";
         tabOther.alignChildren = "left";
-        
-        // Ajout du nouvel onglet pour les styles
-        var tabStyles = tpanel.add("tab", undefined, "Mise en page");
+
+        var tabStyles = tpanel.add("tab", undefined, I18n.__("tabPageLayout"));
         tabStyles.orientation = "column";
         tabStyles.alignChildren = "left";
         
@@ -1792,8 +2213,8 @@
             var item = items[i];
             var itemLabel = item;
             
-            if (typeof item === "object" && item !== null && item.label) {
-              itemLabel = item.label;
+            if (typeof item === "object" && item !== null) {
+              itemLabel = item.labelKey ? I18n.__(item.labelKey) : (item.label || item);
             }
             
             dropdown.add("item", itemLabel);
@@ -1810,37 +2231,36 @@
         }
         
         // Ajout des options dans l'onglet Corrections
-        var cbMoveNotes = addCheckboxOption(tabCorrections, "Déplacer les appels de notes de bas de page", true);
-        var cbEllipsis = addCheckboxOption(tabCorrections, "Convertir ... en points de suspension (…)", true);
-        var cbReplaceApostrophes = addCheckboxOption(tabCorrections, "Remplacer les apostrophes droites par les apostrophes typographiques", true);
-        var cbDashes = addCheckboxOption(tabCorrections, "Remplacer les tirets cadratin par des tirets demi-cadratin", true);
-        var cbFixIsolatedHyphens = addCheckboxOption(tabCorrections, "Transformer les tirets isolés en tirets demi-cadratin", true);
-        var cbFixValueRanges = addCheckboxOption(tabCorrections, "Transformer les tirets en tirets demi-cadratin dans les intervalles de valeurs", true);
+        var cbMoveNotes = addCheckboxOption(tabCorrections, I18n.__("moveNotesLabel"), true);
+        var cbEllipsis = addCheckboxOption(tabCorrections, I18n.__("convertEllipsisLabel"), true);
+        var cbReplaceApostrophes = addCheckboxOption(tabCorrections, I18n.__("replaceApostrophesLabel"), true);
+        var cbDashes = addCheckboxOption(tabCorrections, I18n.__("replaceDashesLabel"), true);
+        var cbFixIsolatedHyphens = addCheckboxOption(tabCorrections, I18n.__("fixIsolatedHyphensLabel"), true);
+        var cbFixValueRanges = addCheckboxOption(tabCorrections, I18n.__("fixValueRangesLabel"), true);
         
         // Ajout des options dans l'onglet Espaces et retours
-        var fixTypoSpacesOpt = addDropdownOption(tabSpaces, "Corriger les espaces typographiques :", CONFIG.SPACE_TYPES, true);
-        var fixDashIncisesOpt = addDropdownOption(tabSpaces, "Corriger les espaces des – incises – :", CONFIG.SPACE_TYPES, false);
-          fixDashIncisesOpt.dropdown.selection = 1; // Par défaut, sélectionner "Espace insécable (~S)"
-        var cbFixSpaces = addCheckboxOption(tabSpaces, "Corriger les espaces multiples", true);
-        var cbDoubleReturns = addCheckboxOption(tabSpaces, "Supprimer les doubles retours à la ligne", true);
-        var cbRemoveSpacesBeforePunctuation = addCheckboxOption(tabSpaces, "Supprimer les espaces avant les points, virgules et notes", true);
-        var cbRemoveSpacesStartParagraph = addCheckboxOption(tabSpaces, "Supprimer les espaces en début de paragraphe", true);
-        var cbRemoveSpacesEndParagraph = addCheckboxOption(tabSpaces, "Supprimer les espaces en fin de paragraphe", true);
-        var cbRemoveTabs = addCheckboxOption(tabSpaces, "Supprimer les tabulations", true);
-        var cbFormatEspaces = addCheckboxOption(tabSpaces, "Ajouter espaces insécables dans les références de page (p. 54)", true);
+        var fixTypoSpacesOpt = addDropdownOption(tabSpaces, I18n.__("fixTypoSpacesLabel"), CONFIG.SPACE_TYPES, true);
+        var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
+          fixDashIncisesOpt.dropdown.selection = 1;
+        var cbFixSpaces = addCheckboxOption(tabSpaces, I18n.__("fixDoubleSpacesLabel"), true);
+        var cbDoubleReturns = addCheckboxOption(tabSpaces, I18n.__("removeDoubleReturnsLabel"), true);
+        var cbRemoveSpacesBeforePunctuation = addCheckboxOption(tabSpaces, I18n.__("removeSpacesBeforePunctuationLabel"), true);
+        var cbRemoveSpacesStartParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesStartParagraphLabel"), true);
+        var cbRemoveSpacesEndParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesEndParagraphLabel"), true);
+        var cbRemoveTabs = addCheckboxOption(tabSpaces, I18n.__("removeTabsLabel"), true);
+        var cbFormatEspaces = addCheckboxOption(tabSpaces, I18n.__("formatEspacesLabel"), true);
         
         // Ajout des options de style dans l'onglet Styles
         // Section pour la définition des styles
-        var styleDefinitionPanel = tabStyle.add("panel", undefined, "Définition des styles");
+        var styleDefinitionPanel = tabStyle.add("panel", undefined, I18n.__("styleDefinitionPanel"));
         styleDefinitionPanel.orientation = "column";
         styleDefinitionPanel.alignChildren = "left";
-        
-        // Styles pour notes, italique et SieclesModule dans le panneau de définition des styles
-        var noteStyleOpt = addDropdownOption(styleDefinitionPanel, "Appels de notes:", characterStyles, true);
-        var cbItalicStyle = addDropdownOption(styleDefinitionPanel, "Italique:", characterStyles, true);
-        var romainsStyleOpt = addDropdownOption(styleDefinitionPanel, "Petites capitales:", characterStyles, true);
-        var romainsMajStyleOpt = addDropdownOption(styleDefinitionPanel, "Capitales:", characterStyles, true);
-        var exposantOrdinalStyleOpt = addDropdownOption(styleDefinitionPanel, "Exposants:", characterStyles, true);
+
+        var noteStyleOpt = addDropdownOption(styleDefinitionPanel, I18n.__("noteStyleLabel"), characterStyles, true);
+        var cbItalicStyle = addDropdownOption(styleDefinitionPanel, I18n.__("italicStyleLabel"), characterStyles, true);
+        var romainsStyleOpt = addDropdownOption(styleDefinitionPanel, I18n.__("smallCapsStyleLabel"), characterStyles, true);
+        var romainsMajStyleOpt = addDropdownOption(styleDefinitionPanel, I18n.__("capitalStyleLabel"), characterStyles, true);
+        var exposantOrdinalStyleOpt = addDropdownOption(styleDefinitionPanel, I18n.__("superscriptStyleLabel"), characterStyles, true);
         
         // Sélection des styles par défaut
         if (noteStyleIndex >= 0 && noteStyleIndex < noteStyleOpt.dropdown.items.length) {
@@ -1990,35 +2410,34 @@
         tabStyle.add("statictext", undefined, "");
         
         // Section pour l'application des styles
-        var styleApplicationPanel = tabStyle.add("panel", undefined, "Application des styles");
+        var styleApplicationPanel = tabStyle.add("panel", undefined, I18n.__("styleApplicationPanel"));
         styleApplicationPanel.orientation = "column";
         styleApplicationPanel.alignChildren = "left";
-        
-        // Options d'application de style (séparées des définitions de style)
-        applyNoteStyleOpt = addCheckboxOption(styleApplicationPanel, "Appliquer un style aux appels de notes", true);
-        applyItalicStyleOpt = addCheckboxOption(styleApplicationPanel, "Appliquer un style au texte en italique", true);
-        applyExposantStyleOpt = addCheckboxOption(styleApplicationPanel, "Appliquer un style au texte en exposant", true);
+
+        applyNoteStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyNoteStyleLabel"), true);
+        applyItalicStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyItalicStyleLabel"), true);
+        applyExposantStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyExposantStyleLabel"), true);
         // Appliquer immédiatement les dépendances
         updateFeatureDependencies();
         
         // Ajout des options dans l'onglet Formatages (sans les options déplacées)
         // Options du module SieclesModule (restent dans l'onglet Formatages)
-        var cbFormatSiecles = addCheckboxOption(tabOther, "Formater les siècles (XIVe siècle)", true);
-        var cbFormatOrdinaux = addCheckboxOption(tabOther, "Formater les expressions ordinales (IIe Internationale)", true);
-        var cbFormatReferences = addCheckboxOption(tabOther, "Formater parties d'œuvres et noms propres (Tome III, Louis XIV)", true);
+        var cbFormatSiecles = addCheckboxOption(tabOther, I18n.__("formatSieclesLabel"), true);
+        var cbFormatOrdinaux = addCheckboxOption(tabOther, I18n.__("formatOrdinauxLabel"), true);
+        var cbFormatReferences = addCheckboxOption(tabOther, I18n.__("formatReferencesLabel"), true);
         // Appliquer immédiatement les dépendances
         updateFeatureDependencies();
         
         // Ajout des options pour le formatage des nombres
-        var cbFormatNumbers = addCheckboxOption(tabOther, "Formater les nombres", true);
-        var numberSettingsPanel = tabOther.add("panel", undefined, "Options de formatage des nombres");
+        var cbFormatNumbers = addCheckboxOption(tabOther, I18n.__("formatNumbersLabel"), true);
+        var numberSettingsPanel = tabOther.add("panel", undefined, I18n.__("numberSettingsPanel"));
         numberSettingsPanel.orientation = "column";
         numberSettingsPanel.alignChildren = "left";
         numberSettingsPanel.enabled = cbFormatNumbers.value;
         
-        var cbAddSpaces = addCheckboxOption(numberSettingsPanel, "Ajouter des espaces entre les milliers (12345 → 12 345)", true);
-        var cbExcludeYears = addCheckboxOption(numberSettingsPanel, "Exclure les années potentielles (nombres entre 0 et 2050)", true);
-        var cbUseComma = addCheckboxOption(numberSettingsPanel, "Remplacer les points par des virgules (3.14 → 3,14)", true);
+        var cbAddSpaces = addCheckboxOption(numberSettingsPanel, I18n.__("addSpacesLabel"), true);
+        var cbExcludeYears = addCheckboxOption(numberSettingsPanel, I18n.__("excludeYearsLabel"), true);
+        var cbUseComma = addCheckboxOption(numberSettingsPanel, I18n.__("useCommaLabel"), true);
         
         // Activer/désactiver le panneau d'options selon l'état de la case à cocher principale
         cbFormatNumbers.onClick = function() {
@@ -2026,7 +2445,7 @@
         };
         
         // Ajout des options dans le nouvel onglet Styles de paragraphe
-        var cbEnableStyleAfter = addCheckboxOption(tabStyles, "Application conditionnelle de styles", true);
+        var cbEnableStyleAfter = addCheckboxOption(tabStyles, I18n.__("enableStyleAfterLabel"), true);
         
         // Récupérer les styles de paragraphe du document actif
         var doc = app.activeDocument;
@@ -2069,17 +2488,15 @@
             paraStyleNames.push(allParaStyles[i].name);
           }
         } catch (e) {
-          paraStyleNames = ["[Aucun style disponible]"];
+          paraStyleNames = [I18n.__("noStylesAvailable")];
           allParaStyles = [];
         }
-        
-        // Vérifier qu'il y a des styles de paragraphe
+
         if (paraStyleNames.length === 0) {
-          paraStyleNames = ["[Aucun style disponible]"];
+          paraStyleNames = [I18n.__("noStylesAvailable")];
         }
-        
-        // Créer le panneau des styles déclencheurs
-        var styleGroupPanel = tabStyles.add("panel", undefined, "Styles déclencheurs (sélection multiple)");
+
+        var styleGroupPanel = tabStyles.add("panel", undefined, I18n.__("triggerStylesPanel"));
         styleGroupPanel.orientation = "column";
         styleGroupPanel.alignChildren = "left";
         styleGroupPanel.maximumSize.height = 200;
@@ -2109,7 +2526,7 @@
         var targetStyleGroup = tabStyles.add("group");
         targetStyleGroup.orientation = "row";
         targetStyleGroup.alignChildren = "center";
-        targetStyleGroup.add("statictext", undefined, "Style à appliquer au paragraphe suivant :");
+        targetStyleGroup.add("statictext", undefined, I18n.__("targetStyleLabel"));
         var targetStyleDropdown = targetStyleGroup.add("dropdownlist", undefined, paraStyleNames);
         targetStyleDropdown.preferredSize.width = 150;
         
@@ -2129,7 +2546,7 @@
         }
         
         // Option pour appliquer un gabarit à la dernière page
-        var cbApplyMasterToLastPage = addCheckboxOption(tabStyles, "Appliquer un gabarit à la dernière page en vis-à-vis", true);
+        var cbApplyMasterToLastPage = addCheckboxOption(tabStyles, I18n.__("applyMasterToLastPageLabel"), true);
         
         // Récupérer les gabarits du document
         var masterNames = [];
@@ -2139,21 +2556,20 @@
           if (ErrorHandler.ensureDefined(doc.masterSpreads, "doc.masterSpreads", false)) {
             for (var i = 0; i < doc.masterSpreads.length; i++) {
               var master = doc.masterSpreads[i];
-              if (ErrorHandler.ensureDefined(master, "master à l'index " + i, false) && 
-                ErrorHandler.ensureDefined(master.name, "master.name à l'index " + i, false)) {
+              if (ErrorHandler.ensureDefined(master, "master at index " + i, false) && 
+                ErrorHandler.ensureDefined(master.name, "master.name at index " + i, false)) {
                 masterNames.push(master.name);
                 allMasters.push(master);
               }
             }
           }
         } catch (e) {
-          masterNames = ["[Aucun gabarit disponible]"];
+          masterNames = [I18n.__("noMastersAvailable")];
           allMasters = [];
         }
-        
-        // Si aucun gabarit n'est disponible, désactiver l'option
+
         if (masterNames.length === 0) {
-          masterNames = ["[Aucun gabarit disponible]"];
+          masterNames = [I18n.__("noMastersAvailable")];
           cbApplyMasterToLastPage.enabled = false;
         }
         
@@ -2161,7 +2577,7 @@
         var masterGroup = tabStyles.add("group");
         masterGroup.orientation = "row";
         masterGroup.alignChildren = "center";
-        masterGroup.add("statictext", undefined, "Gabarit à appliquer :");
+        masterGroup.add("statictext", undefined, I18n.__("masterLabel"));
         var masterDropdown = masterGroup.add("dropdownlist", undefined, masterNames);
         masterDropdown.preferredSize.width = 150;
         masterDropdown.enabled = cbApplyMasterToLastPage.value;
@@ -2185,57 +2601,29 @@
         var helpButton = buttonGroup.add("button", undefined, "?");
         helpButton.preferredSize.width = 25; // Mini bouton
         helpButton.preferredSize.height = 25;
-        helpButton.helpTip = "Afficher l'aide de SuperScript";
-        
-        var cancelButton = buttonGroup.add("button", undefined, "Annuler", {name: "cancel"});
-        var okButton = buttonGroup.add("button", undefined, "Appliquer", {name: "ok"});
+        helpButton.helpTip = I18n.__("helpTooltip");
+
+        var cancelButton = buttonGroup.add("button", undefined, I18n.__("cancelButton"), {name: "cancel"});
+        var okButton = buttonGroup.add("button", undefined, I18n.__("applyButton"), {name: "ok"});
         
         // Fonction pour afficher la fenêtre d'aide
         helpButton.onClick = function() {
           // Créer une nouvelle boîte de dialogue pour l'aide
-          var helpDialog = new Window("dialog", "Aide de SuperScript");
+          var helpDialog = new Window("dialog", I18n.__("helpDialogTitle"));
           helpDialog.orientation = "column";
           helpDialog.alignChildren = "fill";
           helpDialog.preferredSize.width = 500;
           helpDialog.preferredSize.height = 400;
-          
-          // Ajouter un groupe pour le logo/bannière
+
           var helpHeaderGroup = helpDialog.add("group");
           helpHeaderGroup.alignment = "center";
-          helpHeaderGroup.add("statictext", undefined, "SuperScript - Guide d'utilisation");
-          
-          // Ajouter une zone de texte avec une barre de défilement
+          helpHeaderGroup.add("statictext", undefined, I18n.__("helpDialogHeader"));
+
           var helpText = helpDialog.add("edittext", undefined, "", {multiline: true, readonly: true, scrollable: true});
           helpText.preferredSize.height = 300;
-          
-          // Texte d'aide à afficher
-          var helpContent = "GUIDE D'UTILISATION DE SUPERSCRIPT\n\n";
-          helpContent += "PRÉSENTATION\n\n";
-          helpContent += "SuperScript est un script pour InDesign qui automatise les corrections typographiques dans les documents de mise en page. Il permet de corriger rapidement les espaces, les ponctuations, les guillemets, les apostrophes, etc.\n\n";
-          helpContent += "ONGLET \"ESPACES ET RETOURS\"\n\n";
-          helpContent += "• Corriger les espaces typographiques : Ajoute des espaces fines insécables ou des espaces insécables avant ou après certains caractères selon les règles typographiques françaises.\n";
-          helpContent += "• Corriger les espaces multiples : Remplace les séquences d'espaces par une seule espace.\n";
-          helpContent += "• Supprimer les doubles retours : Élimine les paragraphes vides.\n";
-          helpContent += "• Supprimer les espaces avant les points, virgules et notes : Retire les espaces indésirables.\n\n";
-          helpContent += "ONGLET \"STYLES\"\n\n";
-          helpContent += "• Définition des styles : Sélectionnez les styles à utiliser pour mettre en forme les appels de notes, le texte en italique et les exposants.\n";
-          helpContent += "• Application des styles : Activez les options pour appliquer automatiquement ces styles.\n\n";
-          helpContent += "ONGLET \"FORMATAGES\"\n\n";
-          helpContent += "• Déplacer les appels de notes : Place les notes avant la ponctuation.\n";
-          helpContent += "• Remplacer les tirets cadratin : Convertit les tirets cadratin en tirets demi-cadratin.\n";
-          helpContent += "• Convertir ... en points de suspension : Remplace trois points par le caractère typographique correspondant.\n";
-          helpContent += "• Remplacer les apostrophes droites : Utilise des apostrophes typographiques.\n";
-          helpContent += "• Formatage des siècles, ordinaux et références : Options pour la mise en forme des chiffres romains.\n\n";
-          helpContent += "ONGLET \"MISE EN PAGE\"\n\n";
-          helpContent += "• Application conditionnelle de styles : Applique automatiquement un style au paragraphe qui suit les styles sélectionnés.\n";
-          helpContent += "• Appliquer un gabarit à la dernière page : Utile pour la fin des chapitres ou des documents.\n\n";
-          helpContent += "Pour plus d'informations, visitez notre site web : https://lab.spectral.art";
-          
-          // Appliquer le texte d'aide
-          helpText.text = helpContent;
-          
-          // Bouton pour fermer l'aide
-          var closeButton = helpDialog.add("button", undefined, "Fermer", {name: "ok"});
+          helpText.text = I18n.__("helpContent");
+
+          var closeButton = helpDialog.add("button", undefined, I18n.__("closeButton"), {name: "ok"});
           closeButton.alignment = "center";
           
           // Afficher la boîte de dialogue d'aide
@@ -2325,7 +2713,7 @@
               
             };
           } catch (resultError) {
-            ErrorHandler.handleError(resultError, "récupération des résultats du dialogue", true);
+            ErrorHandler.handleError(resultError, "dialog results", true);
             return null;
           }
         }
@@ -2385,7 +2773,7 @@
               if (options.formatNumbers) totalSteps++;
 
               // Créer la barre de progression
-              ProgressBar.create("Application des corrections typographiques", totalSteps);
+              ProgressBar.create(I18n.__("progressTitle"), totalSteps);
 
               try {
                   // Compteur de progression
@@ -2393,88 +2781,88 @@
                   
                   // Corrections d'espaces et retours
                   if (options.removeSpacesBeforePunctuation) {
-                      ProgressBar.update(++progress, "Suppression des espaces avant ponctuation...");
+                      ProgressBar.update(++progress, I18n.__("progressRemoveSpacesBeforePunctuation"));
                       Corrections.removeSpacesBeforePunctuation(doc);
                   }
                   
                   if (options.fixDoubleSpaces) {
-                      ProgressBar.update(++progress, "Correction des doubles espaces...");
+                      ProgressBar.update(++progress, I18n.__("progressFixDoubleSpaces"));
                       Corrections.fixDoubleSpaces(doc);
                   }
                   
                   if (options.fixTypoSpaces && options.spaceType) {
-                      ProgressBar.update(++progress, "Correction des espaces typographiques...");
+                      ProgressBar.update(++progress, I18n.__("progressFixTypoSpaces"));
                       Corrections.fixTypoSpaces(doc, options.spaceType);
                   }
                   
                   if (options.fixDashIncises && options.dashIncisesSpaceType) {
-                      ProgressBar.update(++progress, "Correction des espaces autour des incises...");
+                      ProgressBar.update(++progress, I18n.__("progressFixDashIncises"));
                       Corrections.fixDashIncises(doc, options.dashIncisesSpaceType);
                   }
                   
                   if (options.removeDoubleReturns) {
-                      ProgressBar.update(++progress, "Suppression des doubles retours...");
+                      ProgressBar.update(++progress, I18n.__("progressRemoveDoubleReturns"));
                       Corrections.removeDoubleReturns(doc);
                   }
                   
                   if (options.removeSpacesStartParagraph) {
-                      ProgressBar.update(++progress, "Suppression des espaces en début de paragraphe...");
+                      ProgressBar.update(++progress, I18n.__("progressRemoveSpacesStart"));
                       Corrections.removeSpacesStartParagraph(doc);
                   }
                   
                   if (options.removeSpacesEndParagraph) {
-                      ProgressBar.update(++progress, "Suppression des espaces en fin de paragraphe...");
+                      ProgressBar.update(++progress, I18n.__("progressRemoveSpacesEnd"));
                       Corrections.removeSpacesEndParagraph(doc);
                   }
                   
                   if (options.removeTabs) {
-                      ProgressBar.update(++progress, "Suppression des tabulations...");
+                      ProgressBar.update(++progress, I18n.__("progressRemoveTabs"));
                       Corrections.removeTabs(doc);
                   }
                   
                   // Autres corrections
                   if (options.moveNotes) {
-                      ProgressBar.update(++progress, "Déplacement des notes de bas de page...");
+                      ProgressBar.update(++progress, I18n.__("progressMoveNotes"));
                       Corrections.moveNotes(doc);
                   }
                   
                   if (options.applyNoteStyle && options.noteStyleName) {
-                      ProgressBar.update(++progress, "Application du style aux notes de bas de page...");
+                      ProgressBar.update(++progress, I18n.__("progressApplyNoteStyle"));
                       Corrections.applyNoteStyle(doc, options.noteStyleName);
                   }
                   
                   if (options.replaceDashes) {
-                      ProgressBar.update(++progress, "Remplacement des tirets cadratin...");
+                      ProgressBar.update(++progress, I18n.__("progressReplaceDashes"));
                       Corrections.replaceDashes(doc);
                   }
                   
                   if (options.fixIsolatedHyphens) {
-                      ProgressBar.update(++progress, "Correction des tirets isolés...");
+                      ProgressBar.update(++progress, I18n.__("progressFixIsolatedHyphens"));
                       Corrections.fixIsolatedHyphens(doc);
                   }
                   
                   if (options.fixValueRanges) {
-                      ProgressBar.update(++progress, "Correction des intervalles de valeurs...");
+                      ProgressBar.update(++progress, I18n.__("progressFixValueRanges"));
                       Corrections.fixValueRanges(doc);
                   }
                   
                   if (options.applyItalicStyle && options.italicStyleName) {
-                      ProgressBar.update(++progress, "Application du style italique...");
+                      ProgressBar.update(++progress, I18n.__("progressApplyItalicStyle"));
                       Corrections.applyItalicStyle(doc, options.italicStyleName);
                   }
                   
                   if (options.applyExposantStyle && options.exposantStyleName) {
-                      ProgressBar.update(++progress, "Application du style aux exposants...");
+                      ProgressBar.update(++progress, I18n.__("progressApplyExposantStyle"));
                       Corrections.applyExposantStyle(doc, options.exposantStyleName);
                   }
                   
                   if (options.convertEllipsis) {
-                      ProgressBar.update(++progress, "Conversion des points de suspension...");
+                      ProgressBar.update(++progress, I18n.__("progressConvertEllipsis"));
                       Corrections.convertEllipsis(doc);
                   }
                   
                   if (options.replaceApostrophes) {
-                      ProgressBar.update(++progress, "Remplacement des apostrophes...");
+                      ProgressBar.update(++progress, I18n.__("progressReplaceApostrophes"));
                       Corrections.replaceApostrophes(doc);
                   }
                   
@@ -2483,13 +2871,13 @@
                       options.triggerStyles && 
                       options.triggerStyles.length > 0 && 
                       options.targetStyle) {
-                      ProgressBar.update(++progress, "Application des styles conditionnels...");
+                      ProgressBar.update(++progress, I18n.__("progressApplyConditionalStyles"));
                       Corrections.applyStyleAfterTriggers(doc, options.triggerStyles, options.targetStyle);
                   }
                   
                   // Application du gabarit à la dernière page
                   if (options.applyMasterToLastPage && options.selectedMaster) {
-                      ProgressBar.update(++progress, "Application du gabarit à la dernière page...");
+                      ProgressBar.update(++progress, I18n.__("progressApplyMasterToLastPage"));
                       // Stocker le nom du gabarit plutôt que l'objet gabarit lui-même
                       var masterName = options.selectedMaster.name;
                       
@@ -2504,7 +2892,7 @@
                        options.sieclesOptions.formaterReferences || 
                        options.sieclesOptions.formaterEspaces)) {
                       
-                      ProgressBar.update(++progress, "Formatage des siècles et expressions ordinales...");
+                      ProgressBar.update(++progress, I18n.__("progressFormatSiecles"));
                       
                       // Appliquer les corrections du module SieclesModule
                       SieclesModule.processDocument(doc, options.sieclesOptions);
@@ -2512,12 +2900,12 @@
                   
                   // Traitement du formatage des nombres
                   if (options.formatNumbers) {
-                      ProgressBar.update(++progress, "Formatage des nombres...");
+                      ProgressBar.update(++progress, I18n.__("progressFormatNumbers"));
                       Corrections.formatNumbers(doc, options.addSpaces, options.useComma, options.excludeYears);
                   }
                   
                   // Finalisation
-                  ProgressBar.update(totalSteps, "Terminé !");
+                  ProgressBar.update(totalSteps, I18n.__("progressComplete"));
                   
               } catch (correctionsError) {
                   ErrorHandler.handleError(correctionsError, "application des corrections", false);
@@ -2550,7 +2938,7 @@
               if (!ErrorHandler.ensureDefined(app.activeDocument, "app.activeDocument", true)) return;
 
               Processor.applyCorrections(app.activeDocument, options);
-              alert("Corrections appliquées au document actif.");
+              alert(I18n.__("successCorrectionsApplied"));
           } catch (error) {
               ErrorHandler.handleError(error, "processDocuments", true);
           }
@@ -2899,7 +3287,7 @@
             // Réinitialiser l'environnement après utilisation
             this.resetIsolatedEnvironment();
           } catch (error) {
-              alert("Erreur lors du formatage des siècles: " + error);
+              alert(I18n.__("errorFormatSiecles", error));
           }
         },
         
@@ -3040,7 +3428,7 @@
           try {
             // Vérifier que les styles sont définis
             if (!romainsStyle || !exposantStyle) {
-              alert("Les styles de caractère requis ne sont pas définis. Veuillez sélectionner des styles valides.");
+              alert(I18n.__("errorRequiredStyles"));
               return;
             }
             
@@ -3316,7 +3704,7 @@
 
             this.Utilities.appliquerGrepPartout(doc, modeleSiecleExplicite, null, traiterSiecleExplicite);
           } catch (error) {
-            alert("Erreur lors du formatage des siècles: " + error);
+            alert(I18n.__("errorFormatSiecles", error));
           }
         },
         
@@ -3481,7 +3869,7 @@
                 app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
                 doc.changeGrep();
             } catch (error) {
-                alert("Erreur lors du formatage des expressions ordinales: " + error);
+                alert(I18n.__("errorFormatOrdinaux", error));
             }
         },
         
@@ -3627,10 +4015,10 @@
                       }
                   }
               } catch (e) {
-                  alert("Erreur lors du formatage des occurrences de '1er': " + e.message);
+                  alert(I18n.__("errorFormat1er", e.message));
               }
           } catch (error) {
-              alert("Erreur lors du formatage des références d'œuvres et titres: " + error.message);
+              alert(I18n.__("errorFormatReferences", error.message));
           }
         },
         
@@ -3746,7 +4134,7 @@
               app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
               doc.changeGrep();
           } catch (error) {
-              alert("Erreur lors du formatage des espaces insécables pour les références: " + error.message);
+              alert(I18n.__("errorFormatEspaces", error.message));
           }
         }
     };
@@ -3794,11 +4182,11 @@
                         CONFIG.SCRIPT_TITLE
                     );
                 } catch (scriptError) {
-                    ErrorHandler.handleError(scriptError, "exécution du script dans un bloc d'annulation", true);
+                    ErrorHandler.handleError(scriptError, "script execution in undo block", true);
                 }
             }
         } catch (error) {
-            ErrorHandler.handleError(error, "fonction principale", true);
+            ErrorHandler.handleError(error, I18n.__("errorMainFunction"), true);
         }
     }
     
@@ -3806,24 +4194,22 @@
     try {
         main();
     } catch (fatalError) {
-        // Essayer d'afficher l'erreur
         try {
-            alert("Erreur fatale : " + fatalError.message);
-            
+            alert(I18n.__("errorFatal", fatalError.message));
+
             if (typeof console !== "undefined" && console && console.log) {
-                console.log("Erreur fatale dans le script : " + fatalError.message);
-                
+                console.log(I18n.__("errorFatal", fatalError.message));
+
                 if (fatalError.line) {
-                    console.log("Ligne : " + fatalError.line);
+                    console.log(I18n.__("errorLine") + fatalError.line + ")");
                 }
-                
+
                 if (fatalError.stack) {
-                    console.log("Stack trace : " + fatalError.stack);
+                    console.log("Stack trace: " + fatalError.stack);
                 }
             }
         } catch (e) {
-            // Dernier recours si même l'alerte échoue
-            alert("Une erreur irrécupérable s'est produite.");
+            alert(I18n.__("errorUnrecoverable"));
         }
     }
     
@@ -3832,14 +4218,13 @@
      */
     function applyMasterToLastPageStandalone(document, masterName) {
         try {
-            // Vérifications de base
             if (!document) {
-                alert("Erreur : Document invalide");
+                alert(I18n.__("errorInvalidDocument"));
                 return false;
             }
-            
+
             if (!masterName) {
-                alert("Erreur : Nom de gabarit invalide");
+                alert(I18n.__("errorInvalidMasterName"));
                 return false;
             }
             
@@ -3864,15 +4249,14 @@
             }
             
             if (!targetMaster) {
-                alert("Gabarit '" + masterName + "' introuvable dans le document " + document.name);
+                alert(I18n.__("errorMasterNotFound", masterName, document.name));
                 return false;
             }
-            
-            // Appliquer le gabarit spécifique à ce document
+
             lastPage.appliedMaster = targetMaster;
             return true;
         } catch (error) {
-            alert("Erreur lors de l'application du gabarit : " + error.message);
+            alert(I18n.__("errorApplyMaster", error.message));
             return false;
         }
     }
