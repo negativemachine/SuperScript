@@ -409,7 +409,7 @@
                     return false;
                 }
                 
-                if (!Array.isArray(styleList)) {
+                if (Object.prototype.toString.call(styleList) !== "[object Array]") {
                     return false;
                 }
                 
@@ -435,20 +435,20 @@
                 
                 // Réinitialiser les préférences GREP
                 if (ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", false)) {
-                    app.findGrepPreferences = NothingEnum.nothing;
+                    app.findGrepPreferences = NothingEnum.NOTHING;
                 }
                 
                 if (ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", false)) {
-                    app.changeGrepPreferences = NothingEnum.nothing;
+                    app.changeGrepPreferences = NothingEnum.NOTHING;
                 }
                 
                 // Réinitialiser les préférences de texte
                 if (ErrorHandler.ensureDefined(app.findTextPreferences, "app.findTextPreferences", false)) {
-                    app.findTextPreferences = NothingEnum.nothing;
+                    app.findTextPreferences = NothingEnum.NOTHING;
                 }
                 
                 if (ErrorHandler.ensureDefined(app.changeTextPreferences, "app.changeTextPreferences", false)) {
-                    app.changeTextPreferences = NothingEnum.nothing;
+                    app.changeTextPreferences = NothingEnum.NOTHING;
                 }
                 
                 // Activer l'inclusion des notes de bas de page par défaut
@@ -699,8 +699,8 @@
                         // et non dans les notes elles-mêmes
                         
                         // Assurons-nous que les paramètres de recherche sont correctement configurés
-                        app.findGrepPreferences = NothingEnum.nothing;
-                        app.changeGrepPreferences = NothingEnum.nothing;
+                        app.findGrepPreferences = NothingEnum.NOTHING;
+                        app.changeGrepPreferences = NothingEnum.NOTHING;
                         
                         // Désactiver explicitement la recherche dans les notes de bas de page
                         app.findChangeGrepOptions.includeFootnotes = false;
@@ -1265,7 +1265,8 @@
                     var fermantPosition = paraText.indexOf(fermant.contents);
                     
                     // Si ce tiret est le premier du paragraphe, c'est un tiret fermant isolé
-                    if (paraText.indexOf(ENDASH, 0, fermantPosition) === -1) {
+                    var precedingText = paraText.substring(0, fermantPosition);
+                    if (precedingText.indexOf(ENDASH) === -1) {
                         // Utiliser findGrep/changeGrep localement sur cette occurrence
                         Utilities.resetPreferences();
                         app.findGrepPreferences.findWhat = " " + ENDASH;
@@ -1984,12 +1985,7 @@
           cbItalicStyle.dropdown.enabled = cbItalicStyle.checkbox.value;
           updateFeatureDependencies();
         };
-        
-        exposantOrdinalStyleOpt.checkbox.onClick = function() {
-          exposantOrdinalStyleOpt.dropdown.enabled = exposantOrdinalStyleOpt.checkbox.value;
-          updateFeatureDependencies();
-        };
-        
+
         // Ajouter un peu d'espace entre les sections
         tabStyle.add("statictext", undefined, "");
         
@@ -2379,9 +2375,33 @@
                   app.scriptPreferences.enableRedraw = false;
               }
               
+              // Compter le nombre d'étapes activées pour la barre de progression
+              var totalSteps = 0;
+              if (options.removeSpacesBeforePunctuation) totalSteps++;
+              if (options.fixDoubleSpaces) totalSteps++;
+              if (options.fixTypoSpaces && options.spaceType) totalSteps++;
+              if (options.fixDashIncises && options.dashIncisesSpaceType) totalSteps++;
+              if (options.removeDoubleReturns) totalSteps++;
+              if (options.removeSpacesStartParagraph) totalSteps++;
+              if (options.removeSpacesEndParagraph) totalSteps++;
+              if (options.removeTabs) totalSteps++;
+              if (options.moveNotes) totalSteps++;
+              if (options.applyNoteStyle && options.noteStyleName) totalSteps++;
+              if (options.replaceDashes) totalSteps++;
+              if (options.fixIsolatedHyphens) totalSteps++;
+              if (options.fixValueRanges) totalSteps++;
+              if (options.applyItalicStyle && options.italicStyleName) totalSteps++;
+              if (options.applyExposantStyle && options.exposantStyleName) totalSteps++;
+              if (options.convertEllipsis) totalSteps++;
+              if (options.replaceApostrophes) totalSteps++;
+              if (options.enableStyleAfter && options.triggerStyles && options.triggerStyles.length > 0 && options.targetStyle) totalSteps++;
+              if (options.applyMasterToLastPage && options.selectedMaster) totalSteps++;
+              if (options.sieclesOptions && (options.sieclesOptions.formaterSiecles || options.sieclesOptions.formaterOrdinaux || options.sieclesOptions.formaterReferences || options.sieclesOptions.formaterEspaces)) totalSteps++;
+              if (options.formatNumbers) totalSteps++;
+
               // Créer la barre de progression
-              ProgressBar.create("Application des corrections typographiques", 16);
-              
+              ProgressBar.create("Application des corrections typographiques", totalSteps);
+
               try {
                   // Compteur de progression
                   var progress = 0;
@@ -2512,7 +2532,7 @@
                   }
                   
                   // Finalisation
-                  ProgressBar.update(12, "Terminé !");
+                  ProgressBar.update(totalSteps, "Terminé !");
                   
               } catch (correctionsError) {
                   ErrorHandler.handleError(correctionsError, "application des corrections", false);
@@ -2983,8 +3003,7 @@
                     }
                 },
                 
-                appliquerGrepPartout: function(findWhat, changeParams, specificAction) {
-                    var doc = app.activeDocument;
+                appliquerGrepPartout: function(doc, findWhat, changeParams, specificAction) {
                     app.findGrepPreferences.findWhat = findWhat;
                     
                     // Si changeParams contient des paramètres spécifiques (comme un style)
@@ -3143,7 +3162,7 @@
               }
             }
             
-            self.Utilities.appliquerGrepPartout("\\bie\\s+siècle", null, traiterIeSiecle);
+            self.Utilities.appliquerGrepPartout(doc, "\\bie\\s+siècle", null, traiterIeSiecle);
             
             // Traitement explicite pour "Ie siècle" (I majuscule)
             app.findGrepPreferences = app.changeGrepPreferences = null;
@@ -3183,11 +3202,10 @@
               }
             }
             
-            self.Utilities.appliquerGrepPartout("\\bIe\\s+siècle", null, traiterIeCapSiecle);
+            self.Utilities.appliquerGrepPartout(doc, "\\bIe\\s+siècle", null, traiterIeCapSiecle);
             
-            for (var ps = 0; ps < modelesPremierSiecle.length; ps++) {
-              // Fonction spéciale pour traiter le premier siècle
-              function traiterPremierSiecle(resultat) {
+            // Fonction spéciale pour traiter le premier siècle
+            function traiterPremierSiecle(resultat) {
                 // Obtenir le caractère initial (I ou i)
                 var premierChar = resultat.characters[0].contents;
                 
@@ -3234,9 +3252,10 @@
                 }
               }
               
-              this.Utilities.appliquerGrepPartout(modelesPremierSiecle[ps], null, traiterPremierSiecle);
+            for (var ps = 0; ps < modelesPremierSiecle.length; ps++) {
+              this.Utilities.appliquerGrepPartout(doc, modelesPremierSiecle[ps], null, traiterPremierSiecle);
             }
-            
+
             // === TRAITEMENT POUR LE Ier SIÈCLE DÉJÀ FORMATÉ ===
             // Rechercher "Ier siècle" ou "ier siècle" déjà présent
             var modelesPremierSiecleExistant = [
@@ -3245,138 +3264,117 @@
                 "(?<=\\s)([Ii])er(?=[\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))"
             ];
             
-            for (var pse = 0; pse < modelesPremierSiecleExistant.length; pse++) {
-              function traiterPremierSiecleExistant(resultat) {
-                var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
-                var estGrasLocal = self.Utilities.estEnGras(resultat);
-                
-                // Appliquer le style pour la première lettre (I/i)
-                resultat.characters[0].appliedCharacterStyle = romainsStyle;
-                self.Utilities.appliquerStylePolice(resultat.characters[0], estItaliqueLocal, estGrasLocal);
-                
-                // Appliquer le style d'exposant aux caractères "er" (indices 1 et 2)
-                if (resultat.characters.length >= 3) {
-                  resultat.characters[1].appliedCharacterStyle = exposantStyle;
-                  resultat.characters[2].appliedCharacterStyle = exposantStyle;
-                  
-                  self.Utilities.appliquerStylePolice(resultat.characters[1], estItaliqueLocal, estGrasLocal);
-                  self.Utilities.appliquerStylePolice(resultat.characters[2], estItaliqueLocal, estGrasLocal);
-                }
+            function traiterPremierSiecleExistant(resultat) {
+              var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
+              var estGrasLocal = self.Utilities.estEnGras(resultat);
+
+              // Appliquer le style pour la première lettre (I/i)
+              resultat.characters[0].appliedCharacterStyle = romainsStyle;
+              self.Utilities.appliquerStylePolice(resultat.characters[0], estItaliqueLocal, estGrasLocal);
+
+              // Appliquer le style d'exposant aux caractères "er" (indices 1 et 2)
+              if (resultat.characters.length >= 3) {
+                resultat.characters[1].appliedCharacterStyle = exposantStyle;
+                resultat.characters[2].appliedCharacterStyle = exposantStyle;
+
+                self.Utilities.appliquerStylePolice(resultat.characters[1], estItaliqueLocal, estGrasLocal);
+                self.Utilities.appliquerStylePolice(resultat.characters[2], estItaliqueLocal, estGrasLocal);
               }
-              
-              this.Utilities.appliquerGrepPartout(modelesPremierSiecleExistant[pse], null, traiterPremierSiecleExistant);
+            }
+
+            for (var pse = 0; pse < modelesPremierSiecleExistant.length; pse++) {
+              this.Utilities.appliquerGrepPartout(doc, modelesPremierSiecleExistant[pse], null, traiterPremierSiecleExistant);
             }
             
             // === FORMATAGE DES SIÈCLES - MAJUSCULES ===
-            var modelesSiecleMajWithE = [
-              "(?<=\\s)([IVX])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)([IVX][IVX])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)([IVX][IVX][IVX])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)([IVX][IVX][IVX][IVX])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)([IVX][IVX][IVX][IVX][IVX])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))"
-            ];
-            
-            for (var j = 0; j < modelesSiecleMajWithE.length; j++) {
-              function traiterSiecleMaj(resultat) {
-                var texteOriginal = resultat.contents;
-                
-                // Vérifier si le texte est en italique ou en gras
-                var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
-                var estGrasLocal = self.Utilities.estEnGras(resultat);
-                
-                // Séparer le chiffre romain du "e"
-                var chiffreRomain = texteOriginal.slice(0, -1).toLowerCase();
-                var e = texteOriginal.slice(-1);
-                
-                // Remplacer le texte
-                resultat.contents = chiffreRomain + e;
-                
-                // Appliquer les styles séparément
-                for (var c = 0; c < resultat.characters.length - 1; c++) {
-                  resultat.characters[c].appliedCharacterStyle = romainsStyle;
-                  self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
-                }
-                
-                // Appliquer le style d'exposant au dernier caractère
-                resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
-                self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
+            var modeleSiecleMaj = "(?<=\\s)([IVX]{1,5})e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))";
+
+            function traiterSiecleMaj(resultat) {
+              var texteOriginal = resultat.contents;
+
+              // Vérifier si le texte est en italique ou en gras
+              var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
+              var estGrasLocal = self.Utilities.estEnGras(resultat);
+
+              // Séparer le chiffre romain du "e"
+              var chiffreRomain = texteOriginal.slice(0, -1).toLowerCase();
+              var e = texteOriginal.slice(-1);
+
+              // Remplacer le texte
+              resultat.contents = chiffreRomain + e;
+
+              // Appliquer les styles séparément
+              for (var c = 0; c < resultat.characters.length - 1; c++) {
+                resultat.characters[c].appliedCharacterStyle = romainsStyle;
+                self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
               }
-              
-              this.Utilities.appliquerGrepPartout(modelesSiecleMajWithE[j], null, traiterSiecleMaj);
+
+              // Appliquer le style d'exposant au dernier caractère
+              resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
+              self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
             }
+
+            this.Utilities.appliquerGrepPartout(doc, modeleSiecleMaj, null, traiterSiecleMaj);
             
             // === FORMATAGE DES SIÈCLES - MINUSCULES ===
-            var modelesSiecleMinWithE = [
-              "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))",
-              "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx][ivx])e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))"
-            ];
-            
-            for (var i = 0; i < modelesSiecleMinWithE.length; i++) {
-              function traiterSiecleMin(resultat) {
-                var texteOriginal = resultat.contents;
-                
-                // Vérifier si le texte est en italique ou en gras
-                var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
-                var estGrasLocal = self.Utilities.estEnGras(resultat);
-                
-                // Séparer le chiffre romain du "e"
-                var chiffreRomain = texteOriginal.slice(0, -1);
-                var e = texteOriginal.slice(-1);
-                
-                // Remplacer le texte
-                resultat.contents = chiffreRomain + e;
-                
-                // Appliquer les styles séparément
-                for (var c = 0; c < resultat.characters.length - 1; c++) {
-                  resultat.characters[c].appliedCharacterStyle = romainsStyle;
-                  self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
-                }
-                
-                // Appliquer le style d'exposant au dernier caractère
-                resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
-                self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
+            var modeleSiecleMin = "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx]{1,5})e(?=[\\.,;:\\s!\\?\\)\\]\\}\\>])(?!\\s+(?i:" + motsClefsRegex + "))";
+
+            function traiterSiecleMin(resultat) {
+              var texteOriginal = resultat.contents;
+
+              // Vérifier si le texte est en italique ou en gras
+              var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
+              var estGrasLocal = self.Utilities.estEnGras(resultat);
+
+              // Séparer le chiffre romain du "e"
+              var chiffreRomain = texteOriginal.slice(0, -1);
+              var e = texteOriginal.slice(-1);
+
+              // Remplacer le texte
+              resultat.contents = chiffreRomain + e;
+
+              // Appliquer les styles séparément
+              for (var c = 0; c < resultat.characters.length - 1; c++) {
+                resultat.characters[c].appliedCharacterStyle = romainsStyle;
+                self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
               }
-              
-              this.Utilities.appliquerGrepPartout(modelesSiecleMinWithE[i], null, traiterSiecleMin);
+
+              // Appliquer le style d'exposant au dernier caractère
+              resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
+              self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
             }
+
+            this.Utilities.appliquerGrepPartout(doc, modeleSiecleMin, null, traiterSiecleMin);
             
             // === TRAITEMENT EXPLICITE POUR "SIÈCLE" ET "SIÈCLES" ===
-            var modelesSiecleExplicite = [
-              "(?<=\\s)([IVXivx]{1,5})e(?=\\s+(?i:siècle))",
-              "(?<=\\s)([IVXivx]{1,5})e(?=\\s+(?i:siècles))"
-            ];
+            var modeleSiecleExplicite = "(?<=\\s)([IVXivx]{1,5})e(?=\\s+(?i:siècles?))";
             
-            for (var s = 0; s < modelesSiecleExplicite.length; s++) {
-              function traiterSiecleExplicite(resultat) {
-                var texteOriginal = resultat.contents;
-                
-                // Vérifier si le texte est en italique ou en gras
-                var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
-                var estGrasLocal = self.Utilities.estEnGras(resultat);
-                
-                // Séparer le chiffre romain du "e"
-                var chiffreRomain = texteOriginal.slice(0, -1).toLowerCase();
-                var e = texteOriginal.slice(-1);
-                
-                // Remplacer le texte
-                resultat.contents = chiffreRomain + e;
-                
-                // Appliquer les styles séparément
-                for (var c = 0; c < resultat.characters.length - 1; c++) {
-                  resultat.characters[c].appliedCharacterStyle = romainsStyle;
-                  self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
-                }
-                
-                // Appliquer le style d'exposant au dernier caractère
-                resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
-                self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
+            function traiterSiecleExplicite(resultat) {
+              var texteOriginal = resultat.contents;
+
+              // Vérifier si le texte est en italique ou en gras
+              var estItaliqueLocal = self.Utilities.estEnItalique(resultat);
+              var estGrasLocal = self.Utilities.estEnGras(resultat);
+
+              // Séparer le chiffre romain du "e"
+              var chiffreRomain = texteOriginal.slice(0, -1).toLowerCase();
+              var e = texteOriginal.slice(-1);
+
+              // Remplacer le texte
+              resultat.contents = chiffreRomain + e;
+
+              // Appliquer les styles séparément
+              for (var c = 0; c < resultat.characters.length - 1; c++) {
+                resultat.characters[c].appliedCharacterStyle = romainsStyle;
+                self.Utilities.appliquerStylePolice(resultat.characters[c], estItaliqueLocal, estGrasLocal);
               }
-              
-              this.Utilities.appliquerGrepPartout(modelesSiecleExplicite[s], null, traiterSiecleExplicite);
+
+              // Appliquer le style d'exposant au dernier caractère
+              resultat.characters[resultat.characters.length - 1].appliedCharacterStyle = exposantStyle;
+              self.Utilities.appliquerStylePolice(resultat.characters[resultat.characters.length - 1], estItaliqueLocal, estGrasLocal);
             }
+
+            this.Utilities.appliquerGrepPartout(doc, modeleSiecleExplicite, null, traiterSiecleExplicite);
           } catch (error) {
             alert("Erreur lors du formatage des siècles: " + error);
           }
@@ -3405,19 +3403,19 @@
                 // 1. Corriger les formes féminines avec accent
                 app.findGrepPreferences.findWhat = "\\b([Ii])ère\\b";
                 app.changeGrepPreferences.changeTo = "$1re";
-                app.activeDocument.changeGrep();
-                
+                doc.changeGrep();
+
                 // 2. Corriger les formes féminines sans accent
                 app.findGrepPreferences = app.changeGrepPreferences = null;
                 app.findGrepPreferences.findWhat = "\\b([Ii])ere\\b";
                 app.changeGrepPreferences.changeTo = "$1re";
-                app.activeDocument.changeGrep();
-                
-                // 3. Corriger le cas "IeR" 
+                doc.changeGrep();
+
+                // 3. Corriger le cas "IeR"
                 app.findGrepPreferences = app.changeGrepPreferences = null;
                 app.findGrepPreferences.findWhat = "\\b([Ii])eR\\b";
                 app.changeGrepPreferences.changeTo = "$1er";
-                app.activeDocument.changeGrep();
+                doc.changeGrep();
                 
                 // === TRAITEMENT DES ORDINAUX SPÉCIFIQUES ===
                 // Rechercher "Ier" et "Ire" premier/première, mais pas les mots ambigus
@@ -3426,7 +3424,7 @@
                 // Expression qui exclut les mots ambigus
                 app.findGrepPreferences.findWhat = "\\b(?!(?i:" + ambigusRegex + "))([Ii])(?:er|re)\\b";
                 
-                var resultatsIer = app.activeDocument.findGrep();
+                var resultatsIer = doc.findGrep();
                 
                 for (var i = 0; i < resultatsIer.length; i++) {
                     try {
@@ -3449,23 +3447,12 @@
                 }
                 
                 // === CODE ORIGINAL POUR LES CAS GÉNÉRAUX (II, III, IV, etc.) ===
-                // Cas 1: précédés par des mots spécifiques
-                var modelesOrdCase1WithE = [
-                    // Majuscules
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX][IVX])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX][IVX][IVX])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX][IVX][IVX][IVX])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX][IVX][IVX][IVX][IVX])e(?=\\s)",
-                    
-                    // Minuscules - exclure les mots ambigus
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx])e(?=\\s)",
-                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx][ivx])e(?=\\s)"
+                // Cas 1: précédés par des mots spécifiques (majuscules + minuscules)
+                var modelesOrdCase1 = [
+                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)([IVX]{1,5})e(?=\\s)",
+                    "(?<=(?i:" + motsClefsRegexAvant + ")\\s)(?!(?i:" + ambigusRegex + "))([ivx]{1,5})e(?=\\s)"
                 ];
-                
+
                 // Fonction pour traiter les expressions ordinales
                 function traiterExpressionOrdinale(resultat) {
                     try {
@@ -3492,30 +3479,19 @@
                 }
                 
                 // Appliquer aux cas 1
-                for (var o = 0; o < modelesOrdCase1WithE.length; o++) {
-                    this.Utilities.appliquerGrepPartout(modelesOrdCase1WithE[o], null, traiterExpressionOrdinale);
+                for (var o = 0; o < modelesOrdCase1.length; o++) {
+                    this.Utilities.appliquerGrepPartout(doc, modelesOrdCase1[o], null, traiterExpressionOrdinale);
                 }
-                
-                // Cas 2: suivis par des mots spécifiques
-                var modelesOrdCase2WithE = [
-                    // Majuscules
-                    "(?<=\\s)([IVX])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)([IVX][IVX])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)([IVX][IVX][IVX])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)([IVX][IVX][IVX][IVX])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)([IVX][IVX][IVX][IVX][IVX])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    
-                    // Minuscules - exclure les mots ambigus
-                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx])e(?=\\s+(?i:" + motsClefsRegex + "))",
-                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx][ivx][ivx][ivx][ivx])e(?=\\s+(?i:" + motsClefsRegex + "))"
+
+                // Cas 2: suivis par des mots spécifiques (majuscules + minuscules)
+                var modelesOrdCase2 = [
+                    "(?<=\\s)([IVX]{1,5})e(?=\\s+(?i:" + motsClefsRegex + "))",
+                    "(?<=\\s)(?!(?i:" + ambigusRegex + "))([ivx]{1,5})e(?=\\s+(?i:" + motsClefsRegex + "))"
                 ];
-                
+
                 // Appliquer aux cas 2
-                for (var p = 0; p < modelesOrdCase2WithE.length; p++) {
-                    this.Utilities.appliquerGrepPartout(modelesOrdCase2WithE[p], null, traiterExpressionOrdinale);
+                for (var p = 0; p < modelesOrdCase2.length; p++) {
+                    this.Utilities.appliquerGrepPartout(doc, modelesOrdCase2[p], null, traiterExpressionOrdinale);
                 }
                 
                 // === RECHERCHE DIRECTE DES FORMES II, III, etc. + e ===
@@ -3524,7 +3500,7 @@
                 app.findGrepPreferences = app.changeGrepPreferences = null;
                 app.findGrepPreferences.findWhat = "\\b(?!(?i:" + ambigusRegex + "))([IVXivx][IVXivx]+)e\\b";
                 
-                var resultatsAutres = app.activeDocument.findGrep();
+                var resultatsAutres = doc.findGrep();
                 
                 for (var i = 0; i < resultatsAutres.length; i++) {
                     try {
@@ -3557,13 +3533,13 @@
                 app.findGrepPreferences = app.changeGrepPreferences = null;
                 app.findGrepPreferences.findWhat = "(\\b[Ii](?:er|re)) ([A-Z]\\w*)";
                 app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                app.activeDocument.changeGrep();
-                
+                doc.changeGrep();
+
                 // Pour les chiffres romains + e suivis d'un mot commençant par une majuscule
                 app.findGrepPreferences = app.changeGrepPreferences = null;
                 app.findGrepPreferences.findWhat = "(\\b[IVXivx]+e) ([A-Z]\\w*)";
                 app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                app.activeDocument.changeGrep();
+                doc.changeGrep();
             } catch (error) {
                 alert("Erreur lors du formatage des expressions ordinales: " + error);
             }
@@ -3585,61 +3561,48 @@
               // Combiner les mots d'œuvres et les titres de personnes
               var tousLesMots = this.CONFIG.MOTS_OEUVRES.concat(this.CONFIG.TITRES_PERSONNES);
               
-              // ÉTAPE 1: Remplacer les espaces normaux par des espaces insécables
-              for (var i = 0; i < tousLesMots.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Rechercher: mot + espace + chiffre romain
-                  var motif = "(?i)(" + tousLesMots[i] + ") ([ivxIVX][ivxIVX]*)";
-                  app.findGrepPreferences.findWhat = motif;
-                  app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                  
-                  // Appliquer à tout le document
-                  app.activeDocument.changeGrep();
-              }
-              
-              // ÉTAPE 2: Formater les chiffres romains trouvés
-              for (var i = 0; i < tousLesMots.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Rechercher: mot + espace insécable + chiffre romain
-                  var motif = "(?i)(" + tousLesMots[i] + ")" + ESPACE_INSECABLE + "([ivxIVX][ivxIVX]*)";
-                  app.findGrepPreferences.findWhat = motif;
-                  
-                  // Trouver toutes les occurrences
-                  var resultats = app.activeDocument.findGrep();
-                  
-                  // Pour chaque occurrence
-                  for (var r = 0; r < resultats.length; r++) {
-                      // Le texte complet (mot + espace insécable + chiffre romain)
-                      var texteComplet = resultats[r].contents;
-                      
-                      // Extraire le mot, l'espace insécable et le chiffre romain
-                      var mot = texteComplet.substring(0, tousLesMots[i].length);
-                      var espaceEtChiffre = texteComplet.substring(tousLesMots[i].length);
-                      var chiffreRomain = espaceEtChiffre.substring(1); // Ignorer l'espace insécable
-                      
-                      // Conserver les attributs
-                      var estItaliqueLocal = self.Utilities.estEnItalique(resultats[r]);
-                      var estGrasLocal = self.Utilities.estEnGras(resultats[r]);
-                      
-                      // Remplacer le texte en mettant le chiffre romain en majuscules
-                      resultats[r].contents = mot + ESPACE_INSECABLE + chiffreRomain.toUpperCase();
-                      
-                      // Traiter le chiffre romain séparément
-                      var longueurChiffre = chiffreRomain.length;
-                      var debutChiffre = tousLesMots[i].length + 1; // +1 pour l'espace insécable
-                      
-                      // Appliquer le style au chiffre romain uniquement
-                      for (var c = debutChiffre; c < debutChiffre + longueurChiffre; c++) {
-                          if (c < resultats[r].characters.length) {
-                              resultats[r].characters[c].appliedCharacterStyle = romainsMajStyle;
-                              
-                              // Préserver l'italique et/ou le gras
-                              self.Utilities.appliquerStylePolice(resultats[r].characters[c], estItaliqueLocal, estGrasLocal);
-                          }
+              // Joindre tous les mots en un seul pattern d'alternation
+              var motsJoined = tousLesMots.join("|");
+
+              // ÉTAPE 1: Remplacer les espaces normaux par des espaces insécables (un seul changeGrep)
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "(?i)(" + motsJoined + ") ([ivxIVX][ivxIVX]*)";
+              app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
+              doc.changeGrep();
+
+              // ÉTAPE 2: Formater les chiffres romains trouvés (un seul findGrep)
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "(?i)(" + motsJoined + ")" + ESPACE_INSECABLE + "([ivxIVX][ivxIVX]*)";
+              var resultats = doc.findGrep();
+
+              // Pour chaque occurrence
+              for (var r = 0; r < resultats.length; r++) {
+                  // Le texte complet (mot + espace insécable + chiffre romain)
+                  var texteComplet = resultats[r].contents;
+
+                  // Trouver la position de l'espace insécable pour séparer mot et chiffre
+                  var posEspace = texteComplet.indexOf(ESPACE_INSECABLE);
+                  var mot = texteComplet.substring(0, posEspace);
+                  var chiffreRomain = texteComplet.substring(posEspace + 1);
+
+                  // Conserver les attributs
+                  var estItaliqueLocal = self.Utilities.estEnItalique(resultats[r]);
+                  var estGrasLocal = self.Utilities.estEnGras(resultats[r]);
+
+                  // Remplacer le texte en mettant le chiffre romain en majuscules
+                  resultats[r].contents = mot + ESPACE_INSECABLE + chiffreRomain.toUpperCase();
+
+                  // Traiter le chiffre romain séparément
+                  var longueurChiffre = chiffreRomain.length;
+                  var debutChiffre = mot.length + 1; // +1 pour l'espace insécable
+
+                  // Appliquer le style au chiffre romain uniquement
+                  for (var c = debutChiffre; c < debutChiffre + longueurChiffre; c++) {
+                      if (c < resultats[r].characters.length) {
+                          resultats[r].characters[c].appliedCharacterStyle = romainsMajStyle;
+
+                          // Préserver l'italique et/ou le gras
+                          self.Utilities.appliquerStylePolice(resultats[r].characters[c], estItaliqueLocal, estGrasLocal);
                       }
                   }
               }
@@ -3652,8 +3615,8 @@
               app.findGrepPreferences = app.changeGrepPreferences = null;
               app.findGrepPreferences.findWhat = "(?i)(" + nomsPremierRegex + ")[ " + ESPACE_INSECABLE + "]([Ii])er";
               
-              var resultatsIer = app.activeDocument.findGrep();
-              
+              var resultatsIer = doc.findGrep();
+
               for (var i = 0; i < resultatsIer.length; i++) {
                   try {
                       var texteOriginal = resultatsIer[i].contents;
@@ -3696,7 +3659,7 @@
                   app.findGrepPreferences = app.changeGrepPreferences = null;
                   app.findGrepPreferences.findWhat = "(\\s|^)(1er)";
                   
-                  var resultats1er = app.activeDocument.findGrep();
+                  var resultats1er = doc.findGrep();
                   
                   for (var r = 0; r < resultats1er.length; r++) {
                       try {
@@ -3805,22 +3768,16 @@
                   }
               }
               
-              // 1. Abréviations suivies d'un chiffre ou d'un nombre
-              for (var i = 0; i < abreviationsPrecises.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Abréviations suivies d'un chiffre - version améliorée
-                  var motif = "(?i)(" + abreviationsPrecises[i] + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9][0-9.,\\-–—]*(?:[0-9]|[a-z]))";
-                  app.findGrepPreferences.findWhat = motif;
-                  app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                  
-                  // Appliquer à tout le document
-                  app.activeDocument.changeGrep();
-              }
-              
+              // Joindre toutes les abréviations en un seul pattern d'alternation
+              var abrevJoined = abreviationsPrecises.join("|");
+
+              // 1. Abréviations suivies d'un chiffre ou d'un nombre (un seul changeGrep)
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "(?i)(" + abrevJoined + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9][0-9.,\\-\u2013\u2014]*(?:[0-9]|[a-z]))";
+              app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
+              doc.changeGrep();
+
               // 2. Traitement spécial pour les intervalles de pages
-              // Correction : utiliser directement les abréviations de référence avec délimiteurs
               var abreviationsRefs = [];
               for (var i = 0; i < this.CONFIG.ABREVIATIONS_REFS.length; i++) {
                   if (this.CONFIG.ABREVIATIONS_REFS[i].indexOf("\\.") !== -1) {
@@ -3829,47 +3786,25 @@
                       abreviationsRefs.push("\\b" + this.CONFIG.ABREVIATIONS_REFS[i] + "\\b");
                   }
               }
-              
-              for (var i = 0; i < abreviationsRefs.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Format d'intervalle avec trait d'union ou tiret - version améliorée
-                  var motif = "(?i)(" + abreviationsRefs[i] + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9]+)[ ]*([-–—])[ ]*([0-9]+)";
-                  app.findGrepPreferences.findWhat = motif;
-                  app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2$3$4";
-                  
-                  // Appliquer à tout le document
-                  app.activeDocument.changeGrep();
-              }
-              
-              // 3. Traitement spécial pour les numéros avec lettre
-              for (var i = 0; i < abreviationsPrecises.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Format de numéro avec lettre - version améliorée
-                  var motif = "(?i)(" + abreviationsPrecises[i] + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9]+[a-z])\\b";
-                  app.findGrepPreferences.findWhat = motif;
-                  app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                  
-                  // Appliquer à tout le document
-                  app.activeDocument.changeGrep();
-              }
-              
-              // 4. Traitement des unités de mesure précédées de nombres
-              for (var i = 0; i < this.CONFIG.UNITES_MESURE.length; i++) {
-                  // Réinitialiser les préférences
-                  app.findGrepPreferences = app.changeGrepPreferences = null;
-                  
-                  // Nombre suivi d'une unité de mesure - version améliorée
-                  var motif = "([0-9]+[.,]?[0-9]*)[ ](\\b" + this.CONFIG.UNITES_MESURE[i] + "(?=\\s|[.,;:!?)]|$))";
-                  app.findGrepPreferences.findWhat = motif;
-                  app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
-                  
-                  // Appliquer à tout le document
-                  app.activeDocument.changeGrep();
-              }
+              var refsJoined = abreviationsRefs.join("|");
+
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "(?i)(" + refsJoined + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9]+)[ ]*([-\u2013\u2014])[ ]*([0-9]+)";
+              app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2$3$4";
+              doc.changeGrep();
+
+              // 3. Traitement spécial pour les numéros avec lettre (un seul changeGrep)
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "(?i)(" + abrevJoined + ")[ \\t" + ESPACE_INSECABLE + "]+([0-9]+[a-z])\\b";
+              app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
+              doc.changeGrep();
+
+              // 4. Traitement des unités de mesure précédées de nombres (un seul changeGrep)
+              var unitesJoined = this.CONFIG.UNITES_MESURE.join("|");
+              app.findGrepPreferences = app.changeGrepPreferences = null;
+              app.findGrepPreferences.findWhat = "([0-9]+[.,]?[0-9]*)[ ](\\b(?:" + unitesJoined + ")(?=\\s|[.,;:!?)]|$))";
+              app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
+              doc.changeGrep();
           } catch (error) {
               alert("Erreur lors du formatage des espaces insécables pour les références: " + error.message);
           }
@@ -3915,7 +3850,7 @@
                         },
                         ScriptLanguage.JAVASCRIPT,
                         undefined,
-                        UndoModes.fastEntireScript,
+                        UndoModes.FAST_ENTIRE_SCRIPT,
                         CONFIG.SCRIPT_TITLE
                     );
                 } catch (scriptError) {
