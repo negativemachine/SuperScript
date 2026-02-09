@@ -2176,16 +2176,6 @@
           masterDropdown.selection = 0;
         }
         
-        // Section de portée
-        var scopePanel = dialog.add("panel", undefined, "Portée d'application");
-        scopePanel.orientation = "row";
-        scopePanel.alignChildren = "left";
-        scopePanel.margins = 20;
-        
-        var rbActiveDoc = scopePanel.add("radiobutton", undefined, "Document actif");
-        var rbAllDocs = scopePanel.add("radiobutton", undefined, "Tous les documents ouverts");
-        rbActiveDoc.value = true;
-        
         // Boutons d'action
         var buttonGroup = dialog.add("group");
         buttonGroup.orientation = "row";
@@ -2239,9 +2229,6 @@
           helpContent += "ONGLET \"MISE EN PAGE\"\n\n";
           helpContent += "• Application conditionnelle de styles : Applique automatiquement un style au paragraphe qui suit les styles sélectionnés.\n";
           helpContent += "• Appliquer un gabarit à la dernière page : Utile pour la fin des chapitres ou des documents.\n\n";
-          helpContent += "PORTÉE D'APPLICATION\n\n";
-          helpContent += "• Document actif : Applique les corrections uniquement au document ouvert actuellement.\n";
-          helpContent += "• Tous les documents ouverts : Applique les corrections à tous les documents ouverts dans InDesign.\n\n";
           helpContent += "Pour plus d'informations, visitez notre site web : https://lab.spectral.art";
           
           // Appliquer le texte d'aide
@@ -2329,8 +2316,6 @@
               
               // Options pour le module SieclesModule
               sieclesOptions: sieclesOptions,
-              
-              applyToAllDocs: rbAllDocs.value,
               
               // Options pour le formatage des nombres
               formatNumbers: cbFormatNumbers.value,
@@ -2562,56 +2547,11 @@
           try {
               if (!ErrorHandler.ensureDefined(options, "options", true)) return;
               if (!ErrorHandler.ensureDefined(app, "app", true)) return;
-              if (!ErrorHandler.ensureDefined(app.documents, "app.documents", true)) return;
-              
-              var successCount = 0;
-              
-              if (options.applyToAllDocs) {
-                  // Tous les documents
-                  var totalDocs = app.documents.length;
-                  
-                  // Créer une barre de progression pour plusieurs documents
-                  if (totalDocs > 1) {
-                      ProgressBar.create("Traitement des documents", totalDocs);
-                  }
-                  
-                  for (var i = 0; i < totalDocs; i++) {
-                      try {
-                          var doc = app.documents[i];
-                          
-                          if (!ErrorHandler.ensureDefined(doc, "document à l'index " + i, false)) {
-                              continue;
-                          }
-                          
-                          // Mise à jour pour plusieurs documents
-                          if (totalDocs > 1) {
-                              ProgressBar.update(i + 1, "Traitement du document " + (i + 1) + " sur " + totalDocs);
-                          }
-                          
-                          Processor.applyCorrections(doc, options);
-                          successCount++;
-                      } catch (docError) {
-                          ErrorHandler.handleError(docError, "traitement du document " + i, false);
-                          // Continuer avec le document suivant
-                      }
-                  }
-                  
-                  // Fermer la barre de progression de plusieurs documents
-                  if (totalDocs > 1) {
-                      ProgressBar.close();
-                  }
-                  
-                  alert("Corrections appliquées à " + successCount + " document(s) sur " + totalDocs + ".");
-              } else {
-                  // Document actif uniquement
-                  if (!ErrorHandler.ensureDefined(app.activeDocument, "app.activeDocument", true)) return;
-                  
-                  Processor.applyCorrections(app.activeDocument, options);
-                  alert("Corrections appliquées au document actif.");
-              }
+              if (!ErrorHandler.ensureDefined(app.activeDocument, "app.activeDocument", true)) return;
+
+              Processor.applyCorrections(app.activeDocument, options);
+              alert("Corrections appliquées au document actif.");
           } catch (error) {
-              // Fermer la barre de progression en cas d'erreur
-              ProgressBar.close();
               ErrorHandler.handleError(error, "processDocuments", true);
           }
       }
