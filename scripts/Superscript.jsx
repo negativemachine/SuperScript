@@ -7,7 +7,7 @@
   *
   * Supports 7 language profiles: FR-FR, FR-CH, EN-US, EN-UK, DE, ES, IT.
   * Bilingual UI (FR/EN) via I18n module, auto-detected from InDesign locale.
-  * Save/load user preferences via ConfigManager (superscript-config.json).
+  * Save/load user preferences via ConfigManager (typography.json).
   *
   * Architecture:
   *   safeJSON       — ES3-compatible JSON stringify/parse
@@ -1285,7 +1285,7 @@
      * @private
      */
     var ConfigManager = (function() {
-        var CONFIG_FILENAME = "superscript-config.json";
+        var CONFIG_FILENAME = "typography.json";
         var CONFIG_VERSION = 1;
 
         /**
@@ -1553,7 +1553,7 @@
                 if (typeof app !== 'undefined' && app.activeDocument && app.activeDocument.saved) {
                     defaultPath = app.activeDocument.filePath + "/";
                 }
-                var defaultFile = new File(defaultPath + "superscript-config");
+                var defaultFile = new File(defaultPath + "typography");
                 var saveFile = defaultFile.saveDlg(
                     I18n.__("saveConfigTitle"),
                     "JSON files:*.json"
