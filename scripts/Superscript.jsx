@@ -964,10 +964,10 @@
                 }
             };
 
-            // Collect trigger style names
-            for (var i = 0; i < controls.triggerCheckboxes.length; i++) {
-                if (controls.triggerCheckboxes[i].value) {
-                    config.layout.triggerStyles.push(controls.triggerCheckboxes[i].text);
+            // Collect trigger style names from listbox selection
+            if (controls.triggerListbox && controls.triggerListbox.selection) {
+                for (var i = 0; i < controls.triggerListbox.selection.length; i++) {
+                    config.layout.triggerStyles.push(controls.triggerListbox.selection[i].text);
                 }
             }
 
@@ -1099,17 +1099,15 @@
                     controls.masterDropdown.enabled = l.applyMasterToLastPage;
                 }
 
-                // Trigger styles
-                if (l.triggerStyles && controls.triggerCheckboxes) {
-                    // First uncheck all
-                    for (var ti = 0; ti < controls.triggerCheckboxes.length; ti++) {
-                        controls.triggerCheckboxes[ti].value = false;
-                    }
-                    // Then check the ones in config
+                // Trigger styles — restore selection in listbox
+                if (l.triggerStyles && controls.triggerListbox) {
+                    // Deselect all first
+                    controls.triggerListbox.selection = null;
+                    // Select matching items
                     for (var ts = 0; ts < l.triggerStyles.length; ts++) {
-                        for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
-                            if (controls.triggerCheckboxes[tc].text === l.triggerStyles[ts]) {
-                                controls.triggerCheckboxes[tc].value = true;
+                        for (var tc = 0; tc < controls.triggerListbox.items.length; tc++) {
+                            if (controls.triggerListbox.items[tc].text === l.triggerStyles[ts]) {
+                                controls.triggerListbox.items[tc].selected = true;
                                 break;
                             }
                         }
@@ -3353,27 +3351,17 @@
 
         var styleGroupPanel = tabStyles.add("panel", undefined, I18n.__("triggerStylesPanel"));
         styleGroupPanel.orientation = "column";
-        styleGroupPanel.alignChildren = "left";
-        styleGroupPanel.maximumSize.height = 200;
-        styleGroupPanel.minimumSize.height = 150;
-        
-        // Ajouter un groupe déroulant pour les styles
-        var scrollGroup = styleGroupPanel.add("group");
-        scrollGroup.orientation = "column";
-        scrollGroup.alignChildren = "left";
-        scrollGroup.maximumSize.height = 180;
-        
-        // Créer les cases à cocher pour les styles déclencheurs
-        var triggerCheckboxes = [];
-        for (var i = 0; i < paraStyleNames.length; i++) {
-          var cb = scrollGroup.add("checkbox", undefined, paraStyleNames[i]);
-          triggerCheckboxes.push(cb);
-          
-          // Par défaut, tous les styles sont cochés sauf "Body text" et "First paragraph"
-          if (paraStyleNames[i] === "Body text" || paraStyleNames[i] === "First paragraph") {
-            cb.value = false;
-          } else {
-            cb.value = true;
+        styleGroupPanel.alignChildren = "fill";
+
+        // Scrollable listbox with multi-selection instead of checkboxes
+        var triggerListbox = styleGroupPanel.add("listbox", undefined, paraStyleNames, { multiselect: true });
+        triggerListbox.preferredSize.height = 180;
+
+        // Pre-select all styles except "Body text" and "First paragraph"
+        for (var i = 0; i < triggerListbox.items.length; i++) {
+          var itemText = triggerListbox.items[i].text;
+          if (itemText !== "Body text" && itemText !== "First paragraph") {
+            triggerListbox.items[i].selected = true;
           }
         }
         
@@ -3481,7 +3469,7 @@
         dialogControls.cbUseComma = cbUseComma;
         dialogControls.cbExcludeYears = cbExcludeYears;
         dialogControls.cbEnableStyleAfter = cbEnableStyleAfter;
-        dialogControls.triggerCheckboxes = triggerCheckboxes;
+        dialogControls.triggerListbox = triggerListbox;
         dialogControls.targetStyleDropdown = targetStyleDropdown;
         dialogControls.cbApplyMasterToLastPage = cbApplyMasterToLastPage;
         dialogControls.masterDropdown = masterDropdown;
@@ -3571,10 +3559,11 @@
           try {
             // Collecter les styles déclencheurs sélectionnés
             var selectedTriggerStyles = [];
-            if (allParaStyles.length > 0) {
-              for (var i = 0; i < triggerCheckboxes.length; i++) {
-                if (triggerCheckboxes[i].value) {
-                  selectedTriggerStyles.push(allParaStyles[i]);
+            if (allParaStyles.length > 0 && triggerListbox.selection) {
+              for (var i = 0; i < triggerListbox.selection.length; i++) {
+                var selIdx = triggerListbox.selection[i].index;
+                if (selIdx < allParaStyles.length) {
+                  selectedTriggerStyles.push(allParaStyles[selIdx]);
                 }
               }
             }
