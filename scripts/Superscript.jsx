@@ -3514,7 +3514,9 @@
         saveConfigBtn.onClick = function() {
             dialogControls.languageProfileId = getSelectedProfileId();
             var configData = ConfigManager.collectFromDialog(dialogControls);
-            ConfigManager.save(configData);
+            if (ConfigManager.save(configData)) {
+                configStatusText.text = I18n.__("configSaved");
+            }
         };
 
         // Wire Load button
@@ -3524,6 +3526,7 @@
                 ConfigManager.applyToDialog(configData, dialogControls, characterStyles, availableProfiles);
                 updateUIForProfile();
                 updateFeatureDependencies();
+                configStatusText.text = I18n.__("configLoaded");
             }
         };
 
@@ -3977,12 +3980,11 @@
          * @param {Object} options - Options sélectionnées
          */
         /**
-         * Gets a CONFIG data array from LanguageProfile if available, otherwise from hardcoded CONFIG
-         * @param {String} configKey - Key in SieclesModule.CONFIG (e.g., "MOTS_ORDINAUX")
+         * Gets a data array from the active LanguageProfile
          * @param {String} profilePath - Dot path in LanguageProfile (e.g., "data.motsOrdinaux")
-         * @return {Array} The data array
+         * @return {Array} The data array, or [] if no profile loaded
          */
-        getConfigData: function(configKey, profilePath) {
+        getConfigData: function(profilePath) {
             if (LanguageProfile.getCurrentId()) {
                 var profileData = LanguageProfile.getList(profilePath);
                 if (profileData.length > 0) return profileData;
@@ -4170,8 +4172,8 @@
             var ESPACE_INSECABLE = String.fromCharCode(0x00A0);
             
             // Préparer les expressions régulières
-            var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("MOTS_ORDINAUX", "data.motsOrdinaux"));
-            var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("MOTS_AMBIGUS", "data.motsAmbigus"));
+            var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("data.motsOrdinaux"));
+            var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("data.motsAmbigus"));
             
             // Appliquer les styles à tout le document
             app.findGrepPreferences = app.changeGrepPreferences = null;
@@ -4454,9 +4456,9 @@
                 var ESPACE_INSECABLE = String.fromCharCode(0x00A0);
                 
                 // Préparer les expressions régulières
-                var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("MOTS_ORDINAUX", "data.motsOrdinaux"));
-                var motsClefsRegexAvant = this.Utilities.preparerRegex(this.getConfigData("MOTS_AVANT_ORDINAUX", "data.motsAvantOrdinaux"));
-                var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("MOTS_AMBIGUS", "data.motsAmbigus"));
+                var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("data.motsOrdinaux"));
+                var motsClefsRegexAvant = this.Utilities.preparerRegex(this.getConfigData("data.motsAvantOrdinaux"));
+                var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("data.motsAmbigus"));
                 
                 // === CORRECTIONS PRÉLIMINAIRES ===
                 // Remplacer les caractères problématiques avant tout traitement
@@ -4621,7 +4623,7 @@
               app.findGrepPreferences = app.changeGrepPreferences = null;
               
               // Combiner les mots d'œuvres et les titres de personnes
-              var tousLesMots = this.getConfigData("MOTS_OEUVRES", "data.motsOeuvres").concat(this.getConfigData("TITRES_PERSONNES", "data.titresPersonnes"));
+              var tousLesMots = this.getConfigData("data.motsOeuvres").concat(this.getConfigData("data.titresPersonnes"));
               
               // Joindre tous les mots en un seul pattern d'alternation
               var motsJoined = tousLesMots.join("|");
@@ -4671,7 +4673,7 @@
               
               // === TRAITEMENT UNIQUEMENT DES "Ier" DÉJÀ FORMATÉS (IGNORE LES "Ie") ===
               // Créer une expression regex pour les noms avec premier
-              var nomsPremierRegex = this.Utilities.preparerRegex(this.getConfigData("NOMS_PREMIER", "data.nomsPremier"));
+              var nomsPremierRegex = this.Utilities.preparerRegex(this.getConfigData("data.nomsPremier"));
               
               // Rechercher seulement les cas déjà formatés en "Ier" (pas "Ie")
               app.findGrepPreferences = app.changeGrepPreferences = null;
@@ -4772,61 +4774,61 @@
               var abreviationsPrecises = [];
               
               // Traiter les abréviations avec points
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs").length; i++) {
+              for (var i = 0; i < this.getConfigData("data.abreviationsRefs").length; i++) {
                   // Si l'abréviation contient déjà un point d'échappement, elle est correcte
-                  if (this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i]);
+                  if (this.getConfigData("data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.abreviationsRefs")[i]);
                   } else {
                       // Sinon, ajouter des délimiteurs de mot
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsRefs")[i] + "\\b");
                   }
               }
               
               // Ajouter les références aux volumes avec délimiteurs de mot
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes").length; i++) {
-                  if (this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i]);
+              for (var i = 0; i < this.getConfigData("data.abreviationsVolumes").length; i++) {
+                  if (this.getConfigData("data.abreviationsVolumes")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.abreviationsVolumes")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsVolumes")[i] + "\\b");
                   }
               }
               
               // Ajouter les références temporelles avec délimiteurs de mot
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles").length; i++) {
-                  if (this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i]);
+              for (var i = 0; i < this.getConfigData("data.abreviationsTemporelles").length; i++) {
+                  if (this.getConfigData("data.abreviationsTemporelles")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.abreviationsTemporelles")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsTemporelles")[i] + "\\b");
                   }
               }
               
               // Ajouter les références aux numéros avec délimiteurs de mot
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros").length; i++) {
-                  if (this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i]);
-                  } else if (this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i].indexOf("°") !== -1) {
+              for (var i = 0; i < this.getConfigData("data.abreviationsNumeros").length; i++) {
+                  if (this.getConfigData("data.abreviationsNumeros")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.abreviationsNumeros")[i]);
+                  } else if (this.getConfigData("data.abreviationsNumeros")[i].indexOf("°") !== -1) {
                       // Cas spécial pour n° et n°s - pas de \b à la fin
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i]);
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsNumeros")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsNumeros")[i] + "\\b");
                   }
               }
               
               // Ajouter les références directionnelles avec délimiteurs de mot
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection").length; i++) {
-                  if (this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i]);
+              for (var i = 0; i < this.getConfigData("data.abreviationsDirection").length; i++) {
+                  if (this.getConfigData("data.abreviationsDirection")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.abreviationsDirection")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.abreviationsDirection")[i] + "\\b");
                   }
               }
               
               // Ajouter les titres et appellations avec délimiteurs de mot
-              for (var i = 0; i < this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations").length; i++) {
-                  if (this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i]);
+              for (var i = 0; i < this.getConfigData("data.titresAppellations").length; i++) {
+                  if (this.getConfigData("data.titresAppellations")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("data.titresAppellations")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("data.titresAppellations")[i] + "\\b");
                   }
               }
               
@@ -4841,11 +4843,11 @@
 
               // 2. Traitement spécial pour les intervalles de pages
               var abreviationsRefs = [];
-              for (var i = 0; i < this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs").length; i++) {
-                  if (this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
-                      abreviationsRefs.push(this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i]);
+              for (var i = 0; i < this.getConfigData("data.abreviationsRefs").length; i++) {
+                  if (this.getConfigData("data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
+                      abreviationsRefs.push(this.getConfigData("data.abreviationsRefs")[i]);
                   } else {
-                      abreviationsRefs.push("\\b" + this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i] + "\\b");
+                      abreviationsRefs.push("\\b" + this.getConfigData("data.abreviationsRefs")[i] + "\\b");
                   }
               }
               var refsJoined = abreviationsRefs.join("|");
@@ -4862,7 +4864,7 @@
               doc.changeGrep();
 
               // 4. Traitement des unités de mesure précédées de nombres (un seul changeGrep)
-              var unitesJoined = this.getConfigData("UNITES_MESURE", "data.unitesMesure").join("|");
+              var unitesJoined = this.getConfigData("data.unitesMesure").join("|");
               app.findGrepPreferences = app.changeGrepPreferences = null;
               app.findGrepPreferences.findWhat = "([0-9]+[.,]?[0-9]*)[ ](\\b(?:" + unitesJoined + ")(?=\\s|[.,;:!?)]|$))";
               app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
