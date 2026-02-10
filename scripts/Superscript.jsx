@@ -168,8 +168,10 @@
                 'fixValueRangesLabel': 'Convert hyphens to en dashes in value ranges',
 
                 // Spaces tab
-                'fixTypoSpacesLabel': 'Fix typographic spaces:',
-                'fixDashIncisesLabel': 'Fix spaces around \u2013 parenthetical dashes \u2013 :',
+                'fixTypoSpacesLabel': 'Fix typographic spaces',
+                'spaceBeforePunctLabel': 'Before ; ? !',
+                'spaceBeforeColonLabel': 'Before : and inside \u00ab \u00bb',
+                'fixDashIncisesLabel': 'Fix spaces around \u2013 parenthetical dashes \u2013',
                 'fixDoubleSpacesLabel': 'Fix multiple spaces',
                 'removeDoubleReturnsLabel': 'Remove double returns',
                 'removeSpacesBeforePunctuationLabel': 'Remove spaces before periods, commas and footnotes',
@@ -342,8 +344,10 @@
                 'fixValueRangesLabel': 'Transformer les tirets en tirets demi-cadratin dans les intervalles de valeurs',
 
                 // Spaces tab
-                'fixTypoSpacesLabel': 'Corriger les espaces typographiques\u2009:',
-                'fixDashIncisesLabel': 'Corriger les espaces des \u2013 incises \u2013\u2009:',
+                'fixTypoSpacesLabel': 'Corriger les espaces typographiques',
+                'spaceBeforePunctLabel': 'Avant ; ? !',
+                'spaceBeforeColonLabel': 'Avant : et dans \u00ab \u00bb',
+                'fixDashIncisesLabel': 'Corriger les espaces des \u2013 incises \u2013',
                 'fixDoubleSpacesLabel': 'Corriger les espaces multiples',
                 'removeDoubleReturnsLabel': 'Supprimer les doubles retours \u00E0 la ligne',
                 'removeSpacesBeforePunctuationLabel': 'Supprimer les espaces avant les points, virgules et notes',
@@ -922,8 +926,10 @@
                     removeSpacesBeforePunctuation: controls.cbRemoveSpacesBeforePunctuation.value,
                     fixDoubleSpaces: controls.cbFixSpaces.value,
                     fixTypoSpaces: controls.fixTypoSpacesOpt.checkbox.value,
-                    fixTypoSpacesType: (controls.fixTypoSpacesOpt.dropdown.selection)
-                        ? controls.fixTypoSpacesOpt.dropdown.selection.index : 0,
+                    fixTypoSpacesPunct: (controls.fixTypoSpacesOpt.punctDropdown.selection)
+                        ? controls.fixTypoSpacesOpt.punctDropdown.selection.index : 0,
+                    fixTypoSpacesColon: (controls.fixTypoSpacesOpt.colonDropdown.selection)
+                        ? controls.fixTypoSpacesOpt.colonDropdown.selection.index : 0,
                     fixDashIncises: controls.fixDashIncisesOpt.checkbox.value,
                     fixDashIncisesType: (controls.fixDashIncisesOpt.dropdown.selection)
                         ? controls.fixDashIncisesOpt.dropdown.selection.index : 0,
@@ -1045,10 +1051,20 @@
                 if (typeof c.fixDoubleSpaces === 'boolean') controls.cbFixSpaces.value = c.fixDoubleSpaces;
                 if (typeof c.fixTypoSpaces === 'boolean') {
                     controls.fixTypoSpacesOpt.checkbox.value = c.fixTypoSpaces;
-                    controls.fixTypoSpacesOpt.dropdown.enabled = c.fixTypoSpaces;
+                    controls.fixTypoSpacesOpt.subGroup.enabled = c.fixTypoSpaces;
                 }
-                if (typeof c.fixTypoSpacesType === 'number' && c.fixTypoSpacesType < controls.fixTypoSpacesOpt.dropdown.items.length) {
-                    controls.fixTypoSpacesOpt.dropdown.selection = c.fixTypoSpacesType;
+                if (typeof c.fixTypoSpacesPunct === 'number' && c.fixTypoSpacesPunct < controls.fixTypoSpacesOpt.punctDropdown.items.length) {
+                    controls.fixTypoSpacesOpt.punctDropdown.selection = c.fixTypoSpacesPunct;
+                }
+                if (typeof c.fixTypoSpacesColon === 'number' && c.fixTypoSpacesColon < controls.fixTypoSpacesOpt.colonDropdown.items.length) {
+                    controls.fixTypoSpacesOpt.colonDropdown.selection = c.fixTypoSpacesColon;
+                }
+                // Backward compat: old fixTypoSpacesType sets both dropdowns
+                if (typeof c.fixTypoSpacesType === 'number' && typeof c.fixTypoSpacesPunct !== 'number') {
+                    if (c.fixTypoSpacesType < controls.fixTypoSpacesOpt.punctDropdown.items.length) {
+                        controls.fixTypoSpacesOpt.punctDropdown.selection = c.fixTypoSpacesType;
+                        controls.fixTypoSpacesOpt.colonDropdown.selection = c.fixTypoSpacesType;
+                    }
                 }
                 if (typeof c.fixDashIncises === 'boolean') {
                     controls.fixDashIncisesOpt.checkbox.value = c.fixDashIncises;
@@ -1838,35 +1854,26 @@
         /**
          * Corrige les espaces typographiques autour de la ponctuation et des guillemets
          * @param {Document} doc - Document InDesign
-         * @param {string} spaceType - Code d'espace spécial InDesign
+         * @param {string} spaceBeforePunct - InDesign GREP code for space before ; ? ! (e.g. "~<" or "~S")
+         * @param {string} spaceBeforeColon - InDesign GREP code for space before : and inside « » (e.g. "~<" or "~S")
          */
-        fixTypoSpaces: function(doc, spaceType, profile) {
+        fixTypoSpaces: function(doc, spaceBeforePunct, spaceBeforeColon) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
                 if (!ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", true)) return;
                 if (!ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", true)) return;
 
-                // Read per-punctuation space types from language profile, fallback to spaceType
-                var spaceOpenQuote = spaceType;
-                var spaceCloseQuote = spaceType;
-                var spaceSemicolon = spaceType;
-                var spaceColon = spaceType;
-                var spaceExclamation = spaceType;
-                var spaceQuestion = spaceType;
+                // Space types are now fully determined by the UI dropdowns
+                var spaceSemicolon = spaceBeforePunct;
+                var spaceExclamation = spaceBeforePunct;
+                var spaceQuestion = spaceBeforePunct;
+                var spaceColon = spaceBeforeColon;
+                var spaceOpenQuote = spaceBeforeColon;
+                var spaceCloseQuote = spaceBeforeColon;
 
-                if (profile) {
-                    spaceOpenQuote = LanguageProfile.get("punctuation.spaceInsideOpenQuote", spaceType);
-                    spaceCloseQuote = LanguageProfile.get("punctuation.spaceInsideCloseQuote", spaceType);
-                    spaceSemicolon = LanguageProfile.get("punctuation.spaceBeforeSemicolon", spaceType);
-                    spaceColon = LanguageProfile.get("punctuation.spaceBeforeColon", spaceType);
-                    spaceExclamation = LanguageProfile.get("punctuation.spaceBeforeExclamation", spaceType);
-                    spaceQuestion = LanguageProfile.get("punctuation.spaceBeforeQuestion", spaceType);
-                }
-
-                // Skip entirely if no spaces are needed before any punctuation
-                var hasAnySpace = spaceOpenQuote || spaceCloseQuote || spaceSemicolon || spaceColon || spaceExclamation || spaceQuestion;
-                if (!hasAnySpace) return;
+                // Skip entirely if no spaces are needed
+                if (!spaceBeforePunct && !spaceBeforeColon) return;
 
                 Utilities.resetPreferences();
 
@@ -2955,11 +2962,18 @@
         // Called after all controls are created and when profile changes
         var uiProfileControls = {}; // Will be populated as controls are created
 
+        function spaceTypeToIndex(val) {
+            for (var i = 0; i < CONFIG.SPACE_TYPES.length; i++) {
+                if (CONFIG.SPACE_TYPES[i].value === val) return i;
+            }
+            return 0; // default to fine (~<)
+        }
+
         function updateUIForProfile() {
             var profile = LanguageProfile.getProfile();
             if (!profile) return;
 
-            // Hide fixTypoSpaces if no spaces before punctuation for this language
+            // Show/hide fixTypoSpaces and set dropdowns from profile
             var hasAnyPunctSpace = profile.punctuation &&
                 (profile.punctuation.spaceBeforeSemicolon ||
                  profile.punctuation.spaceBeforeColon ||
@@ -2972,8 +2986,33 @@
                 uiProfileControls.fixTypoSpaces.group.visible = !!hasAnyPunctSpace;
                 if (hasAnyPunctSpace) {
                     uiProfileControls.fixTypoSpaces.checkbox.value = true;
+                    uiProfileControls.fixTypoSpaces.subGroup.enabled = true;
+                    // Set per-punctuation dropdowns from profile
+                    var punctSpace = profile.punctuation.spaceBeforeSemicolon || "~<";
+                    var colonSpace = profile.punctuation.spaceBeforeColon || "~<";
+                    uiProfileControls.fixTypoSpaces.punctDropdown.selection = spaceTypeToIndex(punctSpace);
+                    uiProfileControls.fixTypoSpaces.colonDropdown.selection = spaceTypeToIndex(colonSpace);
                 } else {
                     uiProfileControls.fixTypoSpaces.checkbox.value = false;
+                }
+            }
+
+            // Set dash incise dropdown from profile
+            if (uiProfileControls.fixDashIncises && profile.dashes) {
+                var inciseSpace = profile.dashes.inciseSpace;
+                if (inciseSpace && inciseSpace !== " ") {
+                    uiProfileControls.fixDashIncises.checkbox.value = true;
+                    uiProfileControls.fixDashIncises.dropdown.enabled = true;
+                    uiProfileControls.fixDashIncises.dropdown.selection = spaceTypeToIndex(inciseSpace);
+                } else if (inciseSpace === " ") {
+                    // Normal space — enable but set to first option
+                    uiProfileControls.fixDashIncises.checkbox.value = true;
+                    uiProfileControls.fixDashIncises.dropdown.enabled = true;
+                    uiProfileControls.fixDashIncises.dropdown.selection = 1; // ~S closest
+                } else {
+                    // No space (e.g. EN-US em dash no spaces)
+                    uiProfileControls.fixDashIncises.checkbox.value = false;
+                    uiProfileControls.fixDashIncises.dropdown.enabled = false;
                 }
             }
 
@@ -3099,7 +3138,55 @@
         var cbFixValueRanges = addCheckboxOption(tabCorrections, I18n.__("fixValueRangesLabel"), true);
         
         // Ajout des options dans l'onglet Espaces et retours
-        var fixTypoSpacesOpt = addDropdownOption(tabSpaces, I18n.__("fixTypoSpacesLabel"), CONFIG.SPACE_TYPES, true);
+        // fixTypoSpaces: main checkbox + 2 sub-dropdowns for per-punctuation space types
+        var fixTypoSpacesGroup = tabSpaces.add("group");
+        fixTypoSpacesGroup.orientation = "column";
+        fixTypoSpacesGroup.alignChildren = "left";
+        fixTypoSpacesGroup.alignment = ["fill", "top"];
+
+        var cbFixTypoSpaces = fixTypoSpacesGroup.add("checkbox", undefined, I18n.__("fixTypoSpacesLabel"));
+        cbFixTypoSpaces.value = true;
+
+        var fixTypoSubGroup = fixTypoSpacesGroup.add("group");
+        fixTypoSubGroup.orientation = "column";
+        fixTypoSubGroup.alignChildren = "left";
+        fixTypoSubGroup.margins = [20, 0, 0, 0]; // indent left
+
+        var punctRow = fixTypoSubGroup.add("group");
+        punctRow.orientation = "row";
+        punctRow.alignChildren = "left";
+        punctRow.add("statictext", undefined, I18n.__("spaceBeforePunctLabel"));
+        var punctSpaceDropdown = punctRow.add("dropdownlist", undefined);
+        punctSpaceDropdown.preferredSize.width = 200;
+        for (var si = 0; si < CONFIG.SPACE_TYPES.length; si++) {
+            punctSpaceDropdown.add("item", I18n.__(CONFIG.SPACE_TYPES[si].labelKey));
+        }
+        punctSpaceDropdown.selection = 0; // default: fine (~<)
+
+        var colonRow = fixTypoSubGroup.add("group");
+        colonRow.orientation = "row";
+        colonRow.alignChildren = "left";
+        colonRow.add("statictext", undefined, I18n.__("spaceBeforeColonLabel"));
+        var colonSpaceDropdown = colonRow.add("dropdownlist", undefined);
+        colonSpaceDropdown.preferredSize.width = 200;
+        for (var si2 = 0; si2 < CONFIG.SPACE_TYPES.length; si2++) {
+            colonSpaceDropdown.add("item", I18n.__(CONFIG.SPACE_TYPES[si2].labelKey));
+        }
+        colonSpaceDropdown.selection = 0; // default: fine (~<), will be set by profile
+
+        cbFixTypoSpaces.onClick = function() {
+            fixTypoSubGroup.enabled = cbFixTypoSpaces.value;
+        };
+
+        // fixTypoSpaces compat object for existing code references
+        var fixTypoSpacesOpt = {
+            checkbox: cbFixTypoSpaces,
+            punctDropdown: punctSpaceDropdown,
+            colonDropdown: colonSpaceDropdown,
+            group: fixTypoSpacesGroup,
+            subGroup: fixTypoSubGroup
+        };
+
         var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
           fixDashIncisesOpt.dropdown.selection = 1;
         var cbFixSpaces = addCheckboxOption(tabSpaces, I18n.__("fixDoubleSpacesLabel"), true);
@@ -3306,6 +3393,7 @@
 
         // Populate profile control references for dynamic profile switching
         uiProfileControls.fixTypoSpaces = fixTypoSpacesOpt;
+        uiProfileControls.fixDashIncises = fixDashIncisesOpt;
         uiProfileControls.formatSiecles = cbFormatSiecles;
         uiProfileControls.formatOrdinaux = cbFormatOrdinaux;
         uiProfileControls.formatReferences = cbFormatReferences;
@@ -3616,8 +3704,10 @@
                 noteStyleOpt.dropdown.selection.text : null,
               fixDoubleSpaces: cbFixSpaces.value,
               fixTypoSpaces: fixTypoSpacesOpt.checkbox.value,
-              spaceType: fixTypoSpacesOpt.checkbox.value && fixTypoSpacesOpt.dropdown.selection ? 
-                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.dropdown.selection.index].value : null,
+              spaceBeforePunct: fixTypoSpacesOpt.checkbox.value && fixTypoSpacesOpt.punctDropdown.selection ?
+                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.punctDropdown.selection.index].value : null,
+              spaceBeforeColon: fixTypoSpacesOpt.checkbox.value && fixTypoSpacesOpt.colonDropdown.selection ?
+                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.colonDropdown.selection.index].value : null,
               fixDashIncises: fixDashIncisesOpt.checkbox.value,
               dashIncisesSpaceType: fixDashIncisesOpt.checkbox.value && fixDashIncisesOpt.dropdown.selection ? 
                   CONFIG.SPACE_TYPES[fixDashIncisesOpt.dropdown.selection.index].value : null,
@@ -3701,7 +3791,7 @@
               var totalSteps = 0;
               if (options.removeSpacesBeforePunctuation) totalSteps++;
               if (options.fixDoubleSpaces) totalSteps++;
-              if (options.fixTypoSpaces && options.spaceType) totalSteps++;
+              if (options.fixTypoSpaces) totalSteps++;
               if (options.fixDashIncises && options.dashIncisesSpaceType) totalSteps++;
               if (options.removeDoubleReturns) totalSteps++;
               if (options.removeSpacesStartParagraph) totalSteps++;
@@ -3739,9 +3829,9 @@
                       Corrections.fixDoubleSpaces(doc);
                   }
                   
-                  if (options.fixTypoSpaces && options.spaceType) {
+                  if (options.fixTypoSpaces) {
                       ProgressBar.update(++progress, I18n.__("progressFixTypoSpaces"));
-                      Corrections.fixTypoSpaces(doc, options.spaceType, options.languageProfileId);
+                      Corrections.fixTypoSpaces(doc, options.spaceBeforePunct, options.spaceBeforeColon);
                   }
 
                   if (options.fixDashIncises && options.dashIncisesSpaceType) {
