@@ -1352,7 +1352,7 @@
 
         /**
          * Automatically loads configuration from near the active document
-         * @return {Object|null} Parsed config data or null
+         * @return {Object|null} Object with { data, inConfigFolder } or null
          */
         function autoLoad() {
             try {
@@ -1367,7 +1367,18 @@
 
                 if (!files || files.length === 0) return null;
 
+                // Check if any config file is inside a "config" subfolder
+                var inConfigFolder = false;
                 var configFile = files[0];
+                for (var fi = 0; fi < files.length; fi++) {
+                    var parentFolder = files[fi].parent;
+                    if (parentFolder && parentFolder.name.toLowerCase() === "config") {
+                        configFile = files[fi];
+                        inConfigFolder = true;
+                        break;
+                    }
+                }
+
                 configFile.encoding = "UTF-8";
 
                 if (configFile.open("r")) {
@@ -1375,7 +1386,7 @@
                         var content = configFile.read();
                         configFile.close();
                         var configData = safeJSON.parse(content);
-                        return configData;
+                        return { data: configData, inConfigFolder: inConfigFolder };
                     } catch (e) {
                         return null;
                     }
@@ -1384,6 +1395,151 @@
                 // Silently fail
             }
             return null;
+        }
+
+        /**
+         * Builds runtime options object from saved config data (for silent mode).
+         * Resolves style names to actual InDesign style objects.
+         * @param {Object} configData - Parsed config data from JSON
+         * @param {Document} doc - Active InDesign document
+         * @return {Object} Options object compatible with Processor.processDocuments()
+         */
+        function buildOptionsFromConfig(configData, doc) {
+            var c = configData.corrections || {};
+            var f = configData.formatting || {};
+            var s = configData.styles || {};
+            var l = configData.layout || {};
+
+            // Helper to find a character style by name
+            function findCharStyle(name) {
+                if (!name) return null;
+                try {
+                    for (var i = 0; i < doc.characterStyles.length; i++) {
+                        if (doc.characterStyles[i].name === name) return doc.characterStyles[i];
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            // Helper to find a paragraph style by name
+            function findParaStyle(name) {
+                if (!name) return null;
+                try {
+                    var result = null;
+                    function searchInGroup(group) {
+                        for (var i = 0; i < group.paragraphStyles.length; i++) {
+                            if (group.paragraphStyles[i].name === name) {
+                                result = group.paragraphStyles[i];
+                                return;
+                            }
+                        }
+                        for (var j = 0; j < group.paragraphStyleGroups.length; j++) {
+                            searchInGroup(group.paragraphStyleGroups[j]);
+                            if (result) return;
+                        }
+                    }
+                    searchInGroup(doc);
+                } catch (e) {}
+                return result;
+            }
+
+            // Helper to find a master spread by name
+            function findMaster(name) {
+                if (!name) return null;
+                try {
+                    for (var i = 0; i < doc.masterSpreads.length; i++) {
+                        if (doc.masterSpreads[i].name === name) return doc.masterSpreads[i];
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            // Resolve space type values from config indices
+            var spaceBeforePunct = null;
+            var spaceBeforeColon = null;
+            if (c.fixTypoSpaces) {
+                var punctIdx = (typeof c.fixTypoSpacesPunct === 'number') ? c.fixTypoSpacesPunct : 0;
+                var colonIdx = (typeof c.fixTypoSpacesColon === 'number') ? c.fixTypoSpacesColon : 0;
+                if (punctIdx < CONFIG.SPACE_TYPES.length) spaceBeforePunct = CONFIG.SPACE_TYPES[punctIdx].value;
+                if (colonIdx < CONFIG.SPACE_TYPES.length) spaceBeforeColon = CONFIG.SPACE_TYPES[colonIdx].value;
+            }
+
+            var dashIncisesSpaceType = null;
+            if (c.fixDashIncises) {
+                var dashIdx = (typeof c.fixDashIncisesType === 'number') ? c.fixDashIncisesType : 0;
+                if (dashIdx < CONFIG.SPACE_TYPES.length) dashIncisesSpaceType = CONFIG.SPACE_TYPES[dashIdx].value;
+            }
+
+            // Resolve thousands separator
+            var thousandsSeparator = null;
+            if (f.addThousandsSep) {
+                var sepIdx = (typeof f.thousandsSepType === 'number') ? f.thousandsSepType : 0;
+                if (sepIdx < CONFIG.THOUSANDS_SEPARATOR_TYPES.length) {
+                    thousandsSeparator = CONFIG.THOUSANDS_SEPARATOR_TYPES[sepIdx].value;
+                }
+            }
+
+            // Resolve trigger styles
+            var triggerStyles = [];
+            if (l.enableStyleAfter && l.triggerStyles) {
+                for (var ti = 0; ti < l.triggerStyles.length; ti++) {
+                    var ts = findParaStyle(l.triggerStyles[ti]);
+                    if (ts) triggerStyles.push(ts);
+                }
+            }
+
+            // Resolve SieclesModule style objects
+            var smallCapsStyle = findCharStyle(s.smallCapsStyle);
+            var capitalsStyle = findCharStyle(s.capitalsStyle);
+            var superscriptStyle = findCharStyle(s.superscriptStyle);
+
+            return {
+                removeSpacesBeforePunctuation: !!c.removeSpacesBeforePunctuation,
+                moveNotes: !!c.moveNotes,
+                applyNoteStyle: !!c.applyNoteStyle,
+                noteStyleName: c.applyNoteStyle ? s.noteStyle : null,
+                fixDoubleSpaces: !!c.fixDoubleSpaces,
+                fixTypoSpaces: !!c.fixTypoSpaces,
+                spaceBeforePunct: spaceBeforePunct,
+                spaceBeforeColon: spaceBeforeColon,
+                fixDashIncises: !!c.fixDashIncises,
+                dashIncisesSpaceType: dashIncisesSpaceType,
+                replaceDashes: !!c.replaceDashes,
+                applyItalicStyle: !!c.applyItalicStyle,
+                italicStyleName: c.applyItalicStyle ? s.italicStyle : null,
+                applyItalicExpressions: !!c.applyItalicExpressions,
+                italicExpressionsStyleName: c.applyItalicExpressions ? s.italicStyle : null,
+                applyExposantStyle: !!c.applyExposantStyle,
+                exposantStyleName: c.applyExposantStyle ? s.superscriptStyle : null,
+                removeDoubleReturns: !!c.removeDoubleReturns,
+                convertEllipsis: !!c.convertEllipsis,
+                replaceApostrophes: !!c.replaceApostrophes,
+                fixIsolatedHyphens: !!c.fixIsolatedHyphens,
+                fixValueRanges: !!c.fixValueRanges,
+                removeSpacesStartParagraph: !!c.removeSpacesStartParagraph,
+                removeSpacesEndParagraph: !!c.removeSpacesEndParagraph,
+                removeTabs: !!c.removeTabs,
+                enableStyleAfter: !!l.enableStyleAfter,
+                triggerStyles: triggerStyles,
+                targetStyle: findParaStyle(l.targetStyle),
+                applyMasterToLastPage: !!l.applyMasterToLastPage,
+                selectedMaster: findMaster(l.masterName),
+                sieclesOptions: {
+                    formaterSiecles: !!f.formatSiecles,
+                    formaterOrdinaux: !!f.formatOrdinaux,
+                    formaterReferences: !!f.formatReferences,
+                    formaterEspaces: !!c.formatEspaces,
+                    romainsStyle: smallCapsStyle,
+                    romainsMajStyle: capitalsStyle,
+                    exposantStyle: superscriptStyle
+                },
+                formatNumbers: !!f.formatNumbers,
+                addSpaces: !!f.addThousandsSep,
+                thousandsSeparator: thousandsSeparator,
+                excludeYears: !!f.excludeYears,
+                useComma: !!f.useComma,
+                languageProfileId: configData.languageProfile || null
+            };
         }
 
         /**
@@ -1741,7 +1897,8 @@
             save: save,
             load: load,
             collectFromDialog: collectFromDialog,
-            applyToDialog: applyToDialog
+            applyToDialog: applyToDialog,
+            buildOptionsFromConfig: buildOptionsFromConfig
         };
     })();
 
@@ -4307,7 +4464,11 @@
         }
 
         // Load configuration: preloadConfig (reopen) takes priority over autoLoad
-        var configToApply = preloadConfig || ConfigManager.autoLoad();
+        var configToApply = preloadConfig;
+        if (!configToApply) {
+            var autoResult = ConfigManager.autoLoad();
+            if (autoResult) configToApply = autoResult.data;
+        }
         if (configToApply) {
             if (!preloadConfig) configStatusText.text = I18n.__("configDetected");
             ConfigManager.applyToDialog(configToApply, dialogControls, characterStyles, availableProfiles);
@@ -4708,7 +4869,9 @@
               }
 
               Processor.applyCorrections(app.activeDocument, options);
-              alert(I18n.__("successCorrectionsApplied"));
+              if (!options.silentMode) {
+                  alert(I18n.__("successCorrectionsApplied"));
+              }
           } catch (error) {
               ErrorHandler.handleError(error, "processDocuments", true);
           }
@@ -5708,28 +5871,58 @@
             if (!Utilities.validateDocumentOpen()) {
                 return;
             }
-            
+
             // Récupérer les styles de caractère
             if (!ErrorHandler.ensureDefined(app, "app", true)) return;
             if (!ErrorHandler.ensureDefined(app.activeDocument, "app.activeDocument", true)) return;
-            
+
             var doc = app.activeDocument;
+
+            // Check for auto-loaded config (silent mode if in config/ subfolder)
+            var autoResult = ConfigManager.autoLoad();
+            if (autoResult && autoResult.inConfigFolder && autoResult.data) {
+                // Silent mode: config found in config/ subfolder — skip dialog
+                try {
+                    var silentOptions = ConfigManager.buildOptionsFromConfig(autoResult.data, doc);
+                    silentOptions.silentMode = true;
+
+                    if (!ErrorHandler.ensureDefined(ScriptLanguage, "ScriptLanguage", true)) return;
+                    if (!ErrorHandler.ensureDefined(UndoModes, "UndoModes", true)) return;
+
+                    app.doScript(
+                        function() {
+                            Processor.processDocuments(silentOptions);
+                        },
+                        ScriptLanguage.JAVASCRIPT,
+                        undefined,
+                        UndoModes.FAST_ENTIRE_SCRIPT,
+                        CONFIG.SCRIPT_TITLE
+                    );
+
+                    doc.save();
+                } catch (silentError) {
+                    ErrorHandler.handleError(silentError, "silent mode execution", true);
+                }
+                return;
+            }
+
+            // Interactive mode
             var styleInfo = Utilities.getCharacterStyles(doc);
-            
+
             // Créer et afficher le dialogue
             var options = UIBuilder.createDialog(
-                styleInfo.styles, 
-                styleInfo.superscriptIndex, 
+                styleInfo.styles,
+                styleInfo.superscriptIndex,
                 styleInfo.italicIndex
             );
-            
+
             // Traiter si l'utilisateur a cliqué sur Appliquer
             if (options) {
                 try {
                     // Vérifier les constantes nécessaires
                     if (!ErrorHandler.ensureDefined(ScriptLanguage, "ScriptLanguage", true)) return;
                     if (!ErrorHandler.ensureDefined(UndoModes, "UndoModes", true)) return;
-                    
+
                     // Exécuter les corrections dans un bloc d'annulation
                     app.doScript(
                         function() {
