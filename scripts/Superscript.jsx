@@ -498,6 +498,546 @@
                 'errorParseConfig': 'Erreur lors de l\'analyse du fichier de configuration\u2009: %s',
                 'errorOpenConfig': 'Impossible d\'ouvrir le fichier de configuration.',
 
+            },
+            'de': {
+                // App-level
+                'errorInDesignAccess': 'Kein Zugriff auf die InDesign-Anwendung m\u00F6glich.',
+                'errorUnrecoverable': 'Ein nicht behebbarer Fehler ist aufgetreten.',
+                'errorFatal': 'Schwerwiegender Fehler: %s',
+                'errorScriptHalted': 'Skript wegen eines schwerwiegenden Fehlers angehalten',
+                'errorObjectUndefined': "Objekt '%s' ist undefined oder null",
+                'errorInContext': 'Fehler',
+                'errorContextIn': ' in ',
+                'errorLine': ' (Zeile ',
+                'errorInDesignUnavailable': 'Die InDesign-Anwendung ist nicht verf\u00FCgbar',
+                'errorDocumentsUnavailable': 'Die Dokumentensammlung ist nicht verf\u00FCgbar',
+                'errorNoDocumentOpen': 'Bitte \u00F6ffnen Sie ein Dokument, bevor Sie dieses Skript ausf\u00FChren.',
+                'errorInvalidDocument': 'Fehler: Ung\u00FCltiges Dokument',
+                'errorInvalidMasterName': 'Fehler: Ung\u00FCltiger Musterseiten-Name',
+                'errorMasterNotFound': "Musterseite '%s' nicht gefunden im Dokument %s",
+                'errorApplyMaster': 'Fehler beim Anwenden der Musterseite: %s',
+                'errorRequiredStyles': 'Die erforderlichen Zeichenformate sind nicht definiert. Bitte w\u00E4hlen Sie g\u00FCltige Formate aus.',
+
+                // Dialog
+                'dialogTitle': 'SuperScript',
+                'tabCorrections': 'Korrekturen',
+                'tabSpaces': 'Leerzeichen & Umbruch',
+                'tabStyles': 'Formate',
+                'tabFormatting': 'Formatierung',
+                'tabPageLayout': 'Seitenlayout',
+
+                // Corrections tab
+                'moveNotesLabel': 'Fu\u00DFnotenverweise vor Satzzeichen verschieben',
+                'convertEllipsisLabel': '... in Auslassungspunkte umwandeln (\u2026)',
+                'replaceApostrophesLabel': 'Gerade Apostrophe durch typografische ersetzen',
+                'replaceDashesLabel': 'Geviertstriche durch Halbgeviertstriche ersetzen',
+                'fixIsolatedHyphensLabel': 'Einzelne Bindestriche in Halbgeviertstriche umwandeln',
+                'fixValueRangesLabel': 'Bindestriche in Wertebereichen durch Halbgeviertstriche ersetzen',
+
+                // Spaces tab
+                'fixTypoSpacesLabel': 'Typografische Leerzeichen korrigieren',
+                'spaceBeforePunctLabel': 'Vor ; ? !',
+                'spaceBeforeColonLabel': 'Vor : und in \u00ab \u00bb',
+                'fixDashIncisesLabel': 'Leerzeichen um \u2013 Einsch\u00FCbe \u2013 korrigieren',
+                'fixDoubleSpacesLabel': 'Mehrfache Leerzeichen korrigieren',
+                'removeDoubleReturnsLabel': 'Doppelte Abs\u00E4tze entfernen',
+                'removeSpacesBeforePunctuationLabel': 'Leerzeichen vor Punkten, Kommas und Noten entfernen',
+                'removeSpacesStartParagraphLabel': 'Leerzeichen am Absatzanfang entfernen',
+                'removeSpacesEndParagraphLabel': 'Leerzeichen am Absatzende entfernen',
+                'removeTabsLabel': 'Tabulatoren entfernen',
+                'formatEspacesLabel': 'Gesch\u00FCtzte Leerzeichen in Seitenverweisen (S.\u00A054)',
+
+                // Styles definition panel
+                'styleDefinitionPanel': 'Formatdefinitionen',
+                'noteStyleLabel': 'Fu\u00DFnotenverweise:',
+                'italicStyleLabel': 'Kursiv:',
+                'smallCapsStyleLabel': 'Kapit\u00E4lchen:',
+                'capitalStyleLabel': 'Versalien:',
+                'superscriptStyleLabel': 'Hochgestellt:',
+
+                // Styles application panel
+                'styleApplicationPanel': 'Formatzuweisung',
+                'applyNoteStyleLabel': 'Format auf Fu\u00DFnotenverweise anwenden',
+                'applyItalicStyleLabel': 'Format auf kursiven Text anwenden',
+                'applyItalicExpressionsLabel': 'Fremdsprachliche Ausdr\u00FCcke kursiv setzen',
+                'applyExposantStyleLabel': 'Format auf hochgestellten Text anwenden',
+
+                // Formatting tab
+                'formatSieclesLabel': 'Jahrhunderte formatieren (XIV. Jahrhundert)',
+                'formatOrdinauxLabel': 'Ordnungsausdr\u00FCcke formatieren (II. Internationale)',
+                'formatReferencesLabel': 'Werkteile und Eigennamen formatieren (Band III, Ludwig XIV.)',
+                'formatNumbersLabel': 'Zahlen formatieren',
+                'numberSettingsPanel': 'Optionen f\u00FCr die Zahlenformatierung',
+                'addThousandsSepLabel': 'Tausendertrennzeichen hinzuf\u00FCgen',
+                'excludeYearsLabel': 'Potenzielle Jahreszahlen ausschlie\u00DFen (Zahlen zwischen 0 und 2050)',
+                'useCommaLabel': 'Punkte durch Kommas ersetzen (3.14 \u2192 3,14)',
+                'thousandsSepFine': 'Drittelgeviert (~<)',
+                'thousandsSepComma': 'Komma (,)',
+                'thousandsSepPeriod': 'Punkt (.)',
+
+                // Page layout tab
+                'enableStyleAfterLabel': 'Bedingte Formatzuweisung',
+                'triggerStylesPanel': 'Ausl\u00F6sende Formate',
+                'targetStyleLabel': 'Auf folgenden Absatz anzuwendendes Format:',
+                'applyMasterToLastPageLabel': 'Musterseite auf letzte Druckbogenseite anwenden',
+                'masterLabel': 'Anzuwendende Musterseite:',
+
+                // Space types
+                'spaceTypeFine': 'Drittelgeviert (~<)',
+                'spaceTypeNonBreaking': 'Gesch\u00FCtztes Leerzeichen (~S)',
+
+                // Default/placeholder
+                'defaultStyle': '[Standardformat]',
+                'noStylesAvailable': '[Keine Formate verf\u00FCgbar]',
+                'noMastersAvailable': '[Keine Musterseiten verf\u00FCgbar]',
+
+                // Buttons
+                'helpTooltip': 'SuperScript-Hilfe anzeigen',
+                'cancelButton': 'Abbrechen',
+                'applyButton': 'Anwenden',
+                'closeButton': 'Schlie\u00DFen',
+
+                // Help dialog
+                'helpDialogTitle': 'SuperScript-Hilfe',
+                'helpDialogHeader': 'SuperScript \u2013 Benutzerhandbuch',
+                'helpContent': 'BENUTZERHANDBUCH SUPERSCRIPT\n\n'
+                    + '\u00DCBERSICHT\n\n'
+                    + 'SuperScript ist ein InDesign-Skript, das typografische Korrekturen in Layoutdokumenten automatisiert. Es korrigiert schnell Leerzeichen, Satzzeichen, Anf\u00FChrungszeichen, Apostrophe usw.\n\n'
+                    + 'REGISTER \u201ELEERZEICHEN & UMBRUCH\u201C\n\n'
+                    + '\u2022 Typografische Leerzeichen korrigieren: F\u00FCgt gesch\u00FCtzte Leerzeichen vor oder nach bestimmten Zeichen gem\u00E4\u00DF den typografischen Regeln ein.\n'
+                    + '\u2022 Mehrfache Leerzeichen korrigieren: Ersetzt Leerzeichenfolgen durch ein einzelnes Leerzeichen.\n'
+                    + '\u2022 Doppelte Abs\u00E4tze entfernen: Beseitigt leere Abs\u00E4tze.\n'
+                    + '\u2022 Leerzeichen vor Punkten, Kommas und Noten entfernen: Entfernt unerw\u00FCnschte Leerzeichen.\n\n'
+                    + 'REGISTER \u201EFORMATE\u201C\n\n'
+                    + '\u2022 Formatdefinitionen: W\u00E4hlen Sie die Formate f\u00FCr Fu\u00DFnotenverweise, Kursivtext und Hochstellungen.\n'
+                    + '\u2022 Formatzuweisung: Aktivieren Sie Optionen, um diese Formate automatisch anzuwenden.\n\n'
+                    + 'REGISTER \u201EFORMATIERUNG\u201C\n\n'
+                    + '\u2022 Fu\u00DFnotenverweise verschieben: Platziert Noten vor der Interpunktion.\n'
+                    + '\u2022 Geviertstriche ersetzen: Wandelt Geviertstriche in Halbgeviertstriche um.\n'
+                    + '\u2022 ... in Auslassungspunkte: Ersetzt drei Punkte durch das typografische Zeichen.\n'
+                    + '\u2022 Apostrophe ersetzen: Verwendet typografische Apostrophe.\n'
+                    + '\u2022 Jahrhunderte, Ordnungszahlen und Verweise formatieren.\n\n'
+                    + 'REGISTER \u201ESEITENLAYOUT\u201C\n\n'
+                    + '\u2022 Bedingte Formatzuweisung: Weist dem Absatz nach den ausgew\u00E4hlten Formaten automatisch ein Format zu.\n'
+                    + '\u2022 Musterseite auf letzte Seite anwenden: N\u00FCtzlich f\u00FCr Kapitel- oder Dokumentenden.\n\n'
+                    + 'Weitere Informationen: https://lab.spectral.art',
+
+                // Progress bar
+                'progressTitle': 'Typografische Korrekturen anwenden',
+                'progressRemoveSpacesBeforePunctuation': 'Leerzeichen vor Satzzeichen entfernen\u2026',
+                'progressFixDoubleSpaces': 'Doppelte Leerzeichen korrigieren\u2026',
+                'progressFixTypoSpaces': 'Typografische Leerzeichen korrigieren\u2026',
+                'progressFixDashIncises': 'Leerzeichen um Einsch\u00FCbe korrigieren\u2026',
+                'progressRemoveDoubleReturns': 'Doppelte Abs\u00E4tze entfernen\u2026',
+                'progressRemoveSpacesStart': 'Leerzeichen am Absatzanfang entfernen\u2026',
+                'progressRemoveSpacesEnd': 'Leerzeichen am Absatzende entfernen\u2026',
+                'progressRemoveTabs': 'Tabulatoren entfernen\u2026',
+                'progressMoveNotes': 'Fu\u00DFnotenverweise verschieben\u2026',
+                'progressApplyNoteStyle': 'Format auf Fu\u00DFnotenverweise anwenden\u2026',
+                'progressReplaceDashes': 'Geviertstriche ersetzen\u2026',
+                'progressFixIsolatedHyphens': 'Einzelne Bindestriche korrigieren\u2026',
+                'progressFixValueRanges': 'Wertebereiche korrigieren\u2026',
+                'progressApplyItalicStyle': 'Kursivformat anwenden\u2026',
+                'progressApplyItalicExpressions': 'Fremdsprachliche Ausdr\u00FCcke kursiv setzen\u2026',
+                'progressApplyExposantStyle': 'Hochstellungsformat anwenden\u2026',
+                'progressConvertEllipsis': 'Auslassungspunkte umwandeln\u2026',
+                'progressReplaceApostrophes': 'Apostrophe ersetzen\u2026',
+                'progressApplyConditionalStyles': 'Bedingte Formate anwenden\u2026',
+                'progressApplyMasterToLastPage': 'Musterseite auf letzte Seite anwenden\u2026',
+                'progressFormatSiecles': 'Jahrhunderte und Ordnungsausdr\u00FCcke formatieren\u2026',
+                'progressFormatNumbers': 'Zahlen formatieren\u2026',
+                'progressComplete': 'Fertig!',
+
+                // Alerts
+                'successCorrectionsApplied': 'Korrekturen auf das aktive Dokument angewendet.',
+
+                // SieclesModule errors
+                'errorUnknown': 'Unbekannter Fehler',
+                'errorReplaceApostrophes': 'Fehler in replaceApostrophes: %s',
+                'errorFormatSiecles': 'Fehler bei der Jahrhundertformatierung: %s',
+                'errorFormatOrdinaux': 'Fehler bei der Formatierung der Ordnungsausdr\u00FCcke: %s',
+                'errorFormat1er': 'Fehler bei der Formatierung der \'1.\'-Vorkommen: %s',
+                'errorFormatReferences': 'Fehler bei der Formatierung der Werkverweise und Titel: %s',
+                'errorFormatEspaces': 'Fehler bei der Formatierung der gesch\u00FCtzten Leerzeichen: %s',
+                'errorMainFunction': 'Hauptfunktion',
+
+                // Language profile selector
+                'languageProfileLabel': 'Sprachprofil:',
+                'languageProfileNone': '[Keine Profile verf\u00FCgbar]',
+
+                // ConfigManager
+                'saveConfigButton': 'Speichern',
+                'loadConfigButton': 'Laden',
+                'configDetected': 'Konfiguration erkannt',
+                'configNotDetected': '',
+                'saveConfigTitle': 'SuperScript-Konfiguration speichern',
+                'loadConfigTitle': 'SuperScript-Konfiguration laden',
+                'configSaved': 'Konfiguration erfolgreich gespeichert.',
+                'configLoaded': 'Konfiguration erfolgreich geladen.',
+                'errorSaveConfig': 'Fehler beim Speichern der Konfiguration: %s',
+                'errorLoadConfig': 'Fehler beim Laden der Konfiguration: %s',
+                'errorParseConfig': 'Fehler beim Parsen der Konfigurationsdatei: %s',
+                'errorOpenConfig': 'Konfigurationsdatei konnte nicht ge\u00F6ffnet werden.'
+            },
+            'es': {
+                // App-level
+                'errorInDesignAccess': 'No se puede acceder a la aplicaci\u00F3n InDesign.',
+                'errorUnrecoverable': 'Se ha producido un error irrecuperable.',
+                'errorFatal': 'Error fatal: %s',
+                'errorScriptHalted': 'Script detenido debido a un error fatal',
+                'errorObjectUndefined': "El objeto '%s' es undefined o null",
+                'errorInContext': 'Error',
+                'errorContextIn': ' en ',
+                'errorLine': ' (l\u00EDnea ',
+                'errorInDesignUnavailable': 'La aplicaci\u00F3n InDesign no est\u00E1 disponible',
+                'errorDocumentsUnavailable': 'La colecci\u00F3n de documentos no est\u00E1 disponible',
+                'errorNoDocumentOpen': 'Por favor, abra un documento antes de ejecutar este script.',
+                'errorInvalidDocument': 'Error: Documento no v\u00E1lido',
+                'errorInvalidMasterName': 'Error: Nombre de p\u00E1gina maestra no v\u00E1lido',
+                'errorMasterNotFound': "P\u00E1gina maestra '%s' no encontrada en el documento %s",
+                'errorApplyMaster': 'Error al aplicar la p\u00E1gina maestra: %s',
+                'errorRequiredStyles': 'Los estilos de car\u00E1cter requeridos no est\u00E1n definidos. Por favor, seleccione estilos v\u00E1lidos.',
+
+                // Dialog
+                'dialogTitle': 'SuperScript',
+                'tabCorrections': 'Correcciones',
+                'tabSpaces': 'Espacios y retornos',
+                'tabStyles': 'Estilos',
+                'tabFormatting': 'Formato',
+                'tabPageLayout': 'Maquetaci\u00F3n',
+
+                // Corrections tab
+                'moveNotesLabel': 'Mover referencias de notas al pie antes de la puntuaci\u00F3n',
+                'convertEllipsisLabel': 'Convertir ... en puntos suspensivos (\u2026)',
+                'replaceApostrophesLabel': 'Reemplazar ap\u00F3strofos rectos por tipogr\u00E1ficos',
+                'replaceDashesLabel': 'Reemplazar rayas por semirraya',
+                'fixIsolatedHyphensLabel': 'Convertir guiones aislados en semirraya',
+                'fixValueRangesLabel': 'Convertir guiones en semirraya en rangos de valores',
+
+                // Spaces tab
+                'fixTypoSpacesLabel': 'Corregir espacios tipogr\u00E1ficos',
+                'spaceBeforePunctLabel': 'Antes de ; ? !',
+                'spaceBeforeColonLabel': 'Antes de : y en \u00ab \u00bb',
+                'fixDashIncisesLabel': 'Corregir espacios en \u2013 incisos \u2013',
+                'fixDoubleSpacesLabel': 'Corregir espacios m\u00FAltiples',
+                'removeDoubleReturnsLabel': 'Eliminar retornos dobles',
+                'removeSpacesBeforePunctuationLabel': 'Eliminar espacios antes de puntos, comas y notas',
+                'removeSpacesStartParagraphLabel': 'Eliminar espacios al inicio de p\u00E1rrafo',
+                'removeSpacesEndParagraphLabel': 'Eliminar espacios al final de p\u00E1rrafo',
+                'removeTabsLabel': 'Eliminar tabulaciones',
+                'formatEspacesLabel': 'A\u00F1adir espacios fijos en referencias de p\u00E1gina (p.\u00A054)',
+
+                // Styles definition panel
+                'styleDefinitionPanel': 'Definici\u00F3n de estilos',
+                'noteStyleLabel': 'Referencias de notas:',
+                'italicStyleLabel': 'Cursiva:',
+                'smallCapsStyleLabel': 'Versalitas:',
+                'capitalStyleLabel': 'Versales:',
+                'superscriptStyleLabel': 'Super\u00EDndice:',
+
+                // Styles application panel
+                'styleApplicationPanel': 'Aplicaci\u00F3n de estilos',
+                'applyNoteStyleLabel': 'Aplicar estilo a las referencias de notas',
+                'applyItalicStyleLabel': 'Aplicar estilo al texto en cursiva',
+                'applyItalicExpressionsLabel': 'Poner en cursiva las expresiones extranjeras',
+                'applyExposantStyleLabel': 'Aplicar estilo al texto en super\u00EDndice',
+
+                // Formatting tab
+                'formatSieclesLabel': 'Formatear siglos (siglo XIV)',
+                'formatOrdinauxLabel': 'Formatear expresiones ordinales (II Internacional)',
+                'formatReferencesLabel': 'Formatear partes de obras y nombres propios (Tomo III, Luis XIV)',
+                'formatNumbersLabel': 'Formatear n\u00FAmeros',
+                'numberSettingsPanel': 'Opciones de formato de n\u00FAmeros',
+                'addThousandsSepLabel': 'A\u00F1adir separador de millares',
+                'excludeYearsLabel': 'Excluir a\u00F1os potenciales (n\u00FAmeros entre 0 y 2050)',
+                'useCommaLabel': 'Reemplazar puntos por comas (3.14 \u2192 3,14)',
+                'thousandsSepFine': 'Espacio fino (~<)',
+                'thousandsSepComma': 'Coma (,)',
+                'thousandsSepPeriod': 'Punto (.)',
+
+                // Page layout tab
+                'enableStyleAfterLabel': 'Aplicaci\u00F3n condicional de estilos',
+                'triggerStylesPanel': 'Estilos desencadenantes',
+                'targetStyleLabel': 'Estilo a aplicar al p\u00E1rrafo siguiente:',
+                'applyMasterToLastPageLabel': 'Aplicar p\u00E1gina maestra a la \u00FAltima p\u00E1gina del pliego',
+                'masterLabel': 'P\u00E1gina maestra a aplicar:',
+
+                // Space types
+                'spaceTypeFine': 'Espacio fino irrompible (~<)',
+                'spaceTypeNonBreaking': 'Espacio irrompible (~S)',
+
+                // Default/placeholder
+                'defaultStyle': '[Estilo predeterminado]',
+                'noStylesAvailable': '[No hay estilos disponibles]',
+                'noMastersAvailable': '[No hay p\u00E1ginas maestras disponibles]',
+
+                // Buttons
+                'helpTooltip': 'Mostrar ayuda de SuperScript',
+                'cancelButton': 'Cancelar',
+                'applyButton': 'Aplicar',
+                'closeButton': 'Cerrar',
+
+                // Help dialog
+                'helpDialogTitle': 'Ayuda de SuperScript',
+                'helpDialogHeader': 'SuperScript \u2013 Gu\u00EDa de uso',
+                'helpContent': 'GU\u00CDA DE USO DE SUPERSCRIPT\n\n'
+                    + 'DESCRIPCI\u00D3N GENERAL\n\n'
+                    + 'SuperScript es un script para InDesign que automatiza las correcciones tipogr\u00E1ficas en documentos de maquetaci\u00F3n. Corrige r\u00E1pidamente espacios, puntuaci\u00F3n, comillas, ap\u00F3strofos, etc.\n\n'
+                    + 'PESTA\u00D1A \u201CESPACIOS Y RETORNOS\u201D\n\n'
+                    + '\u2022 Corregir espacios tipogr\u00E1ficos: A\u00F1ade espacios finos irrompibles seg\u00FAn las reglas tipogr\u00E1ficas.\n'
+                    + '\u2022 Corregir espacios m\u00FAltiples: Reemplaza secuencias de espacios por uno solo.\n'
+                    + '\u2022 Eliminar retornos dobles: Elimina p\u00E1rrafos vac\u00EDos.\n'
+                    + '\u2022 Eliminar espacios antes de puntos, comas y notas: Elimina espacios no deseados.\n\n'
+                    + 'PESTA\u00D1A \u201CESTILOS\u201D\n\n'
+                    + '\u2022 Definici\u00F3n de estilos: Seleccione los estilos para las notas, cursiva y super\u00EDndice.\n'
+                    + '\u2022 Aplicaci\u00F3n de estilos: Active las opciones para aplicar estos estilos autom\u00E1ticamente.\n\n'
+                    + 'PESTA\u00D1A \u201CFORMATO\u201D\n\n'
+                    + '\u2022 Mover notas al pie: Coloca las notas antes de la puntuaci\u00F3n.\n'
+                    + '\u2022 Reemplazar rayas: Convierte rayas en semirrayas.\n'
+                    + '\u2022 Convertir ... en puntos suspensivos: Reemplaza tres puntos por el car\u00E1cter tipogr\u00E1fico.\n'
+                    + '\u2022 Reemplazar ap\u00F3strofos rectos: Usa ap\u00F3strofos tipogr\u00E1ficos.\n'
+                    + '\u2022 Formatear siglos, ordinales y referencias.\n\n'
+                    + 'PESTA\u00D1A \u201CMAQUETACI\u00D3N\u201D\n\n'
+                    + '\u2022 Aplicaci\u00F3n condicional: Aplica autom\u00E1ticamente un estilo al p\u00E1rrafo que sigue a los estilos seleccionados.\n'
+                    + '\u2022 Aplicar p\u00E1gina maestra a la \u00FAltima p\u00E1gina: \u00DAtil para finales de cap\u00EDtulo o documento.\n\n'
+                    + 'M\u00E1s informaci\u00F3n: https://lab.spectral.art',
+
+                // Progress bar
+                'progressTitle': 'Aplicando correcciones tipogr\u00E1ficas',
+                'progressRemoveSpacesBeforePunctuation': 'Eliminando espacios antes de puntuaci\u00F3n\u2026',
+                'progressFixDoubleSpaces': 'Corrigiendo espacios dobles\u2026',
+                'progressFixTypoSpaces': 'Corrigiendo espacios tipogr\u00E1ficos\u2026',
+                'progressFixDashIncises': 'Corrigiendo espacios en incisos\u2026',
+                'progressRemoveDoubleReturns': 'Eliminando retornos dobles\u2026',
+                'progressRemoveSpacesStart': 'Eliminando espacios al inicio de p\u00E1rrafo\u2026',
+                'progressRemoveSpacesEnd': 'Eliminando espacios al final de p\u00E1rrafo\u2026',
+                'progressRemoveTabs': 'Eliminando tabulaciones\u2026',
+                'progressMoveNotes': 'Moviendo referencias de notas\u2026',
+                'progressApplyNoteStyle': 'Aplicando estilo a las notas\u2026',
+                'progressReplaceDashes': 'Reemplazando rayas\u2026',
+                'progressFixIsolatedHyphens': 'Corrigiendo guiones aislados\u2026',
+                'progressFixValueRanges': 'Corrigiendo rangos de valores\u2026',
+                'progressApplyItalicStyle': 'Aplicando estilo cursiva\u2026',
+                'progressApplyItalicExpressions': 'Poniendo en cursiva expresiones extranjeras\u2026',
+                'progressApplyExposantStyle': 'Aplicando estilo super\u00EDndice\u2026',
+                'progressConvertEllipsis': 'Convirtiendo puntos suspensivos\u2026',
+                'progressReplaceApostrophes': 'Reemplazando ap\u00F3strofos\u2026',
+                'progressApplyConditionalStyles': 'Aplicando estilos condicionales\u2026',
+                'progressApplyMasterToLastPage': 'Aplicando p\u00E1gina maestra a la \u00FAltima p\u00E1gina\u2026',
+                'progressFormatSiecles': 'Formateando siglos y expresiones ordinales\u2026',
+                'progressFormatNumbers': 'Formateando n\u00FAmeros\u2026',
+                'progressComplete': '\u00A1Hecho!',
+
+                // Alerts
+                'successCorrectionsApplied': 'Correcciones aplicadas al documento activo.',
+
+                // SieclesModule errors
+                'errorUnknown': 'Error desconocido',
+                'errorReplaceApostrophes': 'Error en replaceApostrophes: %s',
+                'errorFormatSiecles': 'Error al formatear los siglos: %s',
+                'errorFormatOrdinaux': 'Error al formatear las expresiones ordinales: %s',
+                'errorFormat1er': 'Error al formatear las ocurrencias de \'1.er\': %s',
+                'errorFormatReferences': 'Error al formatear las referencias de obras y t\u00EDtulos: %s',
+                'errorFormatEspaces': 'Error al formatear los espacios irrompibles: %s',
+                'errorMainFunction': 'funci\u00F3n principal',
+
+                // Language profile selector
+                'languageProfileLabel': 'Perfil ling\u00FC\u00EDstico:',
+                'languageProfileNone': '[No hay perfiles disponibles]',
+
+                // ConfigManager
+                'saveConfigButton': 'Guardar',
+                'loadConfigButton': 'Cargar',
+                'configDetected': 'Configuraci\u00F3n detectada',
+                'configNotDetected': '',
+                'saveConfigTitle': 'Guardar configuraci\u00F3n de SuperScript',
+                'loadConfigTitle': 'Cargar configuraci\u00F3n de SuperScript',
+                'configSaved': 'Configuraci\u00F3n guardada correctamente.',
+                'configLoaded': 'Configuraci\u00F3n cargada correctamente.',
+                'errorSaveConfig': 'Error al guardar la configuraci\u00F3n: %s',
+                'errorLoadConfig': 'Error al cargar la configuraci\u00F3n: %s',
+                'errorParseConfig': 'Error al analizar el archivo de configuraci\u00F3n: %s',
+                'errorOpenConfig': 'No se pudo abrir el archivo de configuraci\u00F3n.'
+            },
+            'it': {
+                // App-level
+                'errorInDesignAccess': 'Impossibile accedere all\'applicazione InDesign.',
+                'errorUnrecoverable': 'Si \u00E8 verificato un errore irreversibile.',
+                'errorFatal': 'Errore fatale: %s',
+                'errorScriptHalted': 'Script interrotto a causa di un errore fatale',
+                'errorObjectUndefined': "L'oggetto '%s' \u00E8 undefined o null",
+                'errorInContext': 'Errore',
+                'errorContextIn': ' in ',
+                'errorLine': ' (riga ',
+                'errorInDesignUnavailable': 'L\'applicazione InDesign non \u00E8 disponibile',
+                'errorDocumentsUnavailable': 'La raccolta documenti non \u00E8 disponibile',
+                'errorNoDocumentOpen': 'Aprire un documento prima di eseguire questo script.',
+                'errorInvalidDocument': 'Errore: Documento non valido',
+                'errorInvalidMasterName': 'Errore: Nome della pagina mastro non valido',
+                'errorMasterNotFound': "Pagina mastro '%s' non trovata nel documento %s",
+                'errorApplyMaster': 'Errore nell\'applicazione della pagina mastro: %s',
+                'errorRequiredStyles': 'Gli stili carattere richiesti non sono definiti. Selezionare stili validi.',
+
+                // Dialog
+                'dialogTitle': 'SuperScript',
+                'tabCorrections': 'Correzioni',
+                'tabSpaces': 'Spazi e a capo',
+                'tabStyles': 'Stili',
+                'tabFormatting': 'Formattazione',
+                'tabPageLayout': 'Layout pagina',
+
+                // Corrections tab
+                'moveNotesLabel': 'Spostare i riferimenti delle note a pi\u00E8 di pagina prima della punteggiatura',
+                'convertEllipsisLabel': 'Convertire ... in puntini di sospensione (\u2026)',
+                'replaceApostrophesLabel': 'Sostituire gli apostrofi dritti con apostrofi tipografici',
+                'replaceDashesLabel': 'Sostituire i trattini lunghi con trattini medi',
+                'fixIsolatedHyphensLabel': 'Convertire i trattini isolati in trattini medi',
+                'fixValueRangesLabel': 'Convertire i trattini in trattini medi negli intervalli di valori',
+
+                // Spaces tab
+                'fixTypoSpacesLabel': 'Correggere gli spazi tipografici',
+                'spaceBeforePunctLabel': 'Prima di ; ? !',
+                'spaceBeforeColonLabel': 'Prima di : e in \u00ab \u00bb',
+                'fixDashIncisesLabel': 'Correggere gli spazi attorno ai \u2013 trattini di inciso \u2013',
+                'fixDoubleSpacesLabel': 'Correggere gli spazi multipli',
+                'removeDoubleReturnsLabel': 'Eliminare i doppi a capo',
+                'removeSpacesBeforePunctuationLabel': 'Eliminare gli spazi prima di punti, virgole e note',
+                'removeSpacesStartParagraphLabel': 'Eliminare gli spazi a inizio paragrafo',
+                'removeSpacesEndParagraphLabel': 'Eliminare gli spazi a fine paragrafo',
+                'removeTabsLabel': 'Eliminare le tabulazioni',
+                'formatEspacesLabel': 'Aggiungere spazi fissi nei riferimenti di pagina (p.\u00A054)',
+
+                // Styles definition panel
+                'styleDefinitionPanel': 'Definizione stili',
+                'noteStyleLabel': 'Riferimenti note:',
+                'italicStyleLabel': 'Corsivo:',
+                'smallCapsStyleLabel': 'Maiuscoletto:',
+                'capitalStyleLabel': 'Maiuscole:',
+                'superscriptStyleLabel': 'Apice:',
+
+                // Styles application panel
+                'styleApplicationPanel': 'Applicazione stili',
+                'applyNoteStyleLabel': 'Applicare stile ai riferimenti delle note',
+                'applyItalicStyleLabel': 'Applicare stile al testo in corsivo',
+                'applyItalicExpressionsLabel': 'Mettere in corsivo le espressioni straniere',
+                'applyExposantStyleLabel': 'Applicare stile al testo in apice',
+
+                // Formatting tab
+                'formatSieclesLabel': 'Formattare i secoli (XIX secolo)',
+                'formatOrdinauxLabel': 'Formattare le espressioni ordinali (II Internazionale)',
+                'formatReferencesLabel': 'Formattare parti di opere e nomi propri (Tomo III, Luigi XIV)',
+                'formatNumbersLabel': 'Formattare i numeri',
+                'numberSettingsPanel': 'Opzioni di formattazione dei numeri',
+                'addThousandsSepLabel': 'Aggiungere separatore delle migliaia',
+                'excludeYearsLabel': 'Escludere potenziali anni (numeri tra 0 e 2050)',
+                'useCommaLabel': 'Sostituire i punti con le virgole (3.14 \u2192 3,14)',
+                'thousandsSepFine': 'Spazio sottile (~<)',
+                'thousandsSepComma': 'Virgola (,)',
+                'thousandsSepPeriod': 'Punto (.)',
+
+                // Page layout tab
+                'enableStyleAfterLabel': 'Applicazione condizionale di stili',
+                'triggerStylesPanel': 'Stili attivatori',
+                'targetStyleLabel': 'Stile da applicare al paragrafo successivo:',
+                'applyMasterToLastPageLabel': 'Applicare pagina mastro all\'ultima pagina del foglio',
+                'masterLabel': 'Pagina mastro da applicare:',
+
+                // Space types
+                'spaceTypeFine': 'Spazio sottile protetto (~<)',
+                'spaceTypeNonBreaking': 'Spazio protetto (~S)',
+
+                // Default/placeholder
+                'defaultStyle': '[Stile predefinito]',
+                'noStylesAvailable': '[Nessuno stile disponibile]',
+                'noMastersAvailable': '[Nessuna pagina mastro disponibile]',
+
+                // Buttons
+                'helpTooltip': 'Mostrare la guida di SuperScript',
+                'cancelButton': 'Annulla',
+                'applyButton': 'Applica',
+                'closeButton': 'Chiudi',
+
+                // Help dialog
+                'helpDialogTitle': 'Guida di SuperScript',
+                'helpDialogHeader': 'SuperScript \u2013 Guida all\'uso',
+                'helpContent': 'GUIDA ALL\'USO DI SUPERSCRIPT\n\n'
+                    + 'PANORAMICA\n\n'
+                    + 'SuperScript \u00E8 uno script per InDesign che automatizza le correzioni tipografiche nei documenti di impaginazione. Corregge rapidamente spazi, punteggiatura, virgolette, apostrofi, ecc.\n\n'
+                    + 'SCHEDA \u201CSPAZI E A CAPO\u201D\n\n'
+                    + '\u2022 Correggere gli spazi tipografici: Aggiunge spazi protetti prima o dopo determinati caratteri secondo le regole tipografiche.\n'
+                    + '\u2022 Correggere gli spazi multipli: Sostituisce le sequenze di spazi con uno solo.\n'
+                    + '\u2022 Eliminare i doppi a capo: Rimuove i paragrafi vuoti.\n'
+                    + '\u2022 Eliminare gli spazi prima di punti, virgole e note: Rimuove gli spazi indesiderati.\n\n'
+                    + 'SCHEDA \u201CSTILI\u201D\n\n'
+                    + '\u2022 Definizione stili: Selezionare gli stili per riferimenti note, corsivo e apice.\n'
+                    + '\u2022 Applicazione stili: Attivare le opzioni per applicare automaticamente questi stili.\n\n'
+                    + 'SCHEDA \u201CFORMATTAZIONE\u201D\n\n'
+                    + '\u2022 Spostare i riferimenti note: Posiziona le note prima della punteggiatura.\n'
+                    + '\u2022 Sostituire i trattini lunghi: Converte i trattini lunghi in trattini medi.\n'
+                    + '\u2022 Convertire ... in puntini di sospensione: Sostituisce tre punti con il carattere tipografico.\n'
+                    + '\u2022 Sostituire gli apostrofi dritti: Utilizza apostrofi tipografici.\n'
+                    + '\u2022 Formattare secoli, ordinali e riferimenti.\n\n'
+                    + 'SCHEDA \u201CLAYOUT PAGINA\u201D\n\n'
+                    + '\u2022 Applicazione condizionale: Applica automaticamente uno stile al paragrafo che segue gli stili selezionati.\n'
+                    + '\u2022 Applicare pagina mastro all\'ultima pagina: Utile per la fine di capitoli o documenti.\n\n'
+                    + 'Per maggiori informazioni: https://lab.spectral.art',
+
+                // Progress bar
+                'progressTitle': 'Applicazione delle correzioni tipografiche',
+                'progressRemoveSpacesBeforePunctuation': 'Eliminazione spazi prima della punteggiatura\u2026',
+                'progressFixDoubleSpaces': 'Correzione spazi doppi\u2026',
+                'progressFixTypoSpaces': 'Correzione spazi tipografici\u2026',
+                'progressFixDashIncises': 'Correzione spazi attorno agli incisi\u2026',
+                'progressRemoveDoubleReturns': 'Eliminazione doppi a capo\u2026',
+                'progressRemoveSpacesStart': 'Eliminazione spazi a inizio paragrafo\u2026',
+                'progressRemoveSpacesEnd': 'Eliminazione spazi a fine paragrafo\u2026',
+                'progressRemoveTabs': 'Eliminazione tabulazioni\u2026',
+                'progressMoveNotes': 'Spostamento riferimenti note\u2026',
+                'progressApplyNoteStyle': 'Applicazione stile ai riferimenti note\u2026',
+                'progressReplaceDashes': 'Sostituzione trattini lunghi\u2026',
+                'progressFixIsolatedHyphens': 'Correzione trattini isolati\u2026',
+                'progressFixValueRanges': 'Correzione intervalli di valori\u2026',
+                'progressApplyItalicStyle': 'Applicazione stile corsivo\u2026',
+                'progressApplyItalicExpressions': 'Corsivazione delle espressioni straniere\u2026',
+                'progressApplyExposantStyle': 'Applicazione stile apice\u2026',
+                'progressConvertEllipsis': 'Conversione puntini di sospensione\u2026',
+                'progressReplaceApostrophes': 'Sostituzione apostrofi\u2026',
+                'progressApplyConditionalStyles': 'Applicazione stili condizionali\u2026',
+                'progressApplyMasterToLastPage': 'Applicazione pagina mastro all\'ultima pagina\u2026',
+                'progressFormatSiecles': 'Formattazione secoli ed espressioni ordinali\u2026',
+                'progressFormatNumbers': 'Formattazione numeri\u2026',
+                'progressComplete': 'Fatto!',
+
+                // Alerts
+                'successCorrectionsApplied': 'Correzioni applicate al documento attivo.',
+
+                // SieclesModule errors
+                'errorUnknown': 'Errore sconosciuto',
+                'errorReplaceApostrophes': 'Errore in replaceApostrophes: %s',
+                'errorFormatSiecles': 'Errore nella formattazione dei secoli: %s',
+                'errorFormatOrdinaux': 'Errore nella formattazione delle espressioni ordinali: %s',
+                'errorFormat1er': 'Errore nella formattazione delle occorrenze di \'1\u00BA\': %s',
+                'errorFormatReferences': 'Errore nella formattazione dei riferimenti e titoli: %s',
+                'errorFormatEspaces': 'Errore nella formattazione degli spazi protetti: %s',
+                'errorMainFunction': 'funzione principale',
+
+                // Language profile selector
+                'languageProfileLabel': 'Profilo linguistico:',
+                'languageProfileNone': '[Nessun profilo disponibile]',
+
+                // ConfigManager
+                'saveConfigButton': 'Salva',
+                'loadConfigButton': 'Carica',
+                'configDetected': 'Configurazione rilevata',
+                'configNotDetected': '',
+                'saveConfigTitle': 'Salva configurazione SuperScript',
+                'loadConfigTitle': 'Carica configurazione SuperScript',
+                'configSaved': 'Configurazione salvata con successo.',
+                'configLoaded': 'Configurazione caricata con successo.',
+                'errorSaveConfig': 'Errore nel salvataggio della configurazione: %s',
+                'errorLoadConfig': 'Errore nel caricamento della configurazione: %s',
+                'errorParseConfig': 'Errore nell\'analisi del file di configurazione: %s',
+                'errorOpenConfig': 'Impossibile aprire il file di configurazione.'
             }
         };
 
@@ -537,7 +1077,11 @@
                 if (typeof app !== 'undefined' && app.hasOwnProperty('locale')) {
                     locale = String(app.locale).toLowerCase();
                 }
-                return (locale.indexOf('fr') !== -1) ? 'fr' : 'en';
+                if (locale.indexOf('fr') !== -1) return 'fr';
+                if (locale.indexOf('de') !== -1) return 'de';
+                if (locale.indexOf('es') !== -1) return 'es';
+                if (locale.indexOf('it') !== -1) return 'it';
+                return 'en';
             } catch (e) {
                 return 'en';
             }
@@ -714,7 +1258,11 @@
          */
         function getDefaultProfileId() {
             var lang = I18n.getLanguage();
-            return (lang === 'fr') ? 'fr-FR' : 'en-US';
+            if (lang === 'fr') return 'fr-FR';
+            if (lang === 'de') return 'de';
+            if (lang === 'es') return 'es';
+            if (lang === 'it') return 'it';
+            return 'en-US';
         }
 
         return {
@@ -3528,29 +4076,28 @@
         // Appliquer immédiatement les dépendances
         updateFeatureDependencies();
         
-        // Ajout des options dans l'onglet Formatages (sans les options déplacées)
-        // Options du module SieclesModule (restent dans l'onglet Formatages)
-        var cbFormatSiecles = addCheckboxOption(tabOther, I18n.__("formatSieclesLabel"), true);
-        var cbFormatOrdinaux = addCheckboxOption(tabOther, I18n.__("formatOrdinauxLabel"), true);
-        var cbFormatReferences = addCheckboxOption(tabOther, I18n.__("formatReferencesLabel"), true);
-        // Appliquer immédiatement les dépendances
-        updateFeatureDependencies();
-        
         // Ajout des options pour le formatage des nombres
         var cbFormatNumbers = addCheckboxOption(tabOther, I18n.__("formatNumbersLabel"), true);
         var numberSettingsPanel = tabOther.add("panel", undefined, I18n.__("numberSettingsPanel"));
         numberSettingsPanel.orientation = "column";
         numberSettingsPanel.alignChildren = "left";
         numberSettingsPanel.enabled = cbFormatNumbers.value;
-        
+
         var addThousandsSepOpt = addDropdownOption(numberSettingsPanel, I18n.__("addThousandsSepLabel"), CONFIG.THOUSANDS_SEPARATOR_TYPES, true);
         var cbExcludeYears = addCheckboxOption(numberSettingsPanel, I18n.__("excludeYearsLabel"), true);
         var cbUseComma = addCheckboxOption(numberSettingsPanel, I18n.__("useCommaLabel"), true);
-        
+
         // Activer/désactiver le panneau d'options selon l'état de la case à cocher principale
         cbFormatNumbers.onClick = function() {
           numberSettingsPanel.enabled = cbFormatNumbers.value;
         };
+
+        // Options du module SieclesModule (après les nombres dans l'onglet Formatages)
+        var cbFormatSiecles = addCheckboxOption(tabOther, I18n.__("formatSieclesLabel"), true);
+        var cbFormatOrdinaux = addCheckboxOption(tabOther, I18n.__("formatOrdinauxLabel"), true);
+        var cbFormatReferences = addCheckboxOption(tabOther, I18n.__("formatReferencesLabel"), true);
+        // Appliquer immédiatement les dépendances
+        updateFeatureDependencies();
 
         // Populate profile control references for dynamic profile switching
         uiProfileControls.fixTypoSpaces = fixTypoSpacesOpt;
