@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "id": "fr-CH",
+    "label": "Fran\u00e7ais (Suisse)",
+    "labelEN": "French (Switzerland)"
+  },
+  "punctuation": {
+    "spaceBeforeSemicolon": "~<",
+    "spaceBeforeColon": "~<",
+    "spaceBeforeExclamation": "~<",
+    "spaceBeforeQuestion": "~<",
+    "spaceInsideOpenQuote": "~<",
+    "spaceInsideCloseQuote": "~<",
+    "spaceBeforePercent": "~S",
+    "removeSpacesBeforePunctuation": true
+  },
+  "dashes": {
+    "inciseDash": "~=",
+    "inciseSpace": " ",
+    "replaceCadratinWithDemiCadratin": true,
+    "rangeIntervalDash": "~="
+  },
+  "quotes": {
+    "level1Open": "\u00ab",
+    "level1Close": "\u00bb",
+    "level2Open": "\u201c",
+    "level2Close": "\u201d"
+  },
+  "centuries": {
+    "enabled": true,
+    "useRomanNumerals": true,
+    "useSuperscript": true,
+    "useSmallCaps": true,
+    "suffixes": ["e", "er"],
+    "wordForCentury": "si\u00e8cle",
+    "wordForCenturyPlural": "si\u00e8cles",
+    "abbreviation": "s."
+  },
+  "ordinals": {
+    "enabled": true,
+    "useSuperscript": true,
+    "corrections": {
+      "1\u00e8re": "1re",
+      "1\u00e8res": "1res",
+      "2\u00e8me": "2e",
+      "3i\u00e8me": "3e"
+    },
+    "titleAbbreviations": [
+      { "abbr": "Me", "super": "e" },
+      { "abbr": "Mgr", "super": "gr" },
+      { "abbr": "Dr", "super": "r" },
+      { "abbr": "Mme", "super": "me" },
+      { "abbr": "Mlle", "super": "lle" },
+      { "abbr": "Cie", "super": "ie" }
+    ]
+  },
+  "numbers": {
+    "thousandsSeparator": "~<",
+    "decimalSeparator": ",",
+    "replacePointWithComma": true,
+    "addThousandsSpaces": true,
+    "excludeYears": true,
+    "yearRange": [0, 2050]
+  },
+  "data": {
+    "motsAmbigus": [
+      "vie", "ive", "xie", "ie"
+    ],
+    "motsOrdinaux": [
+      "congr\u00e8s", "conf\u00e9rence", "sommet", "assembl\u00e9e", "session", "convention",
+      "colloque", "forum", "s\u00e9minaire", "symposium", "concile", "internationale",
+      "festival", "biennale", "exposition", "salon", "rencontres", "journ\u00e9es",
+      "c\u00e9r\u00e9monie", "gala", "\u00e9dition", "triennale", "quadriennale",
+      "jeux", "tournoi", "coupe", "championnat", "\u00e9preuve", "grand prix", "olympiade",
+      "round", "manche", "tour",
+      "r\u00e9giment", "division", "corps", "brigade", "batterie", "compagnie",
+      "d\u00e9tachement", "unit\u00e9", "l\u00e9gion", "escadron", "arm\u00e9e", "bataillon", "flotte",
+      "escadre", "flottille", "peloton", "section", "force", "contingent",
+      "arrondissement", "canton", "circonscription", "section", "district",
+      "r\u00e9gion", "zone", "d\u00e9partement", "pr\u00e9fecture", "sous-pr\u00e9fecture", "quartier",
+      "communaut\u00e9", "collectivit\u00e9", "subdivision",
+      "dynastie", "r\u00e8gne", "\u00e9poque", "\u00e8re", "p\u00e9riode", "\u00e2ge", "mill\u00e9naire",
+      "tome", "volume", "acte", "sc\u00e8ne", "chant", "livre", "partie", "section",
+      "chapitre", "paragraphe", "alin\u00e9a", "titre", "sous-section", "annexe",
+      "appendice", "suppl\u00e9ment", "bulletin", "rapport", "num\u00e9ro",
+      "minist\u00e8re", "secr\u00e9tariat", "commission", "conseil", "comit\u00e9", "\u00e9tat",
+      "mandat", "l\u00e9gislature", "administration", "chambre", "cour", "tribunal",
+      "article", "amendement", "lecture",
+      "ann\u00e9e", "classe", "promotion", "cycle", "semestre", "trimestre", "examen",
+      "dipl\u00f4me",
+      "groupe", "collectif",
+      "trimestre", "semestre", "d\u00e9cennie", "vague",
+      "rang", "position", "place", "cat\u00e9gorie", "\u00e9chelon", "niveau", "grade",
+      "stade", "s\u00e9rie", "classe", "division",
+      "tentative", "essai", "phase", "\u00e9tape", "version", "it\u00e9ration", "mouvement",
+      "plan", "phase", "r\u00e9publique", "empire", "ordre", "reich", "dimension",
+      "degr\u00e9", "position", "g\u00e9n\u00e9ration", "base", "volet", "pilier", "concept",
+      "principe", "type", "forme", "paradigme"
+    ],
+    "motsAvantOrdinaux": [
+      "an", "ann\u00e9e", "jour", "mois", "semaine", "trimestre", "semestre",
+      "num\u00e9ro", "n\u00b0", "article", "alin\u00e9a", "paragraphe", "chapitre",
+      "niveau", "groupe", "classe", "\u00e9tage", "zone", "secteur", "district",
+      "bataillon", "r\u00e9giment", "division", "brigade", "compagnie", "escadron",
+      "tome", "volume", "partie", "phase", "\u00e9tape", "session", "version"
+    ],
+    "motsOeuvres": [
+      "livre", "tome", "volume", "chapitre", "partie", "section", "acte",
+      "sc\u00e8ne", "chant", "symphonie", "concerto", "sonate", "opus",
+      "\u00e9pisode", "volet", "cycle", "saison"
+    ],
+    "titresPersonnes": [
+      "louis", "henri", "\u00e9lisabeth", "charles", "napol\u00e9on", "hadrien",
+      "fr\u00e9d\u00e9ric", "jean-paul", "beno\u00eet", "cl\u00e9ment", "pie", "l\u00e9on"
+    ],
+    "nomsPremier": [
+      "louis", "charles", "fran\u00e7ois", "henri", "philippe", "fr\u00e9d\u00e9ric",
+      "napol\u00e9on", "nicolas", "alexandre", "l\u00e9opold", "victor", "ferdinand",
+      "\u00e9douard", "georges", "wilhelm", "michel", "constantin", "jacques",
+      "jean", "pierre", "robert", "albert", "richard", "maximilien",
+      "pie", "gr\u00e9goire", "l\u00e9on", "beno\u00eet", "cl\u00e9ment", "innocent",
+      "urbain", "jean-paul", "boniface", "sixte", "paul", "c\u00e9lestin",
+      "roi", "empereur", "tsar", "pape", "pr\u00e9sident", "prince",
+      "duc", "comte", "baron"
+    ],
+    "abreviationsRefs": [
+      "p\\.", "pp\\.", "page", "pages",
+      "f\\.", "ff\\.", "fol\\.", "folio", "folios",
+      "col\\.", "cols\\.",
+      "\u00a7", "\u00b6", "l\\.", "ligne", "lignes", "sec\\.", "section", "sections",
+      "chap\\.", "chapitre", "chapitres",
+      "fig\\.", "figure", "figures", "tab\\.", "tableau", "tableaux", "ill\\.", "illustration",
+      "doc\\.", "document", "documents", "art\\.", "article", "articles", "app\\.", "appendice", "annexe"
+    ],
+    "abreviationsVolumes": [
+      "vol\\.", "volume", "volumes", "t\\.", "tome", "tomes"
+    ],
+    "abreviationsTemporelles": [
+      "c\\.", "ca\\.", "circa", "env\\.", "environ",
+      "av\\. J\\.-C\\.", "apr\\. J\\.-C\\.", "J\\.-C\\."
+    ],
+    "abreviationsNumeros": [
+      "n\u00b0", "n\u00b0s", "num\\.", "num\u00e9ro", "num\u00e9ros"
+    ],
+    "unitesMesure": [
+      "km", "m", "cm", "mm", "\u00b5m", "nm",
+      "kg", "g", "mg", "\u00b5g",
+      "l", "ml", "cl", "dl"
+    ],
+    "abreviationsDirection": [
+      "N\\.", "S\\.", "E\\.", "O\\.", "N\\.E\\.", "N\\.O\\.", "S\\.E\\.", "S\\.O\\."
+    ],
+    "titresAppellations": [
+      "M\\.", "Mme", "Mlle", "MM\\.", "Mmes", "Mlles", "Dr", "Pr", "Me", "St", "Ste"
+    ]
+  },
+  "italicExpressions": [
+    "ad libitum", "ad valorem", "alma mater", "alter ego",
+    "chi lo sa\\?", "de cujus", "de facto", "de jure",
+    "deus ex machina", "de visu", "dura lex sed lex",
+    "ex cathedra", "fiat lux!", "for ever",
+    "honoris causa", "ibidem", "ibid\\.", "idem", "id\\.",
+    "in aeternum", "in fine",
+    "lapsus calami", "lapsus linguae",
+    "manu militari", "mens sana in corpore sano",
+    "ne varietur", "opere citato", "op\\. cit\\.",
+    "panem et circenses", "post tenebras lux",
+    "sursum corda!", "that is the question",
+    "time is money", "vox populi vox Dei"
+  ]
+}

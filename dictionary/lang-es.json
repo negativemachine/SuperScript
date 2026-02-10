@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "id": "es",
+    "label": "Espa\u00f1ol",
+    "labelEN": "Spanish"
+  },
+  "punctuation": {
+    "spaceBeforeSemicolon": "",
+    "spaceBeforeColon": "",
+    "spaceBeforeExclamation": "",
+    "spaceBeforeQuestion": "",
+    "spaceInsideOpenQuote": "",
+    "spaceInsideCloseQuote": "",
+    "spaceBeforePercent": "~<",
+    "removeSpacesBeforePunctuation": true
+  },
+  "dashes": {
+    "inciseDash": "~=",
+    "inciseSpace": " ",
+    "replaceCadratinWithDemiCadratin": true,
+    "rangeIntervalDash": "~="
+  },
+  "quotes": {
+    "level1Open": "\u00ab",
+    "level1Close": "\u00bb",
+    "level2Open": "\u201c",
+    "level2Close": "\u201d"
+  },
+  "centuries": {
+    "enabled": false,
+    "useRomanNumerals": true,
+    "useSuperscript": false,
+    "useSmallCaps": false,
+    "suffixes": [],
+    "wordForCentury": "siglo",
+    "wordForCenturyPlural": "siglos",
+    "abbreviation": "s."
+  },
+  "ordinals": {
+    "enabled": false,
+    "useSuperscript": true,
+    "corrections": {},
+    "titleAbbreviations": [
+      { "abbr": "Dr", "super": "r" },
+      { "abbr": "Sr", "super": "r" },
+      { "abbr": "Sra", "super": "ra" }
+    ]
+  },
+  "numbers": {
+    "thousandsSeparator": ".",
+    "decimalSeparator": ",",
+    "replacePointWithComma": false,
+    "addThousandsSpaces": false,
+    "excludeYears": true,
+    "yearRange": [0, 2050]
+  },
+  "data": {
+    "motsAmbigus": [],
+    "motsOrdinaux": [],
+    "motsAvantOrdinaux": [],
+    "motsOeuvres": [
+      "libro", "tomo", "volumen", "cap\u00edtulo", "parte", "secci\u00f3n", "acto",
+      "escena", "canto", "sinfon\u00eda", "concierto", "sonata", "opus",
+      "episodio", "temporada", "ciclo"
+    ],
+    "titresPersonnes": [
+      "Luis", "Enrique", "Isabel", "Carlos", "Napole\u00f3n",
+      "Federico", "Jorge", "Eduardo", "Guillermo", "Ricardo",
+      "Juan", "Pedro", "Alejandro", "Nicol\u00e1s"
+    ],
+    "nomsPremier": [
+      "Luis", "Carlos", "Enrique", "Felipe", "Federico",
+      "Napole\u00f3n", "Nicol\u00e1s", "Alejandro", "Leopoldo", "V\u00edctor",
+      "Fernando", "Eduardo", "Jorge", "Guillermo", "Juan",
+      "Pedro", "Roberto", "Alberto", "Ricardo",
+      "papa", "rey", "emperador", "zar", "presidente", "pr\u00edncipe",
+      "duque", "conde", "bar\u00f3n"
+    ],
+    "abreviationsRefs": [
+      "p\\.", "pp\\.", "p\u00e1g\\.", "p\u00e1gina", "p\u00e1ginas",
+      "f\\.", "ff\\.", "fol\\.", "folio", "folios",
+      "col\\.", "cols\\.",
+      "\u00a7", "l\\.", "l\u00ednea", "l\u00edneas", "sec\\.", "secci\u00f3n", "secciones",
+      "cap\\.", "cap\u00edtulo", "cap\u00edtulos",
+      "fig\\.", "figura", "figuras", "tab\\.", "tabla", "tablas", "il\\.", "ilustraci\u00f3n",
+      "doc\\.", "documento", "documentos", "art\\.", "art\u00edculo", "art\u00edculos", "ap\\.", "ap\u00e9ndice", "anexo"
+    ],
+    "abreviationsVolumes": [
+      "vol\\.", "volumen", "vol\u00famenes", "t\\.", "tomo", "tomos"
+    ],
+    "abreviationsTemporelles": [
+      "c\\.", "ca\\.", "circa", "aprox\\.",
+      "a\\. C\\.", "d\\. C\\."
+    ],
+    "abreviationsNumeros": [
+      "n\u00ba", "n\u00ba\\.", "n\u00fam\\.", "n\u00famero", "n\u00fameros"
+    ],
+    "unitesMesure": [
+      "km", "m", "cm", "mm", "\u00b5m", "nm",
+      "kg", "g", "mg", "\u00b5g",
+      "l", "ml", "cl", "dl"
+    ],
+    "abreviationsDirection": [
+      "N\\.", "S\\.", "E\\.", "O\\.", "NE\\.", "NO\\.", "SE\\.", "SO\\."
+    ],
+    "titresAppellations": [
+      "Sr\\.", "Sra\\.", "Srta\\.", "Dr\\.", "Prof\\.", "D\\.", "D\u00f1a\\."
+    ]
+  },
+  "italicExpressions": [
+    "a priori", "a posteriori", "ad hoc",
+    "carpe diem", "caveat emptor",
+    "de facto", "de jure",
+    "in situ", "in vitro", "in vivo",
+    "mea culpa", "modus operandi", "per se",
+    "status quo", "vice versa", "vis-\u00e0-vis"
+  ]
+}

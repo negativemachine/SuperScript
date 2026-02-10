@@ -268,7 +268,21 @@
                 'errorFormat1er': "Error formatting '1er' occurrences: %s",
                 'errorFormatReferences': 'Error formatting work references and titles: %s',
                 'errorFormatEspaces': 'Error formatting non-breaking spaces for references: %s',
-                'errorMainFunction': 'main function'
+                'errorMainFunction': 'main function',
+
+                // Language profile selector
+                'languageProfileLabel': 'Language profile:',
+                'languageProfileNone': '[No profiles available]',
+
+                // SieclesModule UI
+                'sieclesSectionTitle': 'Century and ordinal expression formatting',
+                'sieclesFormatSieclesLabel': 'Format centuries (XIVth century)',
+                'sieclesFormatOrdinauxLabel': 'Format ordinal expressions (IInd International)',
+                'sieclesFormatReferencesLabel': 'Format work parts and proper names (Volume III, Louis XIV)',
+                'sieclesFormatEspacesLabel': 'Add non-breaking spaces in references (p.\u00A054)',
+                'sieclesRomainsStyleLabel': 'Style for Roman numerals in small caps:',
+                'sieclesRomainsMajStyleLabel': 'Style for Roman numerals in CAPITALS:',
+                'sieclesExposantStyleLabel': 'Style for ordinal superscripts (e, er):'
             },
             'fr': {
                 // App-level
@@ -423,7 +437,21 @@
                 'errorFormat1er': 'Erreur lors du formatage des occurrences de \'1er\'\u2009: %s',
                 'errorFormatReferences': 'Erreur lors du formatage des r\u00E9f\u00E9rences d\'\u0153uvres et titres\u2009: %s',
                 'errorFormatEspaces': 'Erreur lors du formatage des espaces ins\u00E9cables pour les r\u00E9f\u00E9rences\u2009: %s',
-                'errorMainFunction': 'fonction principale'
+                'errorMainFunction': 'fonction principale',
+
+                // Language profile selector
+                'languageProfileLabel': 'Profil linguistique\u2009:',
+                'languageProfileNone': '[Aucun profil disponible]',
+
+                // SieclesModule UI
+                'sieclesSectionTitle': 'Formatage des si\u00E8cles et expressions ordinales',
+                'sieclesFormatSieclesLabel': 'Formater les si\u00E8cles (XIV\u1D49 si\u00E8cle)',
+                'sieclesFormatOrdinauxLabel': 'Formater les expressions ordinales (II\u1D49 Internationale)',
+                'sieclesFormatReferencesLabel': 'Formater titres d\'\u0153uvres et noms propres (Tome III, Louis XIV)',
+                'sieclesFormatEspacesLabel': 'Ajouter espaces ins\u00E9cables dans les r\u00E9f\u00E9rences (p.\u00A054)',
+                'sieclesRomainsStyleLabel': 'Style pour chiffres romains en petites capitales\u2009:',
+                'sieclesRomainsMajStyleLabel': 'Style pour chiffres romains en CAPITALES\u2009:',
+                'sieclesExposantStyleLabel': 'Style pour exposants des ordinaux (e, er)\u2009:'
             }
         };
 
@@ -476,6 +504,190 @@
             setLanguage: setLanguage,
             getLanguage: getLanguage,
             detectLanguage: detectInDesignLanguage
+        };
+    })();
+
+    // =========================================================================
+    // LanguageProfile — Language profile loader for typographic rules
+    // =========================================================================
+
+    var LanguageProfile = (function() {
+        var currentProfile = null;
+        var currentId = null;
+        var dictionaryPath = null;
+
+        /**
+         * Resolves the dictionary/ folder path relative to the script file
+         * @return {String} Absolute path to the dictionary folder
+         */
+        function resolveDictionaryPath() {
+            if (dictionaryPath) return dictionaryPath;
+            try {
+                var scriptFile = new File($.fileName);
+                var scriptsFolder = scriptFile.parent;
+                var projectFolder = scriptsFolder.parent;
+                var dictFolder = new Folder(projectFolder.fsName + "/dictionary");
+                if (dictFolder.exists) {
+                    dictionaryPath = dictFolder.fsName;
+                    return dictionaryPath;
+                }
+                // Fallback: try sibling of scripts/
+                dictFolder = new Folder(scriptsFolder.fsName + "/../dictionary");
+                if (dictFolder.exists) {
+                    dictionaryPath = dictFolder.fsName;
+                    return dictionaryPath;
+                }
+            } catch (e) {
+                // Ignore errors during path resolution
+            }
+            return null;
+        }
+
+        /**
+         * Loads a language profile from the dictionary/ folder
+         * @param {String} langId - Language ID (e.g., "fr-FR", "en-US")
+         * @return {Boolean} True if the profile was loaded successfully
+         */
+        function load(langId) {
+            var dictPath = resolveDictionaryPath();
+            if (!dictPath) return false;
+
+            var filePath = dictPath + "/lang-" + langId + ".json";
+            var file = new File(filePath);
+
+            if (!file.exists) return false;
+
+            try {
+                file.open("r");
+                file.encoding = "UTF-8";
+                var content = file.read();
+                file.close();
+
+                var profile = safeJSON.parse(content);
+                if (profile && profile.meta && profile.meta.id) {
+                    currentProfile = profile;
+                    currentId = profile.meta.id;
+                    return true;
+                }
+            } catch (e) {
+                try { file.close(); } catch (ignore) {}
+            }
+            return false;
+        }
+
+        /**
+         * Gets a value from the current profile by dot-separated path
+         * @param {String} path - Dot-separated path (e.g., "punctuation.spaceBeforeColon")
+         * @param {*} defaultValue - Value to return if path not found
+         * @return {*} The value at the path, or defaultValue
+         */
+        function get(path, defaultValue) {
+            if (!currentProfile) return (defaultValue !== undefined) ? defaultValue : null;
+            var parts = path.split(".");
+            var obj = currentProfile;
+            for (var i = 0; i < parts.length; i++) {
+                if (obj === null || obj === undefined || typeof obj !== "object") {
+                    return (defaultValue !== undefined) ? defaultValue : null;
+                }
+                obj = obj[parts[i]];
+            }
+            if (obj === undefined) {
+                return (defaultValue !== undefined) ? defaultValue : null;
+            }
+            return obj;
+        }
+
+        /**
+         * Gets an array value from the current profile
+         * @param {String} path - Dot-separated path to the array
+         * @return {Array} The array, or empty array if not found
+         */
+        function getList(path) {
+            var val = get(path, []);
+            if (Object.prototype.toString.call(val) === "[object Array]") {
+                return val;
+            }
+            return [];
+        }
+
+        /**
+         * Returns the ID of the currently loaded profile
+         * @return {String|null} The profile ID (e.g., "fr-FR"), or null
+         */
+        function getCurrentId() {
+            return currentId;
+        }
+
+        /**
+         * Returns the full loaded profile object
+         * @return {Object|null} The profile object, or null
+         */
+        function getProfile() {
+            return currentProfile;
+        }
+
+        /**
+         * Scans the dictionary/ folder and returns all available profiles
+         * @return {Array} Array of {id, label, labelEN} objects
+         */
+        function getAvailableProfiles() {
+            var profiles = [];
+            var dictPath = resolveDictionaryPath();
+            if (!dictPath) return profiles;
+
+            var dictFolder = new Folder(dictPath);
+            var files = dictFolder.getFiles("lang-*.json");
+
+            for (var i = 0; i < files.length; i++) {
+                try {
+                    var f = files[i];
+                    f.open("r");
+                    f.encoding = "UTF-8";
+                    var content = f.read();
+                    f.close();
+
+                    var profile = safeJSON.parse(content);
+                    if (profile && profile.meta) {
+                        profiles.push({
+                            id: profile.meta.id,
+                            label: profile.meta.label,
+                            labelEN: profile.meta.labelEN
+                        });
+                    }
+                } catch (e) {
+                    try { files[i].close(); } catch (ignore) {}
+                }
+            }
+
+            // Sort profiles: fr-FR first, then alphabetically by id
+            profiles.sort(function(a, b) {
+                if (a.id === "fr-FR") return -1;
+                if (b.id === "fr-FR") return 1;
+                if (a.id < b.id) return -1;
+                if (a.id > b.id) return 1;
+                return 0;
+            });
+
+            return profiles;
+        }
+
+        /**
+         * Gets the default profile ID based on InDesign's locale
+         * @return {String} Default profile ID
+         */
+        function getDefaultProfileId() {
+            var lang = I18n.getLanguage();
+            return (lang === 'fr') ? 'fr-FR' : 'en-US';
+        }
+
+        return {
+            load: load,
+            get: get,
+            getList: getList,
+            getCurrentId: getCurrentId,
+            getProfile: getProfile,
+            getAvailableProfiles: getAvailableProfiles,
+            getDefaultProfileId: getDefaultProfileId
         };
     })();
 
@@ -2161,7 +2373,40 @@
         topBanner.orientation = "row";
         topBanner.alignment = "right";
         var attribution = topBanner.add("statictext", undefined, "entremonde / Spectral lab");
-        
+
+        // Language profile selector
+        var profileGroup = dialog.add("group");
+        profileGroup.orientation = "row";
+        profileGroup.alignment = "fill";
+        profileGroup.add("statictext", undefined, I18n.__("languageProfileLabel"));
+        var profileDropdown = profileGroup.add("dropdownlist");
+        profileDropdown.preferredSize.width = 200;
+
+        var availableProfiles = LanguageProfile.getAvailableProfiles();
+        var defaultProfileId = LanguageProfile.getDefaultProfileId();
+        var defaultProfileIndex = 0;
+
+        if (availableProfiles.length > 0) {
+            for (var pi = 0; pi < availableProfiles.length; pi++) {
+                var displayLabel = (I18n.getLanguage() === 'fr')
+                    ? availableProfiles[pi].label
+                    : availableProfiles[pi].labelEN;
+                profileDropdown.add("item", displayLabel);
+                if (availableProfiles[pi].id === defaultProfileId) {
+                    defaultProfileIndex = pi;
+                }
+            }
+            profileDropdown.selection = defaultProfileIndex;
+        } else {
+            profileDropdown.add("item", I18n.__("languageProfileNone"));
+            profileDropdown.selection = 0;
+        }
+
+        // Load the default profile
+        if (availableProfiles.length > 0) {
+            LanguageProfile.load(availableProfiles[defaultProfileIndex].id);
+        }
+
         // Création des onglets
         var tpanel = dialog.add("tabbedpanel");
         tpanel.alignChildren = "fill";
@@ -2709,8 +2954,12 @@
               formatNumbers: cbFormatNumbers.value,
               addSpaces: cbAddSpaces.value,
               excludeYears: cbExcludeYears.value,
-              useComma: cbUseComma.value
-              
+              useComma: cbUseComma.value,
+
+              // Language profile
+              languageProfileId: (availableProfiles.length > 0 && profileDropdown.selection)
+                ? availableProfiles[profileDropdown.selection.index].id
+                : null
             };
           } catch (resultError) {
             ErrorHandler.handleError(resultError, "dialog results", true);
@@ -2937,6 +3186,11 @@
               if (!ErrorHandler.ensureDefined(app, "app", true)) return;
               if (!ErrorHandler.ensureDefined(app.activeDocument, "app.activeDocument", true)) return;
 
+              // Load the selected language profile
+              if (options.languageProfileId) {
+                  LanguageProfile.load(options.languageProfileId);
+              }
+
               Processor.applyCorrections(app.activeDocument, options);
               alert(I18n.__("successCorrectionsApplied"));
           } catch (error) {
@@ -3135,26 +3389,16 @@
             var titleGroup = tabOther.add("group");
             titleGroup.orientation = "row";
             titleGroup.alignChildren = "left";
-            titleGroup.add("statictext", undefined, "Formatage des siècles et expressions ordinales");
-            
-            // Option pour formater les siècles
-            var cbFormatSiecles = UIBuilder.addCheckboxOption(tabOther, "Formater les siècles (XIVe siècle)", true);
-            
-            // Option pour formater les expressions ordinales
-            var cbFormatOrdinaux = UIBuilder.addCheckboxOption(tabOther, "Formater les expressions ordinales (IIe Internationale)", true);
-            
-            // Option pour formater les parties d'œuvres
-            var cbFormatReferences = UIBuilder.addCheckboxOption(tabOther, "Formater titres d'œuvres et noms propres (Tome III, Louis XIV)", true);
-            
-            // Option pour formater les espaces insécables
-            var cbFormatEspaces = UIBuilder.addCheckboxOption(tabOther, "Ajouter espaces insécables dans les références (p. 54)", true);
-            
-            // Options pour les styles à utiliser
-            var romainsStyleOpt = UIBuilder.addDropdownOption(tabOther, "Style pour chiffres romains en petites capitales:", characterStyles, true);
-            var romainsMajStyleOpt = UIBuilder.addDropdownOption(tabOther, "Style pour chiffres romains en CAPITALES:", characterStyles, true);
-            
-            // Option spécifique pour le style d'exposant des ordinaux
-            var exposantStyleOpt = UIBuilder.addDropdownOption(tabOther, "Style pour exposants des ordinaux (e, er):", characterStyles, true);
+            titleGroup.add("statictext", undefined, I18n.__("sieclesSectionTitle"));
+
+            var cbFormatSiecles = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatSieclesLabel"), true);
+            var cbFormatOrdinaux = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatOrdinauxLabel"), true);
+            var cbFormatReferences = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatReferencesLabel"), true);
+            var cbFormatEspaces = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatEspacesLabel"), true);
+
+            var romainsStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesRomainsStyleLabel"), characterStyles, true);
+            var romainsMajStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesRomainsMajStyleLabel"), characterStyles, true);
+            var exposantStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesExposantStyleLabel"), characterStyles, true);
             
             // Rechercher les styles par défaut
             var defaultIndices = this.trouverStylesParDefaut(characterStyles);

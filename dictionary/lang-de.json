@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "id": "de",
+    "label": "Deutsch",
+    "labelEN": "German"
+  },
+  "punctuation": {
+    "spaceBeforeSemicolon": "",
+    "spaceBeforeColon": "",
+    "spaceBeforeExclamation": "",
+    "spaceBeforeQuestion": "",
+    "spaceInsideOpenQuote": "",
+    "spaceInsideCloseQuote": "",
+    "spaceBeforePercent": "~<",
+    "removeSpacesBeforePunctuation": true
+  },
+  "dashes": {
+    "inciseDash": "~=",
+    "inciseSpace": " ",
+    "replaceCadratinWithDemiCadratin": true,
+    "rangeIntervalDash": "~="
+  },
+  "quotes": {
+    "level1Open": "\u201e",
+    "level1Close": "\u201c",
+    "level2Open": "\u201a",
+    "level2Close": "\u2018"
+  },
+  "centuries": {
+    "enabled": false,
+    "useRomanNumerals": false,
+    "useSuperscript": false,
+    "useSmallCaps": false,
+    "suffixes": ["."],
+    "wordForCentury": "Jahrhundert",
+    "wordForCenturyPlural": "Jahrhunderte",
+    "abbreviation": "Jh."
+  },
+  "ordinals": {
+    "enabled": false,
+    "useSuperscript": false,
+    "corrections": {},
+    "titleAbbreviations": [
+      { "abbr": "Dr", "super": "r" },
+      { "abbr": "Prof", "super": "rof" },
+      { "abbr": "Hr", "super": "r" },
+      { "abbr": "Fr", "super": "r" }
+    ]
+  },
+  "numbers": {
+    "thousandsSeparator": ".",
+    "decimalSeparator": ",",
+    "replacePointWithComma": false,
+    "addThousandsSpaces": false,
+    "excludeYears": true,
+    "yearRange": [0, 2050]
+  },
+  "data": {
+    "motsAmbigus": [],
+    "motsOrdinaux": [],
+    "motsAvantOrdinaux": [],
+    "motsOeuvres": [
+      "Buch", "Band", "Kapitel", "Teil", "Abschnitt", "Akt",
+      "Szene", "Gesang", "Symphonie", "Konzert", "Sonate", "Opus",
+      "Episode", "Staffel", "Zyklus"
+    ],
+    "titresPersonnes": [
+      "Ludwig", "Heinrich", "Elisabeth", "Karl", "Napoleon",
+      "Friedrich", "Georg", "Eduard", "Wilhelm", "Richard",
+      "Johann", "Peter", "Alexander", "Nikolaus"
+    ],
+    "nomsPremier": [
+      "Ludwig", "Karl", "Heinrich", "Philipp", "Friedrich",
+      "Napoleon", "Nikolaus", "Alexander", "Leopold", "Viktor",
+      "Ferdinand", "Eduard", "Georg", "Wilhelm", "Johann",
+      "Peter", "Robert", "Albert", "Richard", "Maximilian",
+      "Papst", "K\u00f6nig", "Kaiser", "Zar", "Pr\u00e4sident", "Prinz",
+      "Herzog", "Graf", "Baron"
+    ],
+    "abreviationsRefs": [
+      "S\\.", "s\\.", "Seite", "Seiten",
+      "f\\.", "ff\\.",
+      "Sp\\.", "Spalte", "Spalten",
+      "\u00a7", "Abs\\.", "Zeile", "Zeilen", "Abschn\\.",
+      "Kap\\.", "Kapitel",
+      "Abb\\.", "Abbildung", "Tab\\.", "Tabelle",
+      "Dok\\.", "Dokument", "Art\\.", "Artikel", "Anh\\.", "Anhang"
+    ],
+    "abreviationsVolumes": [
+      "Bd\\.", "Band", "B\u00e4nde", "T\\.", "Teil", "Teile"
+    ],
+    "abreviationsTemporelles": [
+      "ca\\.", "circa", "ungef\\.",
+      "v\\. Chr\\.", "n\\. Chr\\."
+    ],
+    "abreviationsNumeros": [
+      "Nr\\.", "Nummer", "Nummern"
+    ],
+    "unitesMesure": [
+      "km", "m", "cm", "mm", "\u00b5m", "nm",
+      "kg", "g", "mg", "\u00b5g",
+      "l", "ml", "cl", "dl"
+    ],
+    "abreviationsDirection": [
+      "N\\.", "S\\.", "O\\.", "W\\.", "NO\\.", "NW\\.", "SO\\.", "SW\\."
+    ],
+    "titresAppellations": [
+      "Hr\\.", "Fr\\.", "Dr\\.", "Prof\\.", "St\\."
+    ]
+  },
+  "italicExpressions": [
+    "ad absurdum", "a priori", "a posteriori",
+    "de facto", "de jure", "en d\u00e9tail", "en passant",
+    "in medias res", "in situ",
+    "laissez-faire", "par excellence",
+    "raison d'\u00eatre", "savoir-vivre",
+    "t\u00eate-\u00e0-t\u00eate", "vis-\u00e0-vis"
+  ]
+}

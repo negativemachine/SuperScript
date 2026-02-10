@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "id": "en-UK",
+    "label": "English (UK)",
+    "labelEN": "English (UK)"
+  },
+  "punctuation": {
+    "spaceBeforeSemicolon": "",
+    "spaceBeforeColon": "",
+    "spaceBeforeExclamation": "",
+    "spaceBeforeQuestion": "",
+    "spaceInsideOpenQuote": "",
+    "spaceInsideCloseQuote": "",
+    "spaceBeforePercent": "",
+    "removeSpacesBeforePunctuation": true
+  },
+  "dashes": {
+    "inciseDash": "~=",
+    "inciseSpace": " ",
+    "replaceCadratinWithDemiCadratin": true,
+    "rangeIntervalDash": "~="
+  },
+  "quotes": {
+    "level1Open": "\u2018",
+    "level1Close": "\u2019",
+    "level2Open": "\u201c",
+    "level2Close": "\u201d"
+  },
+  "centuries": {
+    "enabled": false,
+    "useRomanNumerals": false,
+    "useSuperscript": false,
+    "useSmallCaps": false,
+    "suffixes": ["th", "st", "nd", "rd"],
+    "wordForCentury": "century",
+    "wordForCenturyPlural": "centuries",
+    "abbreviation": "c."
+  },
+  "ordinals": {
+    "enabled": false,
+    "useSuperscript": false,
+    "corrections": {},
+    "titleAbbreviations": [
+      { "abbr": "Dr", "super": "r" },
+      { "abbr": "Mr", "super": "r" },
+      { "abbr": "Mrs", "super": "rs" },
+      { "abbr": "Ms", "super": "s" },
+      { "abbr": "Jr", "super": "r" },
+      { "abbr": "Sr", "super": "r" }
+    ]
+  },
+  "numbers": {
+    "thousandsSeparator": ",",
+    "decimalSeparator": ".",
+    "replacePointWithComma": false,
+    "addThousandsSpaces": false,
+    "excludeYears": true,
+    "yearRange": [0, 2050]
+  },
+  "data": {
+    "motsAmbigus": [],
+    "motsOrdinaux": [],
+    "motsAvantOrdinaux": [],
+    "motsOeuvres": [
+      "book", "volume", "chapter", "part", "section", "act",
+      "scene", "canto", "symphony", "concerto", "sonata", "opus",
+      "episode", "season", "cycle"
+    ],
+    "titresPersonnes": [
+      "louis", "henry", "elizabeth", "charles", "napoleon",
+      "frederick", "george", "edward", "richard", "william",
+      "james", "john", "peter", "alexander", "nicholas"
+    ],
+    "nomsPremier": [
+      "louis", "charles", "henry", "philip", "frederick",
+      "napoleon", "nicholas", "alexander", "leopold", "victor",
+      "ferdinand", "edward", "george", "william", "james",
+      "john", "peter", "robert", "albert", "richard",
+      "pope", "king", "emperor", "tsar", "president", "prince",
+      "duke", "count", "baron"
+    ],
+    "abreviationsRefs": [
+      "p\\.", "pp\\.", "page", "pages",
+      "f\\.", "ff\\.", "fol\\.", "folio", "folios",
+      "col\\.", "cols\\.",
+      "\u00a7", "\u00b6", "l\\.", "line", "lines", "sec\\.", "section", "sections",
+      "ch\\.", "chap\\.", "chapter", "chapters",
+      "fig\\.", "figure", "figures", "tab\\.", "table", "tables", "ill\\.", "illustration",
+      "doc\\.", "document", "documents", "art\\.", "article", "articles", "app\\.", "appendix"
+    ],
+    "abreviationsVolumes": [
+      "vol\\.", "volume", "volumes"
+    ],
+    "abreviationsTemporelles": [
+      "c\\.", "ca\\.", "circa",
+      "BC", "AD", "BCE", "CE"
+    ],
+    "abreviationsNumeros": [
+      "no\\.", "nos\\.", "num\\.", "number", "numbers"
+    ],
+    "unitesMesure": [
+      "km", "m", "cm", "mm", "\u00b5m", "nm",
+      "kg", "g", "mg", "\u00b5g",
+      "l", "ml", "cl", "dl",
+      "ft", "in", "yd", "mi",
+      "lb", "oz", "fl oz", "gal", "pt", "qt"
+    ],
+    "abreviationsDirection": [
+      "N\\.", "S\\.", "E\\.", "W\\.", "N\\.E\\.", "N\\.W\\.", "S\\.E\\.", "S\\.W\\."
+    ],
+    "titresAppellations": [
+      "Mr", "Mrs", "Ms", "Dr", "Prof", "Rev", "St"
+    ]
+  },
+  "italicExpressions": [
+    "a priori", "a posteriori", "ad hoc", "bona fide",
+    "carpe diem", "caveat emptor", "coup d'\u00e9tat",
+    "de facto", "de jure", "en route",
+    "in situ", "in vitro", "in vivo",
+    "mea culpa", "modus operandi", "per se",
+    "raison d'\u00eatre", "status quo",
+    "vice versa", "vis-\u00e0-vis", "zeitgeist"
+  ]
+}

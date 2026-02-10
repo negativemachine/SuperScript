@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "id": "it",
+    "label": "Italiano",
+    "labelEN": "Italian"
+  },
+  "punctuation": {
+    "spaceBeforeSemicolon": "",
+    "spaceBeforeColon": "",
+    "spaceBeforeExclamation": "",
+    "spaceBeforeQuestion": "",
+    "spaceInsideOpenQuote": "",
+    "spaceInsideCloseQuote": "",
+    "spaceBeforePercent": "",
+    "removeSpacesBeforePunctuation": true
+  },
+  "dashes": {
+    "inciseDash": "~=",
+    "inciseSpace": " ",
+    "replaceCadratinWithDemiCadratin": true,
+    "rangeIntervalDash": "~="
+  },
+  "quotes": {
+    "level1Open": "\u00ab",
+    "level1Close": "\u00bb",
+    "level2Open": "\u201c",
+    "level2Close": "\u201d"
+  },
+  "centuries": {
+    "enabled": false,
+    "useRomanNumerals": true,
+    "useSuperscript": false,
+    "useSmallCaps": false,
+    "suffixes": [],
+    "wordForCentury": "secolo",
+    "wordForCenturyPlural": "secoli",
+    "abbreviation": "sec."
+  },
+  "ordinals": {
+    "enabled": false,
+    "useSuperscript": true,
+    "corrections": {},
+    "titleAbbreviations": [
+      { "abbr": "Dott", "super": "ott" },
+      { "abbr": "Sig", "super": "ig" },
+      { "abbr": "Sig.ra", "super": "ra" }
+    ]
+  },
+  "numbers": {
+    "thousandsSeparator": ".",
+    "decimalSeparator": ",",
+    "replacePointWithComma": false,
+    "addThousandsSpaces": false,
+    "excludeYears": true,
+    "yearRange": [0, 2050]
+  },
+  "data": {
+    "motsAmbigus": [],
+    "motsOrdinaux": [],
+    "motsAvantOrdinaux": [],
+    "motsOeuvres": [
+      "libro", "tomo", "volume", "capitolo", "parte", "sezione", "atto",
+      "scena", "canto", "sinfonia", "concerto", "sonata", "opus",
+      "episodio", "stagione", "ciclo"
+    ],
+    "titresPersonnes": [
+      "Luigi", "Enrico", "Elisabetta", "Carlo", "Napoleone",
+      "Federico", "Giorgio", "Edoardo", "Guglielmo", "Riccardo",
+      "Giovanni", "Pietro", "Alessandro", "Nicola"
+    ],
+    "nomsPremier": [
+      "Luigi", "Carlo", "Enrico", "Filippo", "Federico",
+      "Napoleone", "Nicola", "Alessandro", "Leopoldo", "Vittorio",
+      "Ferdinando", "Edoardo", "Giorgio", "Guglielmo", "Giovanni",
+      "Pietro", "Roberto", "Alberto", "Riccardo", "Massimiliano",
+      "Pio", "Gregorio", "Leone", "Benedetto", "Clemente", "Innocenzo",
+      "Urbano", "Bonifacio", "Sisto", "Paolo", "Celestino",
+      "papa", "re", "imperatore", "zar", "presidente", "principe",
+      "duca", "conte", "barone"
+    ],
+    "abreviationsRefs": [
+      "p\\.", "pp\\.", "pag\\.", "pagina", "pagine",
+      "f\\.", "ff\\.", "fol\\.", "folio",
+      "col\\.", "coll\\.",
+      "\u00a7", "l\\.", "linea", "linee", "sez\\.", "sezione", "sezioni",
+      "cap\\.", "capitolo", "capitoli",
+      "fig\\.", "figura", "figure", "tab\\.", "tabella", "tabelle", "ill\\.", "illustrazione",
+      "doc\\.", "documento", "documenti", "art\\.", "articolo", "articoli", "app\\.", "appendice", "allegato"
+    ],
+    "abreviationsVolumes": [
+      "vol\\.", "volume", "volumi", "t\\.", "tomo", "tomi"
+    ],
+    "abreviationsTemporelles": [
+      "c\\.", "ca\\.", "circa",
+      "a\\.C\\.", "d\\.C\\."
+    ],
+    "abreviationsNumeros": [
+      "n\\.", "nn\\.", "num\\.", "numero", "numeri"
+    ],
+    "unitesMesure": [
+      "km", "m", "cm", "mm", "\u00b5m", "nm",
+      "kg", "g", "mg", "\u00b5g",
+      "l", "ml", "cl", "dl"
+    ],
+    "abreviationsDirection": [
+      "N\\.", "S\\.", "E\\.", "O\\.", "NE\\.", "NO\\.", "SE\\.", "SO\\."
+    ],
+    "titresAppellations": [
+      "Sig\\.", "Sig\\.ra", "Dott\\.", "Prof\\.", "Don"
+    ]
+  },
+  "italicExpressions": [
+    "a priori", "a posteriori", "ad hoc",
+    "carpe diem", "de facto", "de jure",
+    "in situ", "in vitro", "in vivo",
+    "mea culpa", "modus operandi", "per se",
+    "status quo", "vice versa", "vis-\u00e0-vis"
+  ]
+}
