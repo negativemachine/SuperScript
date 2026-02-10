@@ -2504,6 +2504,9 @@
 
                 // Thousands separator comes from the UI dropdown
                 var SEPARATEUR_MILLIERS = thousandsSeparator || "~<";
+                // GREP-escaped version for use in findWhat patterns
+                // "." must become "\." to avoid matching any character in GREP
+                var SEP_GREP = SEPARATEUR_MILLIERS.replace(/\./g, "\\.");
                 
                 if (addSpaces) {
                     // CORRECTION: Protéger d'abord les intervalles d'années avec tiret demi-cadratin
@@ -2782,7 +2785,7 @@
                     // Traiter très grands nombres
                     for (var pass = 0; pass < 5; pass++) {
                         Utilities.resetPreferences();
-                        app.findGrepPreferences.findWhat = "(\\d{1,3})" + SEPARATEUR_MILLIERS + "(\\d{3}" + SEPARATEUR_MILLIERS + "\\d{3})";
+                        app.findGrepPreferences.findWhat = "(\\d{1,3})" + SEP_GREP + "(\\d{3}" + SEP_GREP + "\\d{3})";
                         app.changeGrepPreferences.changeTo = "$1" + SEPARATEUR_MILLIERS + "$2";
                         
                         var foundItems = doc.findGrep();
@@ -2821,23 +2824,26 @@
                     }
                 }
                 
-                // Nettoyage final
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = SEPARATEUR_MILLIERS + "{2,}";
-                app.changeGrepPreferences.changeTo = SEPARATEUR_MILLIERS;
-                doc.changeGrep();
-                
-                // CORRECTION: Inclure les nouveaux marqueurs dans le nettoyage
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = "###|YEAR_MARK_|_YEAR_MARK|YEAR_ENDASH_|_ENDASH_|SPECIAL_NUMBER_[a-z0-9]+_";
-                app.changeGrepPreferences.changeTo = "";
-                doc.changeGrep();
-                
-                // Convertir espaces normaux en espaces fines insécables
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = "(\\d+) (\\d{3})";
-                app.changeGrepPreferences.changeTo = "$1" + SEPARATEUR_MILLIERS + "$2";
-                while (doc.changeGrep().length > 0) {}
+                // Nettoyage final — only when addSpaces was active
+                if (addSpaces) {
+                    // Remove duplicate separators
+                    Utilities.resetPreferences();
+                    app.findGrepPreferences.findWhat = SEP_GREP + "{2,}";
+                    app.changeGrepPreferences.changeTo = SEPARATEUR_MILLIERS;
+                    doc.changeGrep();
+
+                    // Remove leftover protection markers
+                    Utilities.resetPreferences();
+                    app.findGrepPreferences.findWhat = "###|YEAR_MARK_|_YEAR_MARK|YEAR_ENDASH_|_ENDASH_|SPECIAL_NUMBER_[a-z0-9]+_";
+                    app.changeGrepPreferences.changeTo = "";
+                    doc.changeGrep();
+
+                    // Convert remaining regular spaces between digit groups to separator
+                    Utilities.resetPreferences();
+                    app.findGrepPreferences.findWhat = "(\\d+) (\\d{3})";
+                    app.changeGrepPreferences.changeTo = "$1" + SEPARATEUR_MILLIERS + "$2";
+                    while (doc.changeGrep().length > 0) {}
+                }
                 
             } catch (error) {
                 ErrorHandler.handleError(error, "formatNumbers", false);
