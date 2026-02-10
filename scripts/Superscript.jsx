@@ -1893,10 +1893,10 @@
                 // Build per-punctuation replacement pairs
                 // Each punctuation mark may have a different space type
                 var punctPairs = [];
-                if (spaceSemicolon) punctPairs.push({ char: ";", space: spaceSemicolon });
-                if (spaceColon) punctPairs.push({ char: ":", space: spaceColon });
-                if (spaceExclamation) punctPairs.push({ char: "!", space: spaceExclamation });
-                if (spaceQuestion) punctPairs.push({ char: "\\?", space: spaceQuestion });
+                if (spaceSemicolon) punctPairs.push({ ch: ";", space: spaceSemicolon });
+                if (spaceColon) punctPairs.push({ ch: ":", space: spaceColon });
+                if (spaceExclamation) punctPairs.push({ ch: "!", space: spaceExclamation });
+                if (spaceQuestion) punctPairs.push({ ch: "\\?", space: spaceQuestion });
 
                 if (punctPairs.length > 0) {
                     // Group punctuation marks that share the same space type
@@ -1904,7 +1904,7 @@
                     for (var i = 0; i < punctPairs.length; i++) {
                         var key = punctPairs[i].space;
                         if (!spaceGroups[key]) spaceGroups[key] = [];
-                        spaceGroups[key].push(punctPairs[i].char);
+                        spaceGroups[key].push(punctPairs[i].ch);
                     }
 
                     for (var sp in spaceGroups) {
