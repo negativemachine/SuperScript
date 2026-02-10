@@ -3895,8 +3895,6 @@
             }
         };
 
-        var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
-          fixDashIncisesOpt.dropdown.selection = 1;
         var cbFixSpaces = addCheckboxOption(tabSpaces, I18n.__("fixDoubleSpacesLabel"), true);
         var cbDoubleReturns = addCheckboxOption(tabSpaces, I18n.__("removeDoubleReturnsLabel"), true);
         var cbRemoveSpacesBeforePunctuation = addCheckboxOption(tabSpaces, I18n.__("removeSpacesBeforePunctuationLabel"), true);
@@ -3904,6 +3902,8 @@
         var cbRemoveSpacesEndParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesEndParagraphLabel"), true);
         var cbRemoveTabs = addCheckboxOption(tabSpaces, I18n.__("removeTabsLabel"), true);
         var cbFormatEspaces = addCheckboxOption(tabSpaces, I18n.__("formatEspacesLabel"), true);
+        var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
+          fixDashIncisesOpt.dropdown.selection = 1;
         
         // Ajout des options de style dans l'onglet Styles
         // Section pour la définition des styles
