@@ -5878,6 +5878,97 @@
 
             var doc = app.activeDocument;
 
+            // Check if called from BookCreator via scriptArgs
+            var callerArg = "";
+            var profileArg = "";
+            try { callerArg = app.scriptArgs.getValue("caller") || ""; } catch (e) {}
+            try { profileArg = app.scriptArgs.getValue("superscriptProfile") || ""; } catch (e) {}
+            // Clear scriptArgs immediately
+            try { app.scriptArgs.setValue("caller", ""); } catch (e) {}
+            try { app.scriptArgs.setValue("superscriptProfile", ""); } catch (e) {}
+
+            if (callerArg === "BookCreator" && profileArg) {
+                // Silent mode from BookCreator: build default options for the profile
+                try {
+                    LanguageProfile.load(profileArg);
+                    var profile = LanguageProfile.getProfile();
+                    var styleInfo = Utilities.getCharacterStyles(doc);
+
+                    // Build default options with all corrections enabled
+                    var punct = (profile && profile.punctuation) || {};
+                    var dashes = (profile && profile.dashes) || {};
+                    var centuries = (profile && profile.centuries) || {};
+                    var numbers = (profile && profile.numbers) || {};
+
+                    var bcOptions = {
+                        silentMode: true,
+                        removeSpacesBeforePunctuation: !!(punct.removeSpacesBeforePunctuation),
+                        moveNotes: true,
+                        applyNoteStyle: false,
+                        noteStyleName: null,
+                        fixDoubleSpaces: true,
+                        fixTypoSpaces: !!(punct.spaceBeforeSemicolon || punct.spaceBeforeColon),
+                        spaceBeforePunct: punct.spaceBeforeSemicolon || null,
+                        spaceBeforeColon: punct.spaceBeforeColon || null,
+                        fixDashIncises: !!(dashes.inciseSpace),
+                        dashIncisesSpaceType: dashes.inciseSpace || null,
+                        replaceDashes: !!(dashes.replaceCadratinWithDemiCadratin),
+                        applyItalicStyle: false,
+                        italicStyleName: null,
+                        applyItalicExpressions: false,
+                        italicExpressionsStyleName: null,
+                        applyExposantStyle: false,
+                        exposantStyleName: null,
+                        removeDoubleReturns: true,
+                        convertEllipsis: true,
+                        replaceApostrophes: true,
+                        fixIsolatedHyphens: true,
+                        fixValueRanges: true,
+                        removeSpacesStartParagraph: true,
+                        removeSpacesEndParagraph: true,
+                        removeTabs: true,
+                        enableStyleAfter: false,
+                        triggerStyles: [],
+                        targetStyle: null,
+                        applyMasterToLastPage: false,
+                        selectedMaster: null,
+                        sieclesOptions: {
+                            formaterSiecles: !!(centuries.enabled),
+                            formaterOrdinaux: !!(centuries.enabled),
+                            formaterReferences: !!(centuries.enabled),
+                            formaterEspaces: true,
+                            romainsStyle: null,
+                            romainsMajStyle: null,
+                            exposantStyle: null
+                        },
+                        formatNumbers: !!(numbers.addThousandsSpaces),
+                        addSpaces: !!(numbers.addThousandsSpaces),
+                        thousandsSeparator: numbers.thousandsSeparator || null,
+                        excludeYears: !!(numbers.excludeYears),
+                        useComma: !!(numbers.replacePointWithComma),
+                        languageProfileId: profileArg
+                    };
+
+                    if (!ErrorHandler.ensureDefined(ScriptLanguage, "ScriptLanguage", true)) return;
+                    if (!ErrorHandler.ensureDefined(UndoModes, "UndoModes", true)) return;
+
+                    app.doScript(
+                        function() {
+                            Processor.processDocuments(bcOptions);
+                        },
+                        ScriptLanguage.JAVASCRIPT,
+                        undefined,
+                        UndoModes.FAST_ENTIRE_SCRIPT,
+                        CONFIG.SCRIPT_TITLE
+                    );
+
+                    doc.save();
+                } catch (bcError) {
+                    ErrorHandler.handleError(bcError, "BookCreator silent mode", false);
+                }
+                return;
+            }
+
             // Check for auto-loaded config (silent mode if in config/ subfolder)
             var autoResult = ConfigManager.autoLoad();
             if (autoResult && autoResult.inConfigFolder && autoResult.data) {
