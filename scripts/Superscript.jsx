@@ -214,7 +214,7 @@
 
                 // Page layout tab
                 'enableStyleAfterLabel': 'Conditional style application',
-                'triggerStylesPanel': 'Trigger styles (multiple selection)',
+                'triggerStylesPanel': 'Trigger styles',
                 'targetStyleLabel': 'Style to apply to the following paragraph:',
                 'applyMasterToLastPageLabel': 'Apply a master to the last facing page',
                 'masterLabel': 'Master to apply:',
@@ -393,7 +393,7 @@
 
                 // Page layout tab
                 'enableStyleAfterLabel': 'Application conditionnelle de styles',
-                'triggerStylesPanel': 'Styles d\u00E9clencheurs (s\u00E9lection multiple)',
+                'triggerStylesPanel': 'Styles d\u00E9clencheurs',
                 'targetStyleLabel': 'Style \u00E0 appliquer au paragraphe suivant\u2009:',
                 'applyMasterToLastPageLabel': 'Appliquer un gabarit \u00E0 la derni\u00E8re page en vis-\u00E0-vis',
                 'masterLabel': 'Gabarit \u00E0 appliquer\u2009:',
@@ -979,10 +979,12 @@
                 }
             };
 
-            // Collect trigger style names from listbox selection
-            if (controls.triggerListbox && controls.triggerListbox.selection) {
-                for (var i = 0; i < controls.triggerListbox.selection.length; i++) {
-                    config.layout.triggerStyles.push(controls.triggerListbox.selection[i].text);
+            // Collect trigger style names from checkboxes
+            if (controls.triggerCheckboxes) {
+                for (var i = 0; i < controls.triggerCheckboxes.length; i++) {
+                    if (controls.triggerCheckboxes[i].value) {
+                        config.layout.triggerStyles.push(controls.triggerCheckboxes[i].text);
+                    }
                 }
             }
 
@@ -1141,15 +1143,17 @@
                     controls.masterDropdown.enabled = l.applyMasterToLastPage;
                 }
 
-                // Trigger styles — restore selection in listbox
-                if (l.triggerStyles && controls.triggerListbox) {
-                    // Deselect all first
-                    controls.triggerListbox.selection = null;
-                    // Select matching items
+                // Trigger styles — restore checkboxes
+                if (l.triggerStyles && controls.triggerCheckboxes) {
+                    // Uncheck all first
+                    for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
+                        controls.triggerCheckboxes[tc].value = false;
+                    }
+                    // Check matching items
                     for (var ts = 0; ts < l.triggerStyles.length; ts++) {
-                        for (var tc = 0; tc < controls.triggerListbox.items.length; tc++) {
-                            if (controls.triggerListbox.items[tc].text === l.triggerStyles[ts]) {
-                                controls.triggerListbox.items[tc].selected = true;
+                        for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
+                            if (controls.triggerCheckboxes[tc].text === l.triggerStyles[ts]) {
+                                controls.triggerCheckboxes[tc].value = true;
                                 break;
                             }
                         }
@@ -3542,17 +3546,15 @@
         var styleGroupPanel = tabStyles.add("panel", undefined, I18n.__("triggerStylesPanel"));
         styleGroupPanel.orientation = "column";
         styleGroupPanel.alignChildren = "fill";
+        styleGroupPanel.maximumSize.height = 200;
 
-        // Scrollable listbox with multi-selection instead of checkboxes
-        var triggerListbox = styleGroupPanel.add("listbox", undefined, paraStyleNames, { multiselect: true });
-        triggerListbox.preferredSize.height = 180;
-
-        // Pre-select all styles except "Body text" and "First paragraph"
-        for (var i = 0; i < triggerListbox.items.length; i++) {
-          var itemText = triggerListbox.items[i].text;
-          if (itemText !== "Body text" && itemText !== "First paragraph") {
-            triggerListbox.items[i].selected = true;
-          }
+        // Checkboxes for each paragraph style
+        var triggerCheckboxes = [];
+        for (var tci = 0; tci < paraStyleNames.length; tci++) {
+          var cb = styleGroupPanel.add("checkbox", undefined, paraStyleNames[tci]);
+          // Pre-check all styles except "Body text" and "First paragraph"
+          cb.value = (paraStyleNames[tci] !== "Body text" && paraStyleNames[tci] !== "First paragraph");
+          triggerCheckboxes.push(cb);
         }
         
         // Option pour le style cible
@@ -3659,7 +3661,7 @@
         dialogControls.cbUseComma = cbUseComma;
         dialogControls.cbExcludeYears = cbExcludeYears;
         dialogControls.cbEnableStyleAfter = cbEnableStyleAfter;
-        dialogControls.triggerListbox = triggerListbox;
+        dialogControls.triggerCheckboxes = triggerCheckboxes;
         dialogControls.targetStyleDropdown = targetStyleDropdown;
         dialogControls.cbApplyMasterToLastPage = cbApplyMasterToLastPage;
         dialogControls.masterDropdown = masterDropdown;
@@ -3756,12 +3758,9 @@
           try {
             // Collecter les styles déclencheurs sélectionnés
             var selectedTriggerStyles = [];
-            if (allParaStyles.length > 0 && triggerListbox.selection) {
-              for (var i = 0; i < triggerListbox.selection.length; i++) {
-                var selIdx = triggerListbox.selection[i].index;
-                if (selIdx < allParaStyles.length) {
-                  selectedTriggerStyles.push(allParaStyles[selIdx]);
-                }
+            for (var i = 0; i < triggerCheckboxes.length; i++) {
+              if (triggerCheckboxes[i].value && i < allParaStyles.length) {
+                selectedTriggerStyles.push(allParaStyles[i]);
               }
             }
             
