@@ -5902,6 +5902,12 @@
                     var centuries = (profile && profile.centuries) || {};
                     var numbers = (profile && profile.numbers) || {};
 
+                    // Resolve styles for SieclesModule (get or create defaults)
+                    var smallCapsStyle = Utilities.getOrCreateStyle(doc, "Small Caps", {});
+                    var capitalsStyle = Utilities.getOrCreateStyle(doc, "Capitals", {});
+                    var superscriptStyle = Utilities.getOrCreateStyle(doc, CONFIG.DEFAULT_STYLES.SUPERSCRIPT, { position: Position.SUPERSCRIPT });
+                    var hasSieclesStyles = !!(smallCapsStyle && capitalsStyle && superscriptStyle);
+
                     var bcOptions = {
                         silentMode: true,
                         removeSpacesBeforePunctuation: !!(punct.removeSpacesBeforePunctuation),
@@ -5935,13 +5941,13 @@
                         applyMasterToLastPage: false,
                         selectedMaster: null,
                         sieclesOptions: {
-                            formaterSiecles: !!(centuries.enabled),
-                            formaterOrdinaux: !!(centuries.enabled),
-                            formaterReferences: !!(centuries.enabled),
+                            formaterSiecles: hasSieclesStyles && !!(centuries.enabled),
+                            formaterOrdinaux: hasSieclesStyles && !!(centuries.enabled),
+                            formaterReferences: hasSieclesStyles && !!(centuries.enabled),
                             formaterEspaces: true,
-                            romainsStyle: null,
-                            romainsMajStyle: null,
-                            exposantStyle: null
+                            romainsStyle: smallCapsStyle,
+                            romainsMajStyle: capitalsStyle,
+                            exposantStyle: superscriptStyle
                         },
                         formatNumbers: !!(numbers.addThousandsSpaces),
                         addSpaces: !!(numbers.addThousandsSpaces),
