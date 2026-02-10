@@ -1,11 +1,28 @@
 /**
-  * SuperScript
-  * 
-  * SuperScript est un script InDesign qui automatise 
-  * la correction typographique pour accélérer la préparation
-  * des documents et garantir une mise en page plus propre.
-  * 
-  * @version 1.0 beta 10
+  * SuperScript — Automated multilingual typographic correction for InDesign
+  *
+  * Corrects typography, spaces, punctuation, dashes, quotes, apostrophes,
+  * centuries, ordinals, references, and number formatting according to
+  * language-specific rules defined in external JSON profiles (dictionary/).
+  *
+  * Supports 7 language profiles: FR-FR, FR-CH, EN-US, EN-UK, DE, ES, IT.
+  * Bilingual UI (FR/EN) via I18n module, auto-detected from InDesign locale.
+  * Save/load user preferences via ConfigManager (superscript-config.json).
+  *
+  * Architecture:
+  *   safeJSON       — ES3-compatible JSON stringify/parse
+  *   I18n           — Bilingual UI translations (FR/EN)
+  *   LanguageProfile — Loads dictionary/lang-*.json typographic rules
+  *   ConfigManager  — Save/load user preferences to JSON
+  *   ErrorHandler   — Error handling with context
+  *   Utilities      — Document validation, style helpers
+  *   Corrections    — 21 typographic correction methods
+  *   ProgressBar    — Non-blocking palette progress indicator
+  *   UIBuilder      — 5-tab dialog with profile selector and config bar
+  *   Processor      — Orchestrates corrections on active document
+  *   SieclesModule  — Centuries, ordinals, references, non-breaking spaces
+  *
+  * @version 2.0
   * @license AGPL
   * @author entremonde / Spectral lab
   * @website https://lab.spectral.art
@@ -288,15 +305,6 @@
                 'errorParseConfig': 'Error parsing configuration file: %s',
                 'errorOpenConfig': 'Could not open configuration file.',
 
-                // SieclesModule UI
-                'sieclesSectionTitle': 'Century and ordinal expression formatting',
-                'sieclesFormatSieclesLabel': 'Format centuries (XIVth century)',
-                'sieclesFormatOrdinauxLabel': 'Format ordinal expressions (IInd International)',
-                'sieclesFormatReferencesLabel': 'Format work parts and proper names (Volume III, Louis XIV)',
-                'sieclesFormatEspacesLabel': 'Add non-breaking spaces in references (p.\u00A054)',
-                'sieclesRomainsStyleLabel': 'Style for Roman numerals in small caps:',
-                'sieclesRomainsMajStyleLabel': 'Style for Roman numerals in CAPITALS:',
-                'sieclesExposantStyleLabel': 'Style for ordinal superscripts (e, er):'
             },
             'fr': {
                 // App-level
@@ -471,15 +479,6 @@
                 'errorParseConfig': 'Erreur lors de l\'analyse du fichier de configuration\u2009: %s',
                 'errorOpenConfig': 'Impossible d\'ouvrir le fichier de configuration.',
 
-                // SieclesModule UI
-                'sieclesSectionTitle': 'Formatage des si\u00E8cles et expressions ordinales',
-                'sieclesFormatSieclesLabel': 'Formater les si\u00E8cles (XIV\u1D49 si\u00E8cle)',
-                'sieclesFormatOrdinauxLabel': 'Formater les expressions ordinales (II\u1D49 Internationale)',
-                'sieclesFormatReferencesLabel': 'Formater titres d\'\u0153uvres et noms propres (Tome III, Louis XIV)',
-                'sieclesFormatEspacesLabel': 'Ajouter espaces ins\u00E9cables dans les r\u00E9f\u00E9rences (p.\u00A054)',
-                'sieclesRomainsStyleLabel': 'Style pour chiffres romains en petites capitales\u2009:',
-                'sieclesRomainsMajStyleLabel': 'Style pour chiffres romains en CAPITALES\u2009:',
-                'sieclesExposantStyleLabel': 'Style pour exposants des ordinaux (e, er)\u2009:'
             }
         };
 
@@ -3900,224 +3899,10 @@
          * Copiée directement du script original
          */
         CONFIG: {
-            // Liste des mots pouvant être confondus avec des chiffres romains
-            MOTS_AMBIGUS: [
-                "vie", "ive", "xie", "ie"
-            ],
-            
-            // Liste des mots à exclure des siècles mais à inclure pour les expressions ordinales
-            MOTS_ORDINAUX: [
-                // Événements institutionnels et politiques
-                "congrès", "conférence", "sommet", "assemblée", "session", "convention", 
-                "colloque", "forum", "séminaire", "symposium", "concile", "internationale",
-                
-                // Événements culturels et artistiques
-                "festival", "biennale", "exposition", "salon", "rencontres", "journées", 
-                "cérémonie", "gala", "édition", "triennale", "quadriennale",
-                
-                // Événements sportifs
-                "jeux", "tournoi", "coupe", "championnat", "épreuve", "grand prix", "olympiade",
-                "round", "manche", "tour",
-                
-                // Contexte militaire et administratif
-                "régiment", "division", "corps", "brigade", "batterie", "compagnie", 
-                "détachement", "unité", "légion", "escadron", "armée", "bataillon", "flotte",
-                "escadre", "flottille", "peloton", "section", "force", "contingent",
-                
-                // Géographie administrative
-                "arrondissement", "canton", "circonscription", "section", "district", 
-                "région", "zone", "département", "préfecture", "sous-préfecture", "quartier",
-                "communauté", "collectivité", "subdivision",
-                
-                // Histoire et chronologie
-                "dynastie", "règne", "époque", "ère", "période", "âge", "millénaire",
-                
-                // Littérature, théâtre, édition
-                "tome", "volume", "acte", "scène", "chant", "livre", "partie", "section", 
-                "chapitre", "paragraphe", "alinéa", "titre", "sous-section", "annexe", 
-                "appendice", "supplément", "bulletin", "rapport", "numéro",
-                
-                // Administration et gouvernement
-                "ministère", "secrétariat", "commission", "conseil", "comité", "état",
-                "mandat", "législature", "administration", "chambre", "cour", "tribunal",
-                "article", "amendement", "lecture",
-                
-                // Éducation
-                "année", "classe", "promotion", "cycle", "semestre", "trimestre", "examen",
-                "diplôme",
-                
-                // Structures et groupes
-                "groupe", "collectif",
-                
-                // Temporels
-                "trimestre", "semestre", "décennie", "vague",
-                
-                // Ordres et classements
-                "rang", "position", "place", "catégorie", "échelon", "niveau", "grade",
-                "stade", "série", "classe", "division",
-                
-                // Événements séquentiels
-                "tentative", "essai", "phase", "étape", "version", "itération", "mouvement",
-                
-                // Autres cas officiels ou institutionnels
-                "plan", "phase", "république", "empire", "ordre", "reich", "dimension",
-                "degré", "position", "génération", "base", "volet", "pilier", "concept",
-                "principe", "type", "forme", "paradigme"
-            ],
-            
-            // Liste des mots à exclure avant le chiffre romain
-            MOTS_AVANT_ORDINAUX: [
-                "an", "année", "jour", "mois", "semaine", "trimestre", "semestre",
-                "numéro", "n°", "article", "alinéa", "paragraphe", "chapitre",
-                "niveau", "groupe", "classe", "étage", "zone", "secteur", "district",
-                "bataillon", "régiment", "division", "brigade", "compagnie", "escadron",
-                "tome", "volume", "partie", "phase", "étape", "session", "version"
-            ],
-            
-            // Liste des mots désignant des parties d'œuvres
-            MOTS_OEUVRES: [
-                "livre", "tome", "volume", "chapitre", "partie", "section", "acte", 
-                "scène", "chant", "symphonie", "concerto", "sonate", "opus", 
-                "épisode", "volet", "cycle", "saison"
-            ],
-            
-            // Liste des titres de personnes
-            TITRES_PERSONNES: [
-                "louis", "henri", "élisabeth", "charles", "napoléon", "hadrien", 
-                "frédéric", "jean-paul", "benoît", "clément", "pie", "léon"
-            ],
-            
-            // Liste des noms qui devraient être suivis de "Ier"
-            NOMS_PREMIER: [
-                // Monarques
-                "louis", "charles", "françois", "henri", "philippe", "frédéric",
-                "napoléon", "nicolas", "alexandre", "léopold", "victor", "ferdinand",
-                "édouard", "georges", "wilhelm", "michel", "constantin", "jacques",
-                "jean", "pierre", "robert", "albert", "richard", "maximilien",
-                
-                // Papes et religieux
-                "pie", "grégoire", "léon", "benoît", "clément", "innocent", 
-                "urbain", "jean-paul", "boniface", "sixte", "paul", "célestin",
-                
-                // Titres génériques
-                "roi", "empereur", "tsar", "pape", "président", "prince",
-                "duc", "comte", "baron"
-            ],
-            
-            // Références bibliographiques
-            ABREVIATIONS_REFS: [
-                // Références aux pages
-                "p\\.", "pp\\.", "page", "pages",
-                // Références aux folios
-                "f\\.", "ff\\.", "fol\\.", "folio", "folios",
-                // Références aux colonnes
-                "col\\.", "cols\\.",
-                // Références aux paragraphes, lignes, sections
-                "§", "¶", "l\\.", "ligne", "lignes", "sec\\.", "section", "sections",
-                // Références aux chapitres
-                "chap\\.", "chapitre", "chapitres",
-                // Références aux figures, tableaux, illustrations
-                "fig\\.", "figure", "figures", "tab\\.", "tableau", "tableaux", "ill\\.", "illustration",
-                // Références à des documents
-                "doc\\.", "document", "documents", "art\\.", "article", "articles", "app\\.", "appendice", "annexe"
-            ],
-            
-            // Références à des tomes/volumes
-            ABREVIATIONS_VOLUMES: [
-                "vol\\.", "volume", "volumes", "t\\.", "tome", "tomes"
-            ],
-            
-            // Références temporelles
-            ABREVIATIONS_TEMPORELLES: [
-                "c\\.", "ca\\.", "circa", "env\\.", "environ",
-                "av\\. J\\.-C\\.", "apr\\. J\\.-C\\.", "J\\.-C\\."
-            ],
-            
-            // Références aux numéros
-            ABREVIATIONS_NUMEROS: [
-                "n°", "n°s", "num\\.", "numéro", "numéros"
-            ],
-            
-            // Unités de mesure
-            UNITES_MESURE: [
-                "km", "m", "cm", "mm", "µm", "nm", 
-                "kg", "g", "mg", "µg",
-                "l", "ml", "cl", "dl"
-            ],
-            
-            // Références directionnelles
-            ABREVIATIONS_DIRECTION: [
-                "N\\.", "S\\.", "E\\.", "O\\.", "N\\.E\\.", "N\\.O\\.", "S\\.E\\.", "S\\.O\\."
-            ],
-            
-            // Titres et appellations
-            TITRES_APPELLATIONS: [
-                "M\\.", "Mme", "Mlle", "MM\\.", "Mmes", "Mlles", "Dr", "Pr", "Me", "St", "Ste"
-            ],
-            
-            // Styles par défaut
+            // Style auto-detection names (universal, not language-specific)
             STYLES_PETITES_CAPITALES: ["Small caps", "Small cap", "Small capitals", "Small capital", "Petites capitales", "Petites caps"],
             STYLES_CAPITALES: ["Large Capitals", "Capital", "Capitals"],
             STYLES_EXPOSANT: ["Superscript", "Exposant", "Superior"]
-        },
-        
-        /**
-         * Initialisation du module et création des options dans l'interface
-         * @param {Window} tabOther - Onglet formatages du dialogue principal
-         * @param {Array} characterStyles - Styles de caractère disponibles
-         * @returns {Object} Contrôles créés pour l'onglet
-         */
-        initializeUI: function(tabOther, characterStyles) {
-            var controls = {};
-            
-            // Ajouter un séparateur visuel
-            var separatorGroup = tabOther.add("group");
-            separatorGroup.alignment = "fill";
-            var separator = separatorGroup.add("panel");
-            separator.alignment = "fill";
-            
-            // Ajouter un titre pour la section
-            var titleGroup = tabOther.add("group");
-            titleGroup.orientation = "row";
-            titleGroup.alignChildren = "left";
-            titleGroup.add("statictext", undefined, I18n.__("sieclesSectionTitle"));
-
-            var cbFormatSiecles = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatSieclesLabel"), true);
-            var cbFormatOrdinaux = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatOrdinauxLabel"), true);
-            var cbFormatReferences = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatReferencesLabel"), true);
-            var cbFormatEspaces = UIBuilder.addCheckboxOption(tabOther, I18n.__("sieclesFormatEspacesLabel"), true);
-
-            var romainsStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesRomainsStyleLabel"), characterStyles, true);
-            var romainsMajStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesRomainsMajStyleLabel"), characterStyles, true);
-            var exposantStyleOpt = UIBuilder.addDropdownOption(tabOther, I18n.__("sieclesExposantStyleLabel"), characterStyles, true);
-            
-            // Rechercher les styles par défaut
-            var defaultIndices = this.trouverStylesParDefaut(characterStyles);
-            
-            // Sélectionner les styles par défaut si trouvés
-            if (defaultIndices.petitesCapitales > 0) {
-                romainsStyleOpt.dropdown.selection = defaultIndices.petitesCapitales;
-            }
-            
-            if (defaultIndices.capitales > 0) {
-                romainsMajStyleOpt.dropdown.selection = defaultIndices.capitales;
-            }
-            
-            // Sélectionner le style par défaut pour l'exposant si trouvé
-            if (defaultIndices.exposant > 0) {
-                exposantStyleOpt.dropdown.selection = defaultIndices.exposant;
-            }
-            
-            // Stocker les contrôles pour les récupérer plus tard
-            controls.formatSiecles = cbFormatSiecles;
-            controls.formatOrdinaux = cbFormatOrdinaux;
-            controls.formatReferences = cbFormatReferences;
-            controls.formatEspaces = cbFormatEspaces;
-            controls.romainsStyle = romainsStyleOpt;
-            controls.romainsMajStyle = romainsMajStyleOpt;
-            controls.exposantStyle = exposantStyleOpt;
-            
-            return controls;
         },
         
         /**
@@ -4202,7 +3987,7 @@
                 var profileData = LanguageProfile.getList(profilePath);
                 if (profileData.length > 0) return profileData;
             }
-            return this.CONFIG[configKey] || [];
+            return [];
         },
 
         processDocument: function(doc, options) {
