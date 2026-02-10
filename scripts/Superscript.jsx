@@ -2882,7 +2882,7 @@
        * @param {Array} characterStyles - Tableau des styles de caractère disponibles
        * @param {number} noteStyleIndex - Index du style de note par défaut
        * @param {number} italicStyleIndex - Index du style italique par défaut
-       * @param {Object} [preloadConfig] - Config to preload (used when reopening after language switch)
+       * @param {Object} [preloadConfig] - Config to preload (used when reopening after UI language switch)
        * @returns {Object} Résultat du dialogue avec les options de l'utilisateur
        */
       createDialog: function(characterStyles, noteStyleIndex, italicStyleIndex, preloadConfig) {
@@ -2897,11 +2897,14 @@
         dialog.alignChildren = "fill";
         dialog.preferredSize.width = 400;
         
-        // Bannière supérieure avec attribution
+        // Bannière supérieure avec attribution + sélecteur de langue UI
         var topBanner = dialog.add("group");
         topBanner.orientation = "row";
         topBanner.alignment = "right";
         var attribution = topBanner.add("statictext", undefined, "entremonde / Spectral lab");
+        topBanner.add("statictext", undefined, "  ");
+        var langDropdown = topBanner.add("dropdownlist", undefined, ["En", "Fr"]);
+        langDropdown.selection = I18n.getLanguage() === 'fr' ? 1 : 0;
 
         // Language profile selector
         var profileGroup = dialog.add("group");
@@ -2996,29 +2999,23 @@
             }
         }
 
-        // Derive UI language from profile ID (fr-* → 'fr', everything else → 'en')
-        function uiLangForProfile(profileId) {
-            return (profileId && profileId.indexOf("fr") === 0) ? 'fr' : 'en';
-        }
-
-        // Wire up profile dropdown onChange
+        // Wire up profile dropdown onChange (typographic rules only, no UI language change)
         profileDropdown.onChange = function() {
             if (availableProfiles.length > 0 && profileDropdown.selection) {
                 var selectedId = availableProfiles[profileDropdown.selection.index].id;
-                var newUILang = uiLangForProfile(selectedId);
-
-                if (newUILang !== I18n.getLanguage()) {
-                    // UI language needs to change — collect state, switch lang, reopen
-                    LanguageProfile.load(selectedId);
-                    dialogControls.languageProfileId = selectedId;
-                    dialog.reopenConfig = ConfigManager.collectFromDialog(dialogControls);
-                    I18n.setLanguage(newUILang);
-                    dialog.close(3); // code 3 = reopen
-                    return;
-                }
-
                 LanguageProfile.load(selectedId);
                 updateUIForProfile();
+            }
+        };
+
+        // Wire up UI language dropdown (close/reopen dialog to apply new language)
+        langDropdown.onChange = function() {
+            var newLang = langDropdown.selection.index === 1 ? 'fr' : 'en';
+            if (newLang !== I18n.getLanguage()) {
+                dialogControls.languageProfileId = getSelectedProfileId();
+                dialog.reopenConfig = ConfigManager.collectFromDialog(dialogControls);
+                I18n.setLanguage(newLang);
+                dialog.close(3); // code 3 = reopen with new UI language
             }
         };
 
