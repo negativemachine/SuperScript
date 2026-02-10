@@ -1388,38 +1388,86 @@
          * @param {Document} doc - Document InDesign
          * @param {string} spaceType - Code d'espace spécial InDesign
          */
-        fixTypoSpaces: function(doc, spaceType) {
+        fixTypoSpaces: function(doc, spaceType, profile) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
-                if (!ErrorHandler.ensureDefined(spaceType, "spaceType", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
                 if (!ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", true)) return;
                 if (!ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", true)) return;
-                
+
+                // Read per-punctuation space types from language profile, fallback to spaceType
+                var spaceOpenQuote = spaceType;
+                var spaceCloseQuote = spaceType;
+                var spaceSemicolon = spaceType;
+                var spaceColon = spaceType;
+                var spaceExclamation = spaceType;
+                var spaceQuestion = spaceType;
+
+                if (profile) {
+                    spaceOpenQuote = LanguageProfile.get("punctuation.spaceInsideOpenQuote", spaceType);
+                    spaceCloseQuote = LanguageProfile.get("punctuation.spaceInsideCloseQuote", spaceType);
+                    spaceSemicolon = LanguageProfile.get("punctuation.spaceBeforeSemicolon", spaceType);
+                    spaceColon = LanguageProfile.get("punctuation.spaceBeforeColon", spaceType);
+                    spaceExclamation = LanguageProfile.get("punctuation.spaceBeforeExclamation", spaceType);
+                    spaceQuestion = LanguageProfile.get("punctuation.spaceBeforeQuestion", spaceType);
+                }
+
+                // Skip entirely if no spaces are needed before any punctuation
+                var hasAnySpace = spaceOpenQuote || spaceCloseQuote || spaceSemicolon || spaceColon || spaceExclamation || spaceQuestion;
+                if (!hasAnySpace) return;
+
                 Utilities.resetPreferences();
-                
-                // Espace après guillemet ouvrant
-                app.findGrepPreferences.findWhat = CONFIG.REGEX.SPACE_AFTER_OPENING_QUOTE;
-                app.changeGrepPreferences.changeTo = spaceType;
-                doc.changeGrep();
-                
-                // Espace avant guillemet fermant
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = CONFIG.REGEX.SPACE_BEFORE_CLOSING_QUOTE;
-                app.changeGrepPreferences.changeTo = spaceType;
-                doc.changeGrep();
-                
-                // Espace avant ponctuation double
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = CONFIG.REGEX.SPACE_BEFORE_DOUBLE_PUNCTUATION;
-                app.changeGrepPreferences.changeTo = spaceType;
-                doc.changeGrep();
-                
-                // Espace avant ponctuation double quand elle est collée à un caractère
-                Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = CONFIG.REGEX.CHARACTER_BEFORE_DOUBLE_PUNCTUATION;
-                app.changeGrepPreferences.changeTo = "$1" + spaceType;
-                doc.changeGrep();
+
+                // Space after opening quote
+                if (spaceOpenQuote) {
+                    app.findGrepPreferences.findWhat = CONFIG.REGEX.SPACE_AFTER_OPENING_QUOTE;
+                    app.changeGrepPreferences.changeTo = spaceOpenQuote;
+                    doc.changeGrep();
+                    Utilities.resetPreferences();
+                }
+
+                // Space before closing quote
+                if (spaceCloseQuote) {
+                    app.findGrepPreferences.findWhat = CONFIG.REGEX.SPACE_BEFORE_CLOSING_QUOTE;
+                    app.changeGrepPreferences.changeTo = spaceCloseQuote;
+                    doc.changeGrep();
+                    Utilities.resetPreferences();
+                }
+
+                // Build per-punctuation replacement pairs
+                // Each punctuation mark may have a different space type
+                var punctPairs = [];
+                if (spaceSemicolon) punctPairs.push({ char: ";", space: spaceSemicolon });
+                if (spaceColon) punctPairs.push({ char: ":", space: spaceColon });
+                if (spaceExclamation) punctPairs.push({ char: "!", space: spaceExclamation });
+                if (spaceQuestion) punctPairs.push({ char: "\\?", space: spaceQuestion });
+
+                if (punctPairs.length > 0) {
+                    // Group punctuation marks that share the same space type
+                    var spaceGroups = {};
+                    for (var i = 0; i < punctPairs.length; i++) {
+                        var key = punctPairs[i].space;
+                        if (!spaceGroups[key]) spaceGroups[key] = [];
+                        spaceGroups[key].push(punctPairs[i].char);
+                    }
+
+                    for (var sp in spaceGroups) {
+                        if (spaceGroups.hasOwnProperty(sp)) {
+                            var chars = spaceGroups[sp].join("");
+                            // Replace existing wrong-type spaces before these characters
+                            Utilities.resetPreferences();
+                            app.findGrepPreferences.findWhat = "[ \\t\\u00A0\\u2000-\\u200A\\u202F\\u205F\\u3000](?=[" + chars + "])";
+                            app.changeGrepPreferences.changeTo = sp;
+                            doc.changeGrep();
+
+                            // Insert space when character is directly adjacent
+                            Utilities.resetPreferences();
+                            app.findGrepPreferences.findWhat = "([^\\s])(?=[" + chars + "])";
+                            app.changeGrepPreferences.changeTo = "$1" + sp;
+                            doc.changeGrep();
+                        }
+                    }
+                }
             } catch (error) {
                 ErrorHandler.handleError(error, "fixTypoSpaces", false);
             }
@@ -1429,16 +1477,21 @@
          * Remplace les tirets cadratin par des tirets demi-cadratin
          * @param {Document} doc - Document InDesign
          */
-        replaceDashes: function(doc) {
+        replaceDashes: function(doc, profile) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
                 if (!ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", true)) return;
                 if (!ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", true)) return;
-                
+
+                // Check if profile says to skip this operation
+                if (profile && LanguageProfile.get("dashes.replaceCadratinWithDemiCadratin") === false) {
+                    return;
+                }
+
                 Utilities.resetPreferences();
-                app.findGrepPreferences.findWhat = "—";
-                app.changeGrepPreferences.changeTo = "–";
+                app.findGrepPreferences.findWhat = "\u2014"; // em dash —
+                app.changeGrepPreferences.changeTo = "\u2013"; // en dash –
                 doc.changeGrep();
             } catch (error) {
                 ErrorHandler.handleError(error, "replaceDashes", false);
@@ -1837,19 +1890,36 @@
          * @param {Document} doc - Document InDesign
          * @param {string} spaceType - Code d'espace spécial InDesign
          */
-        fixDashIncises: function(doc, spaceType) {
+        fixDashIncises: function(doc, spaceType, profile) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
-                if (!ErrorHandler.ensureDefined(spaceType, "spaceType", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
                 if (!ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", true)) return;
                 if (!ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", true)) return;
-                
+
                 // Tiret demi-cadratin
                 var ENDASH = "\u2013"; // –
-                
-                // Obtenir le caractère d'espace insécable à utiliser selon le type demandé
-                var insecableChar = (spaceType === "~<") ? "\u202F" : "\u00A0"; // Espace fine ou espace insécable standard
+
+                // Read incise space from profile if available
+                var inciseSpaceConfig = spaceType;
+                if (profile) {
+                    inciseSpaceConfig = LanguageProfile.get("dashes.inciseSpace", spaceType);
+                }
+
+                // If profile says no space (empty string), skip this correction
+                if (!inciseSpaceConfig) return;
+
+                // Determine the actual Unicode character to insert
+                var insecableChar;
+                if (inciseSpaceConfig === "~<") {
+                    insecableChar = "\u202F"; // Fine non-breaking space
+                } else if (inciseSpaceConfig === "~S") {
+                    insecableChar = "\u00A0"; // Non-breaking space
+                } else if (inciseSpaceConfig === " ") {
+                    insecableChar = " "; // Normal (breakable) space — for FR-CH, EN-UK, DE, etc.
+                } else {
+                    insecableChar = (spaceType === "~<") ? "\u202F" : "\u00A0";
+                }
                 
                 // Réinitialiser les préférences
                 Utilities.resetPreferences();
@@ -1926,17 +1996,21 @@
          * @param {boolean} useComma - Si true, remplace les points décimaux par des virgules
          * @param {boolean} excludeYears - Si true, exclut les nombres entre 0 et 2050
          */
-        formatNumbers: function(doc, addSpaces, useComma, excludeYears) {
+        formatNumbers: function(doc, addSpaces, useComma, excludeYears, profile) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
                 if (!ErrorHandler.ensureDefined(app.findGrepPreferences, "app.findGrepPreferences", true)) return;
                 if (!ErrorHandler.ensureDefined(app.changeGrepPreferences, "app.changeGrepPreferences", true)) return;
-                
+
                 // Définir le tiret demi-cadratin
                 var ENDASH = "\u2013"; // –
-                
-                var SEPARATEUR_MILLIERS = "~<"; // Espace fine insécable
+
+                // Read thousands separator from profile, default to fine non-breaking space
+                var SEPARATEUR_MILLIERS = "~<";
+                if (profile) {
+                    SEPARATEUR_MILLIERS = LanguageProfile.get("numbers.thousandsSeparator", "~<");
+                }
                 
                 if (addSpaces) {
                     // CORRECTION: Protéger d'abord les intervalles d'années avec tiret demi-cadratin
@@ -2407,6 +2481,61 @@
             LanguageProfile.load(availableProfiles[defaultProfileIndex].id);
         }
 
+        // Function to update UI state based on loaded profile
+        // Called after all controls are created and when profile changes
+        var uiProfileControls = {}; // Will be populated as controls are created
+
+        function updateUIForProfile() {
+            var profile = LanguageProfile.getProfile();
+            if (!profile) return;
+
+            // Disable fixTypoSpaces if no spaces before punctuation
+            var hasAnyPunctSpace = profile.punctuation &&
+                (profile.punctuation.spaceBeforeSemicolon ||
+                 profile.punctuation.spaceBeforeColon ||
+                 profile.punctuation.spaceBeforeExclamation ||
+                 profile.punctuation.spaceBeforeQuestion ||
+                 profile.punctuation.spaceInsideOpenQuote ||
+                 profile.punctuation.spaceInsideCloseQuote);
+
+            if (uiProfileControls.fixTypoSpaces) {
+                uiProfileControls.fixTypoSpaces.enabled = !!hasAnyPunctSpace;
+                if (!hasAnyPunctSpace) uiProfileControls.fixTypoSpaces.checkbox.value = false;
+            }
+
+            // Disable SieclesModule when centuries.enabled === false
+            var centuriesEnabled = profile.centuries && profile.centuries.enabled !== false;
+            if (uiProfileControls.formatSiecles) {
+                uiProfileControls.formatSiecles.enabled = centuriesEnabled;
+                if (!centuriesEnabled) uiProfileControls.formatSiecles.value = false;
+            }
+            if (uiProfileControls.formatOrdinaux) {
+                uiProfileControls.formatOrdinaux.enabled = centuriesEnabled;
+                if (!centuriesEnabled) uiProfileControls.formatOrdinaux.value = false;
+            }
+            if (uiProfileControls.formatReferences) {
+                uiProfileControls.formatReferences.enabled = centuriesEnabled;
+                if (!centuriesEnabled) uiProfileControls.formatReferences.value = false;
+            }
+
+            // Update number formatting defaults from profile
+            if (uiProfileControls.useComma && profile.numbers) {
+                uiProfileControls.useComma.value = !!profile.numbers.replacePointWithComma;
+            }
+            if (uiProfileControls.addSpaces && profile.numbers) {
+                uiProfileControls.addSpaces.value = !!profile.numbers.addThousandsSpaces;
+            }
+        }
+
+        // Wire up profile dropdown onChange
+        profileDropdown.onChange = function() {
+            if (availableProfiles.length > 0 && profileDropdown.selection) {
+                var selectedId = availableProfiles[profileDropdown.selection.index].id;
+                LanguageProfile.load(selectedId);
+                updateUIForProfile();
+            }
+        };
+
         // Création des onglets
         var tpanel = dialog.add("tabbedpanel");
         tpanel.alignChildren = "fill";
@@ -2688,7 +2817,18 @@
         cbFormatNumbers.onClick = function() {
           numberSettingsPanel.enabled = cbFormatNumbers.value;
         };
-        
+
+        // Populate profile control references for dynamic profile switching
+        uiProfileControls.fixTypoSpaces = fixTypoSpacesOpt;
+        uiProfileControls.formatSiecles = cbFormatSiecles;
+        uiProfileControls.formatOrdinaux = cbFormatOrdinaux;
+        uiProfileControls.formatReferences = cbFormatReferences;
+        uiProfileControls.useComma = cbUseComma;
+        uiProfileControls.addSpaces = cbAddSpaces;
+
+        // Apply initial profile-based state
+        updateUIForProfile();
+
         // Ajout des options dans le nouvel onglet Styles de paragraphe
         var cbEnableStyleAfter = addCheckboxOption(tabStyles, I18n.__("enableStyleAfterLabel"), true);
         
@@ -3041,12 +3181,12 @@
                   
                   if (options.fixTypoSpaces && options.spaceType) {
                       ProgressBar.update(++progress, I18n.__("progressFixTypoSpaces"));
-                      Corrections.fixTypoSpaces(doc, options.spaceType);
+                      Corrections.fixTypoSpaces(doc, options.spaceType, options.languageProfileId);
                   }
-                  
+
                   if (options.fixDashIncises && options.dashIncisesSpaceType) {
                       ProgressBar.update(++progress, I18n.__("progressFixDashIncises"));
-                      Corrections.fixDashIncises(doc, options.dashIncisesSpaceType);
+                      Corrections.fixDashIncises(doc, options.dashIncisesSpaceType, options.languageProfileId);
                   }
                   
                   if (options.removeDoubleReturns) {
@@ -3082,7 +3222,7 @@
                   
                   if (options.replaceDashes) {
                       ProgressBar.update(++progress, I18n.__("progressReplaceDashes"));
-                      Corrections.replaceDashes(doc);
+                      Corrections.replaceDashes(doc, options.languageProfileId);
                   }
                   
                   if (options.fixIsolatedHyphens) {
@@ -3150,14 +3290,14 @@
                   // Traitement du formatage des nombres
                   if (options.formatNumbers) {
                       ProgressBar.update(++progress, I18n.__("progressFormatNumbers"));
-                      Corrections.formatNumbers(doc, options.addSpaces, options.useComma, options.excludeYears);
+                      Corrections.formatNumbers(doc, options.addSpaces, options.useComma, options.excludeYears, options.languageProfileId);
                   }
                   
                   // Finalisation
                   ProgressBar.update(totalSteps, I18n.__("progressComplete"));
                   
               } catch (correctionsError) {
-                  ErrorHandler.handleError(correctionsError, "application des corrections", false);
+                  ErrorHandler.handleError(correctionsError, "applying corrections", false);
               } finally {
                   // Fermer la barre de progression
                   ProgressBar.close();
@@ -3500,14 +3640,28 @@
          * @param {Document} doc - Document InDesign
          * @param {Object} options - Options sélectionnées
          */
+        /**
+         * Gets a CONFIG data array from LanguageProfile if available, otherwise from hardcoded CONFIG
+         * @param {String} configKey - Key in SieclesModule.CONFIG (e.g., "MOTS_ORDINAUX")
+         * @param {String} profilePath - Dot path in LanguageProfile (e.g., "data.motsOrdinaux")
+         * @return {Array} The data array
+         */
+        getConfigData: function(configKey, profilePath) {
+            if (LanguageProfile.getCurrentId()) {
+                var profileData = LanguageProfile.getList(profilePath);
+                if (profileData.length > 0) return profileData;
+            }
+            return this.CONFIG[configKey] || [];
+        },
+
         processDocument: function(doc, options) {
           try {
             // Vérifier si au moins une option est activée
-            if (!options.formaterSiecles && !options.formaterOrdinaux && 
+            if (!options.formaterSiecles && !options.formaterOrdinaux &&
                 !options.formaterReferences && !options.formaterEspaces) {
                 return;
             }
-            
+
             // Initialiser les variables nécessaires pour le script isolé
             this.initializeIsolatedEnvironment();
             
@@ -3680,8 +3834,8 @@
             var ESPACE_INSECABLE = String.fromCharCode(0x00A0);
             
             // Préparer les expressions régulières
-            var motsClefsRegex = this.Utilities.preparerRegex(this.CONFIG.MOTS_ORDINAUX);
-            var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.CONFIG.MOTS_AMBIGUS);
+            var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("MOTS_ORDINAUX", "data.motsOrdinaux"));
+            var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("MOTS_AMBIGUS", "data.motsAmbigus"));
             
             // Appliquer les styles à tout le document
             app.findGrepPreferences = app.changeGrepPreferences = null;
@@ -3964,9 +4118,9 @@
                 var ESPACE_INSECABLE = String.fromCharCode(0x00A0);
                 
                 // Préparer les expressions régulières
-                var motsClefsRegex = this.Utilities.preparerRegex(this.CONFIG.MOTS_ORDINAUX);
-                var motsClefsRegexAvant = this.Utilities.preparerRegex(this.CONFIG.MOTS_AVANT_ORDINAUX);
-                var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.CONFIG.MOTS_AMBIGUS);
+                var motsClefsRegex = this.Utilities.preparerRegex(this.getConfigData("MOTS_ORDINAUX", "data.motsOrdinaux"));
+                var motsClefsRegexAvant = this.Utilities.preparerRegex(this.getConfigData("MOTS_AVANT_ORDINAUX", "data.motsAvantOrdinaux"));
+                var ambigusRegex = this.Utilities.preparerRegexAmbigus(this.getConfigData("MOTS_AMBIGUS", "data.motsAmbigus"));
                 
                 // === CORRECTIONS PRÉLIMINAIRES ===
                 // Remplacer les caractères problématiques avant tout traitement
@@ -4131,7 +4285,7 @@
               app.findGrepPreferences = app.changeGrepPreferences = null;
               
               // Combiner les mots d'œuvres et les titres de personnes
-              var tousLesMots = this.CONFIG.MOTS_OEUVRES.concat(this.CONFIG.TITRES_PERSONNES);
+              var tousLesMots = this.getConfigData("MOTS_OEUVRES", "data.motsOeuvres").concat(this.getConfigData("TITRES_PERSONNES", "data.titresPersonnes"));
               
               // Joindre tous les mots en un seul pattern d'alternation
               var motsJoined = tousLesMots.join("|");
@@ -4181,7 +4335,7 @@
               
               // === TRAITEMENT UNIQUEMENT DES "Ier" DÉJÀ FORMATÉS (IGNORE LES "Ie") ===
               // Créer une expression regex pour les noms avec premier
-              var nomsPremierRegex = this.Utilities.preparerRegex(this.CONFIG.NOMS_PREMIER);
+              var nomsPremierRegex = this.Utilities.preparerRegex(this.getConfigData("NOMS_PREMIER", "data.nomsPremier"));
               
               // Rechercher seulement les cas déjà formatés en "Ier" (pas "Ie")
               app.findGrepPreferences = app.changeGrepPreferences = null;
@@ -4282,61 +4436,61 @@
               var abreviationsPrecises = [];
               
               // Traiter les abréviations avec points
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_REFS.length; i++) {
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs").length; i++) {
                   // Si l'abréviation contient déjà un point d'échappement, elle est correcte
-                  if (this.CONFIG.ABREVIATIONS_REFS[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.ABREVIATIONS_REFS[i]);
+                  if (this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i]);
                   } else {
                       // Sinon, ajouter des délimiteurs de mot
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_REFS[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i] + "\\b");
                   }
               }
               
               // Ajouter les références aux volumes avec délimiteurs de mot
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_VOLUMES.length; i++) {
-                  if (this.CONFIG.ABREVIATIONS_VOLUMES[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.ABREVIATIONS_VOLUMES[i]);
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes").length; i++) {
+                  if (this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_VOLUMES[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_VOLUMES", "data.abreviationsVolumes")[i] + "\\b");
                   }
               }
               
               // Ajouter les références temporelles avec délimiteurs de mot
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_TEMPORELLES.length; i++) {
-                  if (this.CONFIG.ABREVIATIONS_TEMPORELLES[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.ABREVIATIONS_TEMPORELLES[i]);
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles").length; i++) {
+                  if (this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_TEMPORELLES[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_TEMPORELLES", "data.abreviationsTemporelles")[i] + "\\b");
                   }
               }
               
               // Ajouter les références aux numéros avec délimiteurs de mot
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_NUMEROS.length; i++) {
-                  if (this.CONFIG.ABREVIATIONS_NUMEROS[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.ABREVIATIONS_NUMEROS[i]);
-                  } else if (this.CONFIG.ABREVIATIONS_NUMEROS[i].indexOf("°") !== -1) {
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros").length; i++) {
+                  if (this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i]);
+                  } else if (this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i].indexOf("°") !== -1) {
                       // Cas spécial pour n° et n°s - pas de \b à la fin
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_NUMEROS[i]);
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_NUMEROS[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_NUMEROS", "data.abreviationsNumeros")[i] + "\\b");
                   }
               }
               
               // Ajouter les références directionnelles avec délimiteurs de mot
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_DIRECTION.length; i++) {
-                  if (this.CONFIG.ABREVIATIONS_DIRECTION[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.ABREVIATIONS_DIRECTION[i]);
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection").length; i++) {
+                  if (this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.CONFIG.ABREVIATIONS_DIRECTION[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("ABREVIATIONS_DIRECTION", "data.abreviationsDirection")[i] + "\\b");
                   }
               }
               
               // Ajouter les titres et appellations avec délimiteurs de mot
-              for (var i = 0; i < this.CONFIG.TITRES_APPELLATIONS.length; i++) {
-                  if (this.CONFIG.TITRES_APPELLATIONS[i].indexOf("\\.") !== -1) {
-                      abreviationsPrecises.push(this.CONFIG.TITRES_APPELLATIONS[i]);
+              for (var i = 0; i < this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations").length; i++) {
+                  if (this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i].indexOf("\\.") !== -1) {
+                      abreviationsPrecises.push(this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i]);
                   } else {
-                      abreviationsPrecises.push("\\b" + this.CONFIG.TITRES_APPELLATIONS[i] + "\\b");
+                      abreviationsPrecises.push("\\b" + this.getConfigData("TITRES_APPELLATIONS", "data.titresAppellations")[i] + "\\b");
                   }
               }
               
@@ -4351,11 +4505,11 @@
 
               // 2. Traitement spécial pour les intervalles de pages
               var abreviationsRefs = [];
-              for (var i = 0; i < this.CONFIG.ABREVIATIONS_REFS.length; i++) {
-                  if (this.CONFIG.ABREVIATIONS_REFS[i].indexOf("\\.") !== -1) {
-                      abreviationsRefs.push(this.CONFIG.ABREVIATIONS_REFS[i]);
+              for (var i = 0; i < this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs").length; i++) {
+                  if (this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i].indexOf("\\.") !== -1) {
+                      abreviationsRefs.push(this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i]);
                   } else {
-                      abreviationsRefs.push("\\b" + this.CONFIG.ABREVIATIONS_REFS[i] + "\\b");
+                      abreviationsRefs.push("\\b" + this.getConfigData("ABREVIATIONS_REFS", "data.abreviationsRefs")[i] + "\\b");
                   }
               }
               var refsJoined = abreviationsRefs.join("|");
@@ -4372,7 +4526,7 @@
               doc.changeGrep();
 
               // 4. Traitement des unités de mesure précédées de nombres (un seul changeGrep)
-              var unitesJoined = this.CONFIG.UNITES_MESURE.join("|");
+              var unitesJoined = this.getConfigData("UNITES_MESURE", "data.unitesMesure").join("|");
               app.findGrepPreferences = app.changeGrepPreferences = null;
               app.findGrepPreferences.findWhat = "([0-9]+[.,]?[0-9]*)[ ](\\b(?:" + unitesJoined + ")(?=\\s|[.,;:!?)]|$))";
               app.changeGrepPreferences.changeTo = "$1" + ESPACE_INSECABLE + "$2";
