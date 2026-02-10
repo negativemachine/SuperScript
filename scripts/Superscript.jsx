@@ -274,6 +274,20 @@
                 'languageProfileLabel': 'Language profile:',
                 'languageProfileNone': '[No profiles available]',
 
+                // ConfigManager
+                'saveConfigButton': 'Save',
+                'loadConfigButton': 'Load',
+                'configDetected': 'Config detected',
+                'configNotDetected': '',
+                'saveConfigTitle': 'Save SuperScript Configuration',
+                'loadConfigTitle': 'Load SuperScript Configuration',
+                'configSaved': 'Configuration saved successfully.',
+                'configLoaded': 'Configuration loaded successfully.',
+                'errorSaveConfig': 'Error saving configuration: %s',
+                'errorLoadConfig': 'Error loading configuration: %s',
+                'errorParseConfig': 'Error parsing configuration file: %s',
+                'errorOpenConfig': 'Could not open configuration file.',
+
                 // SieclesModule UI
                 'sieclesSectionTitle': 'Century and ordinal expression formatting',
                 'sieclesFormatSieclesLabel': 'Format centuries (XIVth century)',
@@ -442,6 +456,20 @@
                 // Language profile selector
                 'languageProfileLabel': 'Profil linguistique\u2009:',
                 'languageProfileNone': '[Aucun profil disponible]',
+
+                // ConfigManager
+                'saveConfigButton': 'Enregistrer',
+                'loadConfigButton': 'Charger',
+                'configDetected': 'Config d\u00E9tect\u00E9e',
+                'configNotDetected': '',
+                'saveConfigTitle': 'Enregistrer la configuration SuperScript',
+                'loadConfigTitle': 'Charger la configuration SuperScript',
+                'configSaved': 'Configuration enregistr\u00E9e avec succ\u00E8s.',
+                'configLoaded': 'Configuration charg\u00E9e avec succ\u00E8s.',
+                'errorSaveConfig': 'Erreur lors de l\'enregistrement de la configuration\u2009: %s',
+                'errorLoadConfig': 'Erreur lors du chargement de la configuration\u2009: %s',
+                'errorParseConfig': 'Erreur lors de l\'analyse du fichier de configuration\u2009: %s',
+                'errorOpenConfig': 'Impossible d\'ouvrir le fichier de configuration.',
 
                 // SieclesModule UI
                 'sieclesSectionTitle': 'Formatage des si\u00E8cles et expressions ordinales',
@@ -688,6 +716,442 @@
             getProfile: getProfile,
             getAvailableProfiles: getAvailableProfiles,
             getDefaultProfileId: getDefaultProfileId
+        };
+    })();
+
+    // =========================================================================
+    // ConfigManager — Save/Load user preferences
+    // =========================================================================
+
+    /**
+     * Manages saving and loading of user configuration files
+     * @private
+     */
+    var ConfigManager = (function() {
+        var CONFIG_FILENAME = "superscript-config.json";
+        var CONFIG_VERSION = 1;
+
+        /**
+         * Searches recursively for config files
+         * @param {Folder} folder - Starting folder
+         * @param {number} maxDepth - Maximum recursion depth
+         * @param {number} currentDepth - Current recursion depth
+         * @return {Array} Array of found File objects
+         */
+        function findConfigFilesRecursively(folder, maxDepth, currentDepth) {
+            if (currentDepth > maxDepth) return [];
+            var files = [];
+            try {
+                var configFiles = folder.getFiles(CONFIG_FILENAME);
+                if (configFiles && configFiles.length > 0) {
+                    for (var i = 0; i < configFiles.length; i++) {
+                        files.push(configFiles[i]);
+                    }
+                }
+                var subfolders = folder.getFiles(function(file) {
+                    return file instanceof Folder;
+                });
+                if (subfolders && subfolders.length > 0) {
+                    for (var j = 0; j < subfolders.length; j++) {
+                        var subfiles = findConfigFilesRecursively(subfolders[j], maxDepth, currentDepth + 1);
+                        for (var k = 0; k < subfiles.length; k++) {
+                            files.push(subfiles[k]);
+                        }
+                    }
+                }
+            } catch (e) {
+                // Continue silently
+            }
+            return files;
+        }
+
+        /**
+         * Finds a style index by name in a style name array
+         * @param {Array} styleNames - Array of style name strings
+         * @param {string} name - Name to find
+         * @return {number} Index or -1 if not found
+         */
+        function findStyleIndexByName(styleNames, name) {
+            if (!name) return -1;
+            for (var i = 0; i < styleNames.length; i++) {
+                if (styleNames[i] === name) return i;
+            }
+            return -1;
+        }
+
+        /**
+         * Finds a paragraph style index by name
+         * @param {Array} paraStyleNames - Array of paragraph style names
+         * @param {string} name - Style name to find
+         * @return {number} Index or -1
+         */
+        function findParaStyleIndexByName(paraStyleNames, name) {
+            if (!name) return -1;
+            for (var i = 0; i < paraStyleNames.length; i++) {
+                if (paraStyleNames[i] === name) return i;
+            }
+            return -1;
+        }
+
+        /**
+         * Automatically loads configuration from near the active document
+         * @return {Object|null} Parsed config data or null
+         */
+        function autoLoad() {
+            try {
+                if (typeof app === 'undefined' || !app.activeDocument || !app.activeDocument.saved) {
+                    return null;
+                }
+                var docPath = app.activeDocument.filePath;
+                if (!docPath) return null;
+
+                var folder = new Folder(docPath);
+                var files = findConfigFilesRecursively(folder, 3, 0);
+
+                if (!files || files.length === 0) return null;
+
+                var configFile = files[0];
+                configFile.encoding = "UTF-8";
+
+                if (configFile.open("r")) {
+                    try {
+                        var content = configFile.read();
+                        configFile.close();
+                        var configData = safeJSON.parse(content);
+                        return configData;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            } catch (e) {
+                // Silently fail
+            }
+            return null;
+        }
+
+        /**
+         * Saves configuration to a user-selected file
+         * @param {Object} configData - Configuration object to save
+         * @return {boolean} True if saved successfully
+         */
+        function save(configData) {
+            try {
+                var defaultPath = "";
+                if (typeof app !== 'undefined' && app.activeDocument && app.activeDocument.saved) {
+                    defaultPath = app.activeDocument.filePath + "/";
+                }
+                var defaultFile = new File(defaultPath + "superscript-config");
+                var saveFile = defaultFile.saveDlg(
+                    I18n.__("saveConfigTitle"),
+                    "JSON files:*.json"
+                );
+                if (!saveFile) return false;
+
+                // Ensure .json extension
+                if (!saveFile.name.match(/\.json$/i)) {
+                    saveFile = new File(saveFile.absoluteURI + ".json");
+                }
+
+                configData.version = CONFIG_VERSION;
+
+                saveFile.encoding = "UTF-8";
+                if (saveFile.open("w")) {
+                    try {
+                        saveFile.write(safeJSON.stringify(configData));
+                        saveFile.close();
+                        return true;
+                    } catch (e) {
+                        alert(I18n.__("errorSaveConfig", e.message));
+                        return false;
+                    }
+                } else {
+                    alert(I18n.__("errorOpenConfig"));
+                    return false;
+                }
+            } catch (e) {
+                alert(I18n.__("errorSaveConfig", e.message));
+                return false;
+            }
+        }
+
+        /**
+         * Loads configuration from a user-selected file
+         * @return {Object|null} Parsed config data or null
+         */
+        function load() {
+            try {
+                var openFile = File.openDialog(
+                    I18n.__("loadConfigTitle"),
+                    "JSON files:*.json"
+                );
+                if (!openFile) return null;
+
+                openFile.encoding = "UTF-8";
+                if (openFile.open("r")) {
+                    try {
+                        var content = openFile.read();
+                        openFile.close();
+                        var configData = safeJSON.parse(content);
+                        return configData;
+                    } catch (e) {
+                        alert(I18n.__("errorParseConfig", e.message));
+                        return null;
+                    }
+                } else {
+                    alert(I18n.__("errorOpenConfig"));
+                    return null;
+                }
+            } catch (e) {
+                alert(I18n.__("errorLoadConfig", e.message));
+                return null;
+            }
+        }
+
+        /**
+         * Collects current dialog state into a serializable config object
+         * @param {Object} controls - Object with references to all dialog controls
+         * @return {Object} Config data ready for serialization
+         */
+        function collectFromDialog(controls) {
+            var config = {
+                version: CONFIG_VERSION,
+                languageProfile: controls.languageProfileId || null,
+                styles: {
+                    noteStyle: (controls.noteStyleOpt.checkbox.value && controls.noteStyleOpt.dropdown.selection)
+                        ? controls.noteStyleOpt.dropdown.selection.text : null,
+                    italicStyle: (controls.cbItalicStyle.checkbox.value && controls.cbItalicStyle.dropdown.selection)
+                        ? controls.cbItalicStyle.dropdown.selection.text : null,
+                    smallCapsStyle: (controls.romainsStyleOpt.checkbox.value && controls.romainsStyleOpt.dropdown.selection)
+                        ? controls.romainsStyleOpt.dropdown.selection.text : null,
+                    capitalsStyle: (controls.romainsMajStyleOpt.checkbox.value && controls.romainsMajStyleOpt.dropdown.selection)
+                        ? controls.romainsMajStyleOpt.dropdown.selection.text : null,
+                    superscriptStyle: (controls.exposantOrdinalStyleOpt.checkbox.value && controls.exposantOrdinalStyleOpt.dropdown.selection)
+                        ? controls.exposantOrdinalStyleOpt.dropdown.selection.text : null
+                },
+                corrections: {
+                    removeSpacesBeforePunctuation: controls.cbRemoveSpacesBeforePunctuation.value,
+                    fixDoubleSpaces: controls.cbFixSpaces.value,
+                    fixTypoSpaces: controls.fixTypoSpacesOpt.checkbox.value,
+                    fixTypoSpacesType: (controls.fixTypoSpacesOpt.dropdown.selection)
+                        ? controls.fixTypoSpacesOpt.dropdown.selection.index : 0,
+                    fixDashIncises: controls.fixDashIncisesOpt.checkbox.value,
+                    fixDashIncisesType: (controls.fixDashIncisesOpt.dropdown.selection)
+                        ? controls.fixDashIncisesOpt.dropdown.selection.index : 0,
+                    removeDoubleReturns: controls.cbDoubleReturns.value,
+                    removeSpacesStartParagraph: controls.cbRemoveSpacesStartParagraph.value,
+                    removeSpacesEndParagraph: controls.cbRemoveSpacesEndParagraph.value,
+                    removeTabs: controls.cbRemoveTabs.value,
+                    moveNotes: controls.cbMoveNotes.value,
+                    applyNoteStyle: controls.applyNoteStyleOpt.value,
+                    replaceDashes: controls.cbDashes.value,
+                    fixIsolatedHyphens: controls.cbFixIsolatedHyphens.value,
+                    fixValueRanges: controls.cbFixValueRanges.value,
+                    convertEllipsis: controls.cbEllipsis.value,
+                    replaceApostrophes: controls.cbReplaceApostrophes.value,
+                    applyItalicStyle: controls.applyItalicStyleOpt.value,
+                    applyExposantStyle: controls.applyExposantStyleOpt.value,
+                    formatEspaces: controls.cbFormatEspaces.value
+                },
+                formatting: {
+                    formatSiecles: controls.cbFormatSiecles.value,
+                    formatOrdinaux: controls.cbFormatOrdinaux.value,
+                    formatReferences: controls.cbFormatReferences.value,
+                    formatNumbers: controls.cbFormatNumbers.value,
+                    addSpaces: controls.cbAddSpaces.value,
+                    useComma: controls.cbUseComma.value,
+                    excludeYears: controls.cbExcludeYears.value
+                },
+                layout: {
+                    enableStyleAfter: controls.cbEnableStyleAfter.value,
+                    triggerStyles: [],
+                    targetStyle: (controls.targetStyleDropdown.selection)
+                        ? controls.targetStyleDropdown.selection.text : null,
+                    applyMasterToLastPage: controls.cbApplyMasterToLastPage.value,
+                    masterName: (controls.masterDropdown.selection)
+                        ? controls.masterDropdown.selection.text : null
+                }
+            };
+
+            // Collect trigger style names
+            for (var i = 0; i < controls.triggerCheckboxes.length; i++) {
+                if (controls.triggerCheckboxes[i].value) {
+                    config.layout.triggerStyles.push(controls.triggerCheckboxes[i].text);
+                }
+            }
+
+            return config;
+        }
+
+        /**
+         * Applies loaded config data to dialog controls
+         * @param {Object} configData - Parsed config data
+         * @param {Object} controls - Object with references to all dialog controls
+         * @param {Array} characterStyles - Character style names array
+         * @param {Array} availableProfiles - Available profile descriptors
+         */
+        function applyToDialog(configData, controls, characterStyles, availableProfiles) {
+            if (!configData) return;
+
+            // Language profile
+            if (configData.languageProfile && availableProfiles && availableProfiles.length > 0) {
+                for (var pi = 0; pi < availableProfiles.length; pi++) {
+                    if (availableProfiles[pi].id === configData.languageProfile) {
+                        controls.profileDropdown.selection = pi;
+                        LanguageProfile.load(configData.languageProfile);
+                        break;
+                    }
+                }
+            }
+
+            // Styles — find index in character styles dropdown
+            if (configData.styles) {
+                var s = configData.styles;
+                if (s.noteStyle) {
+                    var idx = findStyleIndexByName(characterStyles, s.noteStyle);
+                    if (idx >= 0) {
+                        controls.noteStyleOpt.dropdown.selection = idx;
+                        controls.noteStyleOpt.checkbox.value = true;
+                        controls.noteStyleOpt.dropdown.enabled = true;
+                    }
+                }
+                if (s.italicStyle) {
+                    var idx = findStyleIndexByName(characterStyles, s.italicStyle);
+                    if (idx >= 0) {
+                        controls.cbItalicStyle.dropdown.selection = idx;
+                        controls.cbItalicStyle.checkbox.value = true;
+                        controls.cbItalicStyle.dropdown.enabled = true;
+                    }
+                }
+                if (s.smallCapsStyle) {
+                    var idx = findStyleIndexByName(characterStyles, s.smallCapsStyle);
+                    if (idx >= 0) {
+                        controls.romainsStyleOpt.dropdown.selection = idx;
+                        controls.romainsStyleOpt.checkbox.value = true;
+                        controls.romainsStyleOpt.dropdown.enabled = true;
+                    }
+                }
+                if (s.capitalsStyle) {
+                    var idx = findStyleIndexByName(characterStyles, s.capitalsStyle);
+                    if (idx >= 0) {
+                        controls.romainsMajStyleOpt.dropdown.selection = idx;
+                        controls.romainsMajStyleOpt.checkbox.value = true;
+                        controls.romainsMajStyleOpt.dropdown.enabled = true;
+                    }
+                }
+                if (s.superscriptStyle) {
+                    var idx = findStyleIndexByName(characterStyles, s.superscriptStyle);
+                    if (idx >= 0) {
+                        controls.exposantOrdinalStyleOpt.dropdown.selection = idx;
+                        controls.exposantOrdinalStyleOpt.checkbox.value = true;
+                        controls.exposantOrdinalStyleOpt.dropdown.enabled = true;
+                    }
+                }
+            }
+
+            // Corrections
+            if (configData.corrections) {
+                var c = configData.corrections;
+                if (typeof c.removeSpacesBeforePunctuation === 'boolean') controls.cbRemoveSpacesBeforePunctuation.value = c.removeSpacesBeforePunctuation;
+                if (typeof c.fixDoubleSpaces === 'boolean') controls.cbFixSpaces.value = c.fixDoubleSpaces;
+                if (typeof c.fixTypoSpaces === 'boolean') {
+                    controls.fixTypoSpacesOpt.checkbox.value = c.fixTypoSpaces;
+                    controls.fixTypoSpacesOpt.dropdown.enabled = c.fixTypoSpaces;
+                }
+                if (typeof c.fixTypoSpacesType === 'number' && c.fixTypoSpacesType < controls.fixTypoSpacesOpt.dropdown.items.length) {
+                    controls.fixTypoSpacesOpt.dropdown.selection = c.fixTypoSpacesType;
+                }
+                if (typeof c.fixDashIncises === 'boolean') {
+                    controls.fixDashIncisesOpt.checkbox.value = c.fixDashIncises;
+                    controls.fixDashIncisesOpt.dropdown.enabled = c.fixDashIncises;
+                }
+                if (typeof c.fixDashIncisesType === 'number' && c.fixDashIncisesType < controls.fixDashIncisesOpt.dropdown.items.length) {
+                    controls.fixDashIncisesOpt.dropdown.selection = c.fixDashIncisesType;
+                }
+                if (typeof c.removeDoubleReturns === 'boolean') controls.cbDoubleReturns.value = c.removeDoubleReturns;
+                if (typeof c.removeSpacesStartParagraph === 'boolean') controls.cbRemoveSpacesStartParagraph.value = c.removeSpacesStartParagraph;
+                if (typeof c.removeSpacesEndParagraph === 'boolean') controls.cbRemoveSpacesEndParagraph.value = c.removeSpacesEndParagraph;
+                if (typeof c.removeTabs === 'boolean') controls.cbRemoveTabs.value = c.removeTabs;
+                if (typeof c.moveNotes === 'boolean') controls.cbMoveNotes.value = c.moveNotes;
+                if (typeof c.applyNoteStyle === 'boolean') controls.applyNoteStyleOpt.value = c.applyNoteStyle;
+                if (typeof c.replaceDashes === 'boolean') controls.cbDashes.value = c.replaceDashes;
+                if (typeof c.fixIsolatedHyphens === 'boolean') controls.cbFixIsolatedHyphens.value = c.fixIsolatedHyphens;
+                if (typeof c.fixValueRanges === 'boolean') controls.cbFixValueRanges.value = c.fixValueRanges;
+                if (typeof c.convertEllipsis === 'boolean') controls.cbEllipsis.value = c.convertEllipsis;
+                if (typeof c.replaceApostrophes === 'boolean') controls.cbReplaceApostrophes.value = c.replaceApostrophes;
+                if (typeof c.applyItalicStyle === 'boolean') controls.applyItalicStyleOpt.value = c.applyItalicStyle;
+                if (typeof c.applyExposantStyle === 'boolean') controls.applyExposantStyleOpt.value = c.applyExposantStyle;
+                if (typeof c.formatEspaces === 'boolean') controls.cbFormatEspaces.value = c.formatEspaces;
+            }
+
+            // Formatting
+            if (configData.formatting) {
+                var f = configData.formatting;
+                if (typeof f.formatSiecles === 'boolean') controls.cbFormatSiecles.value = f.formatSiecles;
+                if (typeof f.formatOrdinaux === 'boolean') controls.cbFormatOrdinaux.value = f.formatOrdinaux;
+                if (typeof f.formatReferences === 'boolean') controls.cbFormatReferences.value = f.formatReferences;
+                if (typeof f.formatNumbers === 'boolean') {
+                    controls.cbFormatNumbers.value = f.formatNumbers;
+                    controls.numberSettingsPanel.enabled = f.formatNumbers;
+                }
+                if (typeof f.addSpaces === 'boolean') controls.cbAddSpaces.value = f.addSpaces;
+                if (typeof f.useComma === 'boolean') controls.cbUseComma.value = f.useComma;
+                if (typeof f.excludeYears === 'boolean') controls.cbExcludeYears.value = f.excludeYears;
+            }
+
+            // Layout
+            if (configData.layout) {
+                var l = configData.layout;
+                if (typeof l.enableStyleAfter === 'boolean') controls.cbEnableStyleAfter.value = l.enableStyleAfter;
+                if (typeof l.applyMasterToLastPage === 'boolean') {
+                    controls.cbApplyMasterToLastPage.value = l.applyMasterToLastPage;
+                    controls.masterDropdown.enabled = l.applyMasterToLastPage;
+                }
+
+                // Trigger styles
+                if (l.triggerStyles && controls.triggerCheckboxes) {
+                    // First uncheck all
+                    for (var ti = 0; ti < controls.triggerCheckboxes.length; ti++) {
+                        controls.triggerCheckboxes[ti].value = false;
+                    }
+                    // Then check the ones in config
+                    for (var ts = 0; ts < l.triggerStyles.length; ts++) {
+                        for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
+                            if (controls.triggerCheckboxes[tc].text === l.triggerStyles[ts]) {
+                                controls.triggerCheckboxes[tc].value = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Target style
+                if (l.targetStyle && controls.targetStyleDropdown) {
+                    for (var tsi = 0; tsi < controls.targetStyleDropdown.items.length; tsi++) {
+                        if (controls.targetStyleDropdown.items[tsi].text === l.targetStyle) {
+                            controls.targetStyleDropdown.selection = tsi;
+                            break;
+                        }
+                    }
+                }
+
+                // Master
+                if (l.masterName && controls.masterDropdown) {
+                    for (var mi = 0; mi < controls.masterDropdown.items.length; mi++) {
+                        if (controls.masterDropdown.items[mi].text === l.masterName) {
+                            controls.masterDropdown.selection = mi;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return {
+            autoLoad: autoLoad,
+            save: save,
+            load: load,
+            collectFromDialog: collectFromDialog,
+            applyToDialog: applyToDialog
         };
     })();
 
@@ -2481,6 +2945,20 @@
             LanguageProfile.load(availableProfiles[defaultProfileIndex].id);
         }
 
+        // Configuration bar: Save / Load buttons + auto-detected indicator
+        var configBar = dialog.add("group");
+        configBar.orientation = "row";
+        configBar.alignment = "fill";
+        var saveConfigBtn = configBar.add("button", undefined, I18n.__("saveConfigButton"));
+        saveConfigBtn.preferredSize.width = 100;
+        var loadConfigBtn = configBar.add("button", undefined, I18n.__("loadConfigButton"));
+        loadConfigBtn.preferredSize.width = 100;
+        var configStatusText = configBar.add("statictext", undefined, I18n.__("configNotDetected"));
+        configStatusText.preferredSize.width = 150;
+
+        // dialogControls will be populated after all controls are created
+        var dialogControls = {};
+
         // Function to update UI state based on loaded profile
         // Called after all controls are created and when profile changes
         var uiProfileControls = {}; // Will be populated as controls are created
@@ -2977,6 +3455,79 @@
           masterDropdown.selection = 0;
         }
         
+        // Populate dialogControls with references to all dialog controls
+        dialogControls.profileDropdown = profileDropdown;
+        dialogControls.noteStyleOpt = noteStyleOpt;
+        dialogControls.cbItalicStyle = cbItalicStyle;
+        dialogControls.romainsStyleOpt = romainsStyleOpt;
+        dialogControls.romainsMajStyleOpt = romainsMajStyleOpt;
+        dialogControls.exposantOrdinalStyleOpt = exposantOrdinalStyleOpt;
+        dialogControls.cbRemoveSpacesBeforePunctuation = cbRemoveSpacesBeforePunctuation;
+        dialogControls.cbFixSpaces = cbFixSpaces;
+        dialogControls.fixTypoSpacesOpt = fixTypoSpacesOpt;
+        dialogControls.fixDashIncisesOpt = fixDashIncisesOpt;
+        dialogControls.cbDoubleReturns = cbDoubleReturns;
+        dialogControls.cbRemoveSpacesStartParagraph = cbRemoveSpacesStartParagraph;
+        dialogControls.cbRemoveSpacesEndParagraph = cbRemoveSpacesEndParagraph;
+        dialogControls.cbRemoveTabs = cbRemoveTabs;
+        dialogControls.cbMoveNotes = cbMoveNotes;
+        dialogControls.applyNoteStyleOpt = applyNoteStyleOpt;
+        dialogControls.cbDashes = cbDashes;
+        dialogControls.cbFixIsolatedHyphens = cbFixIsolatedHyphens;
+        dialogControls.cbFixValueRanges = cbFixValueRanges;
+        dialogControls.cbEllipsis = cbEllipsis;
+        dialogControls.cbReplaceApostrophes = cbReplaceApostrophes;
+        dialogControls.applyItalicStyleOpt = applyItalicStyleOpt;
+        dialogControls.applyExposantStyleOpt = applyExposantStyleOpt;
+        dialogControls.cbFormatEspaces = cbFormatEspaces;
+        dialogControls.cbFormatSiecles = cbFormatSiecles;
+        dialogControls.cbFormatOrdinaux = cbFormatOrdinaux;
+        dialogControls.cbFormatReferences = cbFormatReferences;
+        dialogControls.cbFormatNumbers = cbFormatNumbers;
+        dialogControls.numberSettingsPanel = numberSettingsPanel;
+        dialogControls.cbAddSpaces = cbAddSpaces;
+        dialogControls.cbUseComma = cbUseComma;
+        dialogControls.cbExcludeYears = cbExcludeYears;
+        dialogControls.cbEnableStyleAfter = cbEnableStyleAfter;
+        dialogControls.triggerCheckboxes = triggerCheckboxes;
+        dialogControls.targetStyleDropdown = targetStyleDropdown;
+        dialogControls.cbApplyMasterToLastPage = cbApplyMasterToLastPage;
+        dialogControls.masterDropdown = masterDropdown;
+
+        // Helper to get current language profile ID from dropdown
+        function getSelectedProfileId() {
+            if (availableProfiles.length > 0 && profileDropdown.selection) {
+                return availableProfiles[profileDropdown.selection.index].id;
+            }
+            return null;
+        }
+
+        // Auto-load configuration if found near the document
+        var autoLoadedConfig = ConfigManager.autoLoad();
+        if (autoLoadedConfig) {
+            configStatusText.text = I18n.__("configDetected");
+            ConfigManager.applyToDialog(autoLoadedConfig, dialogControls, characterStyles, availableProfiles);
+            updateUIForProfile();
+            updateFeatureDependencies();
+        }
+
+        // Wire Save button
+        saveConfigBtn.onClick = function() {
+            dialogControls.languageProfileId = getSelectedProfileId();
+            var configData = ConfigManager.collectFromDialog(dialogControls);
+            ConfigManager.save(configData);
+        };
+
+        // Wire Load button
+        loadConfigBtn.onClick = function() {
+            var configData = ConfigManager.load();
+            if (configData) {
+                ConfigManager.applyToDialog(configData, dialogControls, characterStyles, availableProfiles);
+                updateUIForProfile();
+                updateFeatureDependencies();
+            }
+        };
+
         // Boutons d'action
         var buttonGroup = dialog.add("group");
         buttonGroup.orientation = "row";
