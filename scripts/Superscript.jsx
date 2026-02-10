@@ -6005,6 +6005,11 @@
                 return;
             }
 
+            // If called from BookCreator but no config and no profile — exit silently
+            if (isFromBookCreator) {
+                return;
+            }
+
             // Interactive mode
             var styleInfo = Utilities.getCharacterStyles(doc);
 
