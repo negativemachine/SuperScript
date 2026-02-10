@@ -679,12 +679,10 @@
                 }
             }
 
-            // Sort profiles: fr-FR first, then alphabetically by id
+            // Sort profiles alphabetically by label
             profiles.sort(function(a, b) {
-                if (a.id === "fr-FR") return -1;
-                if (b.id === "fr-FR") return 1;
-                if (a.id < b.id) return -1;
-                if (a.id > b.id) return 1;
+                if (a.label < b.label) return -1;
+                if (a.label > b.label) return 1;
                 return 0;
             });
 
@@ -2961,7 +2959,7 @@
             var profile = LanguageProfile.getProfile();
             if (!profile) return;
 
-            // Disable fixTypoSpaces if no spaces before punctuation
+            // Hide fixTypoSpaces if no spaces before punctuation for this language
             var hasAnyPunctSpace = profile.punctuation &&
                 (profile.punctuation.spaceBeforeSemicolon ||
                  profile.punctuation.spaceBeforeColon ||
@@ -2971,23 +2969,27 @@
                  profile.punctuation.spaceInsideCloseQuote);
 
             if (uiProfileControls.fixTypoSpaces) {
-                uiProfileControls.fixTypoSpaces.enabled = !!hasAnyPunctSpace;
-                if (!hasAnyPunctSpace) uiProfileControls.fixTypoSpaces.checkbox.value = false;
+                uiProfileControls.fixTypoSpaces.group.visible = !!hasAnyPunctSpace;
+                if (hasAnyPunctSpace) {
+                    uiProfileControls.fixTypoSpaces.checkbox.value = true;
+                } else {
+                    uiProfileControls.fixTypoSpaces.checkbox.value = false;
+                }
             }
 
-            // Disable SieclesModule when centuries.enabled === false
+            // Hide SieclesModule options when centuries.enabled === false
             var centuriesEnabled = profile.centuries && profile.centuries.enabled !== false;
             if (uiProfileControls.formatSiecles) {
-                uiProfileControls.formatSiecles.enabled = centuriesEnabled;
-                if (!centuriesEnabled) uiProfileControls.formatSiecles.value = false;
+                uiProfileControls.formatSiecles.parent.visible = centuriesEnabled;
+                uiProfileControls.formatSiecles.value = centuriesEnabled;
             }
             if (uiProfileControls.formatOrdinaux) {
-                uiProfileControls.formatOrdinaux.enabled = centuriesEnabled;
-                if (!centuriesEnabled) uiProfileControls.formatOrdinaux.value = false;
+                uiProfileControls.formatOrdinaux.parent.visible = centuriesEnabled;
+                uiProfileControls.formatOrdinaux.value = centuriesEnabled;
             }
             if (uiProfileControls.formatReferences) {
-                uiProfileControls.formatReferences.enabled = centuriesEnabled;
-                if (!centuriesEnabled) uiProfileControls.formatReferences.value = false;
+                uiProfileControls.formatReferences.parent.visible = centuriesEnabled;
+                uiProfileControls.formatReferences.value = centuriesEnabled;
             }
 
             // Update number formatting defaults from profile
@@ -3005,6 +3007,7 @@
                 var selectedId = availableProfiles[profileDropdown.selection.index].id;
                 LanguageProfile.load(selectedId);
                 updateUIForProfile();
+                updateFeatureDependencies();
             }
         };
 
@@ -3084,7 +3087,7 @@
             dropdown.enabled = checkbox.value;
           };
           
-          return { checkbox: checkbox, dropdown: dropdown };
+          return { checkbox: checkbox, dropdown: dropdown, group: group };
         }
         
         // Ajout des options dans l'onglet Corrections
