@@ -3819,6 +3819,16 @@
         var cbFixValueRanges = addCheckboxOption(tabCorrections, I18n.__("fixValueRangesLabel"), true);
         
         // Ajout des options dans l'onglet Espaces et retours
+        var cbFixSpaces = addCheckboxOption(tabSpaces, I18n.__("fixDoubleSpacesLabel"), true);
+        var cbDoubleReturns = addCheckboxOption(tabSpaces, I18n.__("removeDoubleReturnsLabel"), true);
+        var cbRemoveSpacesBeforePunctuation = addCheckboxOption(tabSpaces, I18n.__("removeSpacesBeforePunctuationLabel"), true);
+        var cbRemoveSpacesStartParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesStartParagraphLabel"), true);
+        var cbRemoveSpacesEndParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesEndParagraphLabel"), true);
+        var cbRemoveTabs = addCheckboxOption(tabSpaces, I18n.__("removeTabsLabel"), true);
+        var cbFormatEspaces = addCheckboxOption(tabSpaces, I18n.__("formatEspacesLabel"), true);
+        var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
+          fixDashIncisesOpt.dropdown.selection = 1;
+
         // fixTypoSpaces: checkbox + global dropdown (uniform mode) OR 2 sub-dropdowns (split mode)
         var fixTypoSpacesGroup = tabSpaces.add("group");
         fixTypoSpacesGroup.orientation = "column";
@@ -3894,16 +3904,6 @@
                 return this.colonDropdown.selection ? this.colonDropdown.selection.index : 0;
             }
         };
-
-        var cbFixSpaces = addCheckboxOption(tabSpaces, I18n.__("fixDoubleSpacesLabel"), true);
-        var cbDoubleReturns = addCheckboxOption(tabSpaces, I18n.__("removeDoubleReturnsLabel"), true);
-        var cbRemoveSpacesBeforePunctuation = addCheckboxOption(tabSpaces, I18n.__("removeSpacesBeforePunctuationLabel"), true);
-        var cbRemoveSpacesStartParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesStartParagraphLabel"), true);
-        var cbRemoveSpacesEndParagraph = addCheckboxOption(tabSpaces, I18n.__("removeSpacesEndParagraphLabel"), true);
-        var cbRemoveTabs = addCheckboxOption(tabSpaces, I18n.__("removeTabsLabel"), true);
-        var cbFormatEspaces = addCheckboxOption(tabSpaces, I18n.__("formatEspacesLabel"), true);
-        var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
-          fixDashIncisesOpt.dropdown.selection = 1;
         
         // Ajout des options de style dans l'onglet Styles
         // Section pour la définition des styles
