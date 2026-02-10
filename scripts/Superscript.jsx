@@ -5889,14 +5889,42 @@
             try { app.scriptArgs.setValue("caller", ""); } catch (e) {}
             try { app.scriptArgs.setValue("superscriptProfile", ""); } catch (e) {}
 
-            if (callerArg === "BookCreator" && profileArg) {
-                // Silent mode from BookCreator: build default options for the profile
+            var isFromBookCreator = (callerArg === "BookCreator");
+
+            // Priority 1: typography.json in config/ subfolder (has exact style names)
+            var autoResult = ConfigManager.autoLoad();
+            if (autoResult && autoResult.data && (autoResult.inConfigFolder || isFromBookCreator)) {
+                // Silent mode: use the config file
+                try {
+                    var silentOptions = ConfigManager.buildOptionsFromConfig(autoResult.data, doc);
+                    silentOptions.silentMode = true;
+
+                    if (!ErrorHandler.ensureDefined(ScriptLanguage, "ScriptLanguage", true)) return;
+                    if (!ErrorHandler.ensureDefined(UndoModes, "UndoModes", true)) return;
+
+                    app.doScript(
+                        function() {
+                            Processor.processDocuments(silentOptions);
+                        },
+                        ScriptLanguage.JAVASCRIPT,
+                        undefined,
+                        UndoModes.FAST_ENTIRE_SCRIPT,
+                        CONFIG.SCRIPT_TITLE
+                    );
+
+                    doc.save();
+                } catch (silentError) {
+                    ErrorHandler.handleError(silentError, "silent mode execution", !isFromBookCreator);
+                }
+                return;
+            }
+
+            // Priority 2: BookCreator caller with profile but no config file — use profile defaults
+            if (isFromBookCreator && profileArg) {
                 try {
                     LanguageProfile.load(profileArg);
                     var profile = LanguageProfile.getProfile();
-                    var styleInfo = Utilities.getCharacterStyles(doc);
 
-                    // Build default options with all corrections enabled
                     var punct = (profile && profile.punctuation) || {};
                     var dashes = (profile && profile.dashes) || {};
                     var centuries = (profile && profile.centuries) || {};
@@ -5973,34 +6001,6 @@
                     doc.save();
                 } catch (bcError) {
                     ErrorHandler.handleError(bcError, "BookCreator silent mode", false);
-                }
-                return;
-            }
-
-            // Check for auto-loaded config (silent mode if in config/ subfolder)
-            var autoResult = ConfigManager.autoLoad();
-            if (autoResult && autoResult.inConfigFolder && autoResult.data) {
-                // Silent mode: config found in config/ subfolder — skip dialog
-                try {
-                    var silentOptions = ConfigManager.buildOptionsFromConfig(autoResult.data, doc);
-                    silentOptions.silentMode = true;
-
-                    if (!ErrorHandler.ensureDefined(ScriptLanguage, "ScriptLanguage", true)) return;
-                    if (!ErrorHandler.ensureDefined(UndoModes, "UndoModes", true)) return;
-
-                    app.doScript(
-                        function() {
-                            Processor.processDocuments(silentOptions);
-                        },
-                        ScriptLanguage.JAVASCRIPT,
-                        undefined,
-                        UndoModes.FAST_ENTIRE_SCRIPT,
-                        CONFIG.SCRIPT_TITLE
-                    );
-
-                    doc.save();
-                } catch (silentError) {
-                    ErrorHandler.handleError(silentError, "silent mode execution", true);
                 }
                 return;
             }
