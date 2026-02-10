@@ -5931,9 +5931,10 @@
                     var numbers = (profile && profile.numbers) || {};
 
                     // Resolve styles for SieclesModule (get or create defaults)
-                    var smallCapsStyle = Utilities.getOrCreateStyle(doc, "Small Caps", {});
-                    var capitalsStyle = Utilities.getOrCreateStyle(doc, "Capitals", {});
+                    var smallCapsStyle = Utilities.getOrCreateStyle(doc, "Small caps", { capitalization: Capitalization.SMALL_CAPS });
+                    var capitalsStyle = Utilities.getOrCreateStyle(doc, "Large Capitals", { capitalization: Capitalization.ALL_CAPS });
                     var superscriptStyle = Utilities.getOrCreateStyle(doc, CONFIG.DEFAULT_STYLES.SUPERSCRIPT, { position: Position.SUPERSCRIPT });
+                    var italicStyle = Utilities.getOrCreateStyle(doc, CONFIG.DEFAULT_STYLES.ITALIC, { fontStyle: "Italic" });
                     var hasSieclesStyles = !!(smallCapsStyle && capitalsStyle && superscriptStyle);
 
                     var bcOptions = {
@@ -5949,12 +5950,12 @@
                         fixDashIncises: !!(dashes.inciseSpace),
                         dashIncisesSpaceType: dashes.inciseSpace || null,
                         replaceDashes: !!(dashes.replaceCadratinWithDemiCadratin),
-                        applyItalicStyle: false,
-                        italicStyleName: null,
-                        applyItalicExpressions: false,
-                        italicExpressionsStyleName: null,
-                        applyExposantStyle: false,
-                        exposantStyleName: null,
+                        applyItalicStyle: !!italicStyle,
+                        italicStyleName: italicStyle ? CONFIG.DEFAULT_STYLES.ITALIC : null,
+                        applyItalicExpressions: !!italicStyle,
+                        italicExpressionsStyleName: italicStyle ? CONFIG.DEFAULT_STYLES.ITALIC : null,
+                        applyExposantStyle: !!superscriptStyle,
+                        exposantStyleName: superscriptStyle ? CONFIG.DEFAULT_STYLES.SUPERSCRIPT : null,
                         removeDoubleReturns: true,
                         convertEllipsis: true,
                         replaceApostrophes: true,
