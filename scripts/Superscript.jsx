@@ -2882,9 +2882,10 @@
        * @param {Array} characterStyles - Tableau des styles de caractère disponibles
        * @param {number} noteStyleIndex - Index du style de note par défaut
        * @param {number} italicStyleIndex - Index du style italique par défaut
+       * @param {Object} [preloadConfig] - Config to preload (used when reopening after language switch)
        * @returns {Object} Résultat du dialogue avec les options de l'utilisateur
        */
-      createDialog: function(characterStyles, noteStyleIndex, italicStyleIndex) {
+      createDialog: function(characterStyles, noteStyleIndex, italicStyleIndex, preloadConfig) {
         try {
         if (!ErrorHandler.ensureDefined(characterStyles, "characterStyles", true)) {
           characterStyles = [I18n.__("defaultStyle")];
@@ -2995,10 +2996,27 @@
             }
         }
 
+        // Derive UI language from profile ID (fr-* → 'fr', everything else → 'en')
+        function uiLangForProfile(profileId) {
+            return (profileId && profileId.indexOf("fr") === 0) ? 'fr' : 'en';
+        }
+
         // Wire up profile dropdown onChange
         profileDropdown.onChange = function() {
             if (availableProfiles.length > 0 && profileDropdown.selection) {
                 var selectedId = availableProfiles[profileDropdown.selection.index].id;
+                var newUILang = uiLangForProfile(selectedId);
+
+                if (newUILang !== I18n.getLanguage()) {
+                    // UI language needs to change — collect state, switch lang, reopen
+                    LanguageProfile.load(selectedId);
+                    dialogControls.languageProfileId = selectedId;
+                    dialog.reopenConfig = ConfigManager.collectFromDialog(dialogControls);
+                    I18n.setLanguage(newUILang);
+                    dialog.close(3); // code 3 = reopen
+                    return;
+                }
+
                 LanguageProfile.load(selectedId);
                 updateUIForProfile();
             }
@@ -3482,11 +3500,11 @@
             return null;
         }
 
-        // Auto-load configuration if found near the document
-        var autoLoadedConfig = ConfigManager.autoLoad();
-        if (autoLoadedConfig) {
-            configStatusText.text = I18n.__("configDetected");
-            ConfigManager.applyToDialog(autoLoadedConfig, dialogControls, characterStyles, availableProfiles);
+        // Load configuration: preloadConfig (reopen) takes priority over autoLoad
+        var configToApply = preloadConfig || ConfigManager.autoLoad();
+        if (configToApply) {
+            if (!preloadConfig) configStatusText.text = I18n.__("configDetected");
+            ConfigManager.applyToDialog(configToApply, dialogControls, characterStyles, availableProfiles);
             updateUIForProfile();
             updateFeatureDependencies();
         }
@@ -3555,7 +3573,14 @@
         };
         
         // Afficher le dialogue et renvoyer les résultats
-        if (dialog.show() == 1) {
+        var dialogResult = dialog.show();
+
+        // Code 3 = reopen with new UI language
+        if (dialogResult == 3 && dialog.reopenConfig) {
+            return UIBuilder.createDialog(characterStyles, noteStyleIndex, italicStyleIndex, dialog.reopenConfig);
+        }
+
+        if (dialogResult == 1) {
           try {
             // Collecter les styles déclencheurs sélectionnés
             var selectedTriggerStyles = [];
