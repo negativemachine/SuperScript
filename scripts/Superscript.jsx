@@ -4693,8 +4693,10 @@
               if (options.sieclesOptions && (options.sieclesOptions.formaterSiecles || options.sieclesOptions.formaterOrdinaux || options.sieclesOptions.formaterReferences || options.sieclesOptions.formaterEspaces)) totalSteps++;
               if (options.formatNumbers) totalSteps++;
 
-              // Créer la barre de progression
-              ProgressBar.create(I18n.__("progressTitle"), totalSteps);
+              // Créer la barre de progression (skip in silent mode)
+              if (!options.silentMode) {
+                  ProgressBar.create(I18n.__("progressTitle"), totalSteps);
+              }
 
               try {
                   // Compteur de progression
