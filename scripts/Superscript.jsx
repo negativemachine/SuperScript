@@ -65,6 +65,11 @@
             { labelKey: "spaceTypeFine", value: "~<" },
             { labelKey: "spaceTypeNonBreaking", value: "~S" },
         ],
+        THOUSANDS_SEPARATOR_TYPES: [
+            { labelKey: "thousandsSepFine", value: "~<" },
+            { labelKey: "thousandsSepComma", value: "," },
+            { labelKey: "thousandsSepPeriod", value: "." }
+        ],
         SCRIPT_TITLE: "Superscript"
     };
 
@@ -200,9 +205,12 @@
                 'formatReferencesLabel': 'Format work parts and proper names (Volume III, Louis XIV)',
                 'formatNumbersLabel': 'Format numbers',
                 'numberSettingsPanel': 'Number formatting options',
-                'addSpacesLabel': 'Add spaces between thousands (12345 \u2192 12\u2009345)',
+                'addThousandsSepLabel': 'Add thousands separator',
                 'excludeYearsLabel': 'Exclude potential years (numbers between 0 and 2050)',
                 'useCommaLabel': 'Replace dots with commas (3.14 \u2192 3,14)',
+                'thousandsSepFine': 'Thin space (~<)',
+                'thousandsSepComma': 'Comma (,)',
+                'thousandsSepPeriod': 'Period (.)',
 
                 // Page layout tab
                 'enableStyleAfterLabel': 'Conditional style application',
@@ -376,9 +384,12 @@
                 'formatReferencesLabel': 'Formater parties d\'\u0153uvres et noms propres (Tome III, Louis XIV)',
                 'formatNumbersLabel': 'Formater les nombres',
                 'numberSettingsPanel': 'Options de formatage des nombres',
-                'addSpacesLabel': 'Ajouter des espaces entre les milliers (12345 \u2192 12\u2009345)',
+                'addThousandsSepLabel': 'Ajouter un s\u00E9parateur des milliers',
                 'excludeYearsLabel': 'Exclure les ann\u00E9es potentielles (nombres entre 0 et 2050)',
                 'useCommaLabel': 'Remplacer les points par des virgules (3.14 \u2192 3,14)',
+                'thousandsSepFine': 'Espace fine (~<)',
+                'thousandsSepComma': 'Virgule (,)',
+                'thousandsSepPeriod': 'Point (.)',
 
                 // Page layout tab
                 'enableStyleAfterLabel': 'Application conditionnelle de styles',
@@ -951,7 +962,9 @@
                     formatOrdinaux: controls.cbFormatOrdinaux.value,
                     formatReferences: controls.cbFormatReferences.value,
                     formatNumbers: controls.cbFormatNumbers.value,
-                    addSpaces: controls.cbAddSpaces.value,
+                    addThousandsSep: controls.addThousandsSepOpt.checkbox.value,
+                    thousandsSepType: (controls.addThousandsSepOpt.dropdown.selection)
+                        ? controls.addThousandsSepOpt.dropdown.selection.index : 0,
                     useComma: controls.cbUseComma.value,
                     excludeYears: controls.cbExcludeYears.value
                 },
@@ -1103,7 +1116,18 @@
                     controls.cbFormatNumbers.value = f.formatNumbers;
                     controls.numberSettingsPanel.enabled = f.formatNumbers;
                 }
-                if (typeof f.addSpaces === 'boolean') controls.cbAddSpaces.value = f.addSpaces;
+                if (typeof f.addThousandsSep === 'boolean') {
+                    controls.addThousandsSepOpt.checkbox.value = f.addThousandsSep;
+                    controls.addThousandsSepOpt.dropdown.enabled = f.addThousandsSep;
+                }
+                // Backward compat: old addSpaces boolean
+                if (typeof f.addSpaces === 'boolean' && typeof f.addThousandsSep !== 'boolean') {
+                    controls.addThousandsSepOpt.checkbox.value = f.addSpaces;
+                    controls.addThousandsSepOpt.dropdown.enabled = f.addSpaces;
+                }
+                if (typeof f.thousandsSepType === 'number' && f.thousandsSepType < controls.addThousandsSepOpt.dropdown.items.length) {
+                    controls.addThousandsSepOpt.dropdown.selection = f.thousandsSepType;
+                }
                 if (typeof f.useComma === 'boolean') controls.cbUseComma.value = f.useComma;
                 if (typeof f.excludeYears === 'boolean') controls.cbExcludeYears.value = f.excludeYears;
             }
@@ -2464,7 +2488,7 @@
          * @param {boolean} useComma - Si true, remplace les points décimaux par des virgules
          * @param {boolean} excludeYears - Si true, exclut les nombres entre 0 et 2050
          */
-        formatNumbers: function(doc, addSpaces, useComma, excludeYears, profile) {
+        formatNumbers: function(doc, addSpaces, useComma, excludeYears, thousandsSeparator) {
             try {
                 if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
                 if (!ErrorHandler.ensureDefined(app, "app", true)) return;
@@ -2474,11 +2498,8 @@
                 // Définir le tiret demi-cadratin
                 var ENDASH = "\u2013"; // –
 
-                // Read thousands separator from profile, default to fine non-breaking space
-                var SEPARATEUR_MILLIERS = "~<";
-                if (profile) {
-                    SEPARATEUR_MILLIERS = LanguageProfile.get("numbers.thousandsSeparator", "~<");
-                }
+                // Thousands separator comes from the UI dropdown
+                var SEPARATEUR_MILLIERS = thousandsSeparator || "~<";
                 
                 if (addSpaces) {
                     // CORRECTION: Protéger d'abord les intervalles d'années avec tiret demi-cadratin
@@ -3060,8 +3081,19 @@
             if (uiProfileControls.useComma && profile.numbers) {
                 uiProfileControls.useComma.value = !!profile.numbers.replacePointWithComma;
             }
-            if (uiProfileControls.addSpaces && profile.numbers) {
-                uiProfileControls.addSpaces.value = !!profile.numbers.addThousandsSpaces;
+            if (uiProfileControls.addThousandsSep && profile.numbers) {
+                uiProfileControls.addThousandsSep.checkbox.value = !!profile.numbers.addThousandsSpaces;
+                uiProfileControls.addThousandsSep.dropdown.enabled = !!profile.numbers.addThousandsSpaces;
+                if (profile.numbers.thousandsSeparator) {
+                    var sepIdx = 0;
+                    for (var ti = 0; ti < CONFIG.THOUSANDS_SEPARATOR_TYPES.length; ti++) {
+                        if (CONFIG.THOUSANDS_SEPARATOR_TYPES[ti].value === profile.numbers.thousandsSeparator) {
+                            sepIdx = ti;
+                            break;
+                        }
+                    }
+                    uiProfileControls.addThousandsSep.dropdown.selection = sepIdx;
+                }
             }
         }
 
@@ -3434,7 +3466,7 @@
         numberSettingsPanel.alignChildren = "left";
         numberSettingsPanel.enabled = cbFormatNumbers.value;
         
-        var cbAddSpaces = addCheckboxOption(numberSettingsPanel, I18n.__("addSpacesLabel"), true);
+        var addThousandsSepOpt = addDropdownOption(numberSettingsPanel, I18n.__("addThousandsSepLabel"), CONFIG.THOUSANDS_SEPARATOR_TYPES, true);
         var cbExcludeYears = addCheckboxOption(numberSettingsPanel, I18n.__("excludeYearsLabel"), true);
         var cbUseComma = addCheckboxOption(numberSettingsPanel, I18n.__("useCommaLabel"), true);
         
@@ -3450,7 +3482,7 @@
         uiProfileControls.formatOrdinaux = cbFormatOrdinaux;
         uiProfileControls.formatReferences = cbFormatReferences;
         uiProfileControls.useComma = cbUseComma;
-        uiProfileControls.addSpaces = cbAddSpaces;
+        uiProfileControls.addThousandsSep = addThousandsSepOpt;
 
         // Apply initial profile-based state
         updateUIForProfile();
@@ -3623,7 +3655,7 @@
         dialogControls.cbFormatReferences = cbFormatReferences;
         dialogControls.cbFormatNumbers = cbFormatNumbers;
         dialogControls.numberSettingsPanel = numberSettingsPanel;
-        dialogControls.cbAddSpaces = cbAddSpaces;
+        dialogControls.addThousandsSepOpt = addThousandsSepOpt;
         dialogControls.cbUseComma = cbUseComma;
         dialogControls.cbExcludeYears = cbExcludeYears;
         dialogControls.cbEnableStyleAfter = cbEnableStyleAfter;
@@ -3794,7 +3826,9 @@
               
               // Options pour le formatage des nombres
               formatNumbers: cbFormatNumbers.value,
-              addSpaces: cbAddSpaces.value,
+              addSpaces: addThousandsSepOpt.checkbox.value,
+              thousandsSeparator: addThousandsSepOpt.checkbox.value && addThousandsSepOpt.dropdown.selection ?
+                CONFIG.THOUSANDS_SEPARATOR_TYPES[addThousandsSepOpt.dropdown.selection.index].value : null,
               excludeYears: cbExcludeYears.value,
               useComma: cbUseComma.value,
 
@@ -3992,7 +4026,7 @@
                   // Traitement du formatage des nombres
                   if (options.formatNumbers) {
                       ProgressBar.update(++progress, I18n.__("progressFormatNumbers"));
-                      Corrections.formatNumbers(doc, options.addSpaces, options.useComma, options.excludeYears, options.languageProfileId);
+                      Corrections.formatNumbers(doc, options.addSpaces, options.useComma, options.excludeYears, options.thousandsSeparator);
                   }
                   
                   // Finalisation
