@@ -551,15 +551,8 @@
             if (dictionaryPath) return dictionaryPath;
             try {
                 var scriptFile = new File($.fileName);
-                var scriptsFolder = scriptFile.parent;
-                var projectFolder = scriptsFolder.parent;
-                var dictFolder = new Folder(projectFolder.fsName + "/dictionary");
-                if (dictFolder.exists) {
-                    dictionaryPath = dictFolder.fsName;
-                    return dictionaryPath;
-                }
-                // Fallback: try sibling of scripts/
-                dictFolder = new Folder(scriptsFolder.fsName + "/../dictionary");
+                var scriptFolder = scriptFile.parent;
+                var dictFolder = new Folder(scriptFolder.fsName + "/dictionary");
                 if (dictFolder.exists) {
                     dictionaryPath = dictFolder.fsName;
                     return dictionaryPath;
