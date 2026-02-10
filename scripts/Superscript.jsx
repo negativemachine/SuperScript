@@ -197,6 +197,7 @@
                 'styleApplicationPanel': 'Style application',
                 'applyNoteStyleLabel': 'Apply style to footnote references',
                 'applyItalicStyleLabel': 'Apply style to italic text',
+                'applyItalicExpressionsLabel': 'Apply italic to foreign expressions',
                 'applyExposantStyleLabel': 'Apply style to superscript text',
 
                 // Formatting tab
@@ -275,6 +276,7 @@
                 'progressFixIsolatedHyphens': 'Fixing isolated hyphens...',
                 'progressFixValueRanges': 'Fixing value ranges...',
                 'progressApplyItalicStyle': 'Applying italic style...',
+                'progressApplyItalicExpressions': 'Applying italic to foreign expressions...',
                 'progressApplyExposantStyle': 'Applying superscript style...',
                 'progressConvertEllipsis': 'Converting ellipsis...',
                 'progressReplaceApostrophes': 'Replacing apostrophes...',
@@ -376,6 +378,7 @@
                 'styleApplicationPanel': 'Application des styles',
                 'applyNoteStyleLabel': 'Appliquer un style aux appels de notes',
                 'applyItalicStyleLabel': 'Appliquer un style au texte en italique',
+                'applyItalicExpressionsLabel': 'Mettre en italique les expressions \u00E9trang\u00E8res',
                 'applyExposantStyleLabel': 'Appliquer un style au texte en exposant',
 
                 // Formatting tab
@@ -454,6 +457,7 @@
                 'progressFixIsolatedHyphens': 'Correction des tirets isol\u00E9s...',
                 'progressFixValueRanges': 'Correction des intervalles de valeurs...',
                 'progressApplyItalicStyle': 'Application du style italique...',
+                'progressApplyItalicExpressions': 'Mise en italique des expressions \u00E9trang\u00E8res...',
                 'progressApplyExposantStyle': 'Application du style aux exposants...',
                 'progressConvertEllipsis': 'Conversion des points de suspension...',
                 'progressReplaceApostrophes': 'Remplacement des apostrophes...',
@@ -954,6 +958,7 @@
                     convertEllipsis: controls.cbEllipsis.value,
                     replaceApostrophes: controls.cbReplaceApostrophes.value,
                     applyItalicStyle: controls.applyItalicStyleOpt.value,
+                    applyItalicExpressions: controls.cbApplyItalicExpressions.value,
                     applyExposantStyle: controls.applyExposantStyleOpt.value,
                     formatEspaces: controls.cbFormatEspaces.value
                 },
@@ -1104,6 +1109,7 @@
                 if (typeof c.convertEllipsis === 'boolean') controls.cbEllipsis.value = c.convertEllipsis;
                 if (typeof c.replaceApostrophes === 'boolean') controls.cbReplaceApostrophes.value = c.replaceApostrophes;
                 if (typeof c.applyItalicStyle === 'boolean') controls.applyItalicStyleOpt.value = c.applyItalicStyle;
+                if (typeof c.applyItalicExpressions === 'boolean') controls.cbApplyItalicExpressions.value = c.applyItalicExpressions;
                 if (typeof c.applyExposantStyle === 'boolean') controls.applyExposantStyleOpt.value = c.applyExposantStyle;
                 if (typeof c.formatEspaces === 'boolean') controls.cbFormatEspaces.value = c.formatEspaces;
             }
@@ -2139,6 +2145,57 @@
         },
         
         /**
+         * Applique un style italique aux expressions étrangères du profil linguistique
+         * @param {Document} doc - Document InDesign
+         * @param {string} styleName - Nom du style de caractère italique
+         */
+        applyItalicExpressions: function(doc, styleName) {
+            try {
+                if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
+                if (!ErrorHandler.ensureDefined(styleName, "styleName", true)) return;
+
+                var expressions = LanguageProfile.getList("italicExpressions");
+                if (!expressions || expressions.length === 0) return;
+
+                var style = Utilities.getOrCreateStyle(doc, styleName, { fontStyle: "Italic" });
+                if (!style) return;
+
+                // Batch expressions into a single GREP alternation for performance
+                // InDesign GREP pattern limit is ~2048-4096 chars, split if needed
+                var batch = [];
+                var batchLen = 0;
+                var MAX_PATTERN_LEN = 2000;
+
+                for (var i = 0; i < expressions.length; i++) {
+                    var expr = expressions[i];
+                    // Each expression is already GREP-ready in the profile (e.g. "op\\. cit\\.")
+                    var addition = (batch.length > 0 ? 1 : 0) + expr.length; // +1 for |
+                    if (batchLen + addition > MAX_PATTERN_LEN && batch.length > 0) {
+                        // Flush current batch
+                        Utilities.resetPreferences();
+                        app.findGrepPreferences.findWhat = "(?i)\\b(" + batch.join("|") + ")\\b";
+                        app.changeGrepPreferences.appliedCharacterStyle = style;
+                        doc.changeGrep();
+                        batch = [];
+                        batchLen = 0;
+                    }
+                    batch.push(expr);
+                    batchLen += addition;
+                }
+
+                // Flush remaining batch
+                if (batch.length > 0) {
+                    Utilities.resetPreferences();
+                    app.findGrepPreferences.findWhat = "(?i)\\b(" + batch.join("|") + ")\\b";
+                    app.changeGrepPreferences.appliedCharacterStyle = style;
+                    doc.changeGrep();
+                }
+            } catch (error) {
+                ErrorHandler.handleError(error, "applyItalicExpressions", false);
+            }
+        },
+
+        /**
          * Applique un style au texte avec formatage exposant
          * @param {Document} doc - Document InDesign
          * @param {string} styleName - Nom du style de caractère
@@ -3105,6 +3162,15 @@
                     uiProfileControls.addThousandsSep.dropdown.selection = sepIdx;
                 }
             }
+
+            // Show/hide italic expressions based on profile
+            if (uiProfileControls.applyItalicExpressions) {
+                var hasExpressions = false;
+                var exprList = LanguageProfile.getList("italicExpressions");
+                if (exprList && exprList.length > 0) hasExpressions = true;
+                uiProfileControls.applyItalicExpressions.parent.visible = hasExpressions;
+                uiProfileControls.applyItalicExpressions.value = hasExpressions;
+            }
         }
 
         // Wire up profile dropdown onChange (typographic rules only, no UI language change)
@@ -3457,6 +3523,7 @@
 
         applyNoteStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyNoteStyleLabel"), true);
         applyItalicStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyItalicStyleLabel"), true);
+        var cbApplyItalicExpressions = addCheckboxOption(styleApplicationPanel, I18n.__("applyItalicExpressionsLabel"), true);
         applyExposantStyleOpt = addCheckboxOption(styleApplicationPanel, I18n.__("applyExposantStyleLabel"), true);
         // Appliquer immédiatement les dépendances
         updateFeatureDependencies();
@@ -3493,6 +3560,7 @@
         uiProfileControls.formatReferences = cbFormatReferences;
         uiProfileControls.useComma = cbUseComma;
         uiProfileControls.addThousandsSep = addThousandsSepOpt;
+        uiProfileControls.applyItalicExpressions = cbApplyItalicExpressions;
 
         // Apply initial profile-based state
         updateUIForProfile();
@@ -3552,15 +3620,25 @@
         var styleGroupPanel = tabStyles.add("panel", undefined, I18n.__("triggerStylesPanel"));
         styleGroupPanel.orientation = "column";
         styleGroupPanel.alignChildren = "fill";
-        styleGroupPanel.maximumSize.height = 200;
 
-        // Checkboxes for each paragraph style
+        // 3-column layout for trigger style checkboxes
         var triggerCheckboxes = [];
-        for (var tci = 0; tci < paraStyleNames.length; tci++) {
-          var cb = styleGroupPanel.add("checkbox", undefined, paraStyleNames[tci]);
-          // Pre-check all styles except "Body text" and "First paragraph"
-          cb.value = (paraStyleNames[tci] !== "Body text" && paraStyleNames[tci] !== "First paragraph");
-          triggerCheckboxes.push(cb);
+        var colCount = 3;
+        var rowCount = Math.ceil(paraStyleNames.length / colCount);
+        for (var ri = 0; ri < rowCount; ri++) {
+          var row = styleGroupPanel.add("group");
+          row.orientation = "row";
+          row.alignChildren = "left";
+          row.alignment = ["fill", "top"];
+          for (var ci = 0; ci < colCount; ci++) {
+            var idx = ri * colCount + ci;
+            if (idx < paraStyleNames.length) {
+              var cb = row.add("checkbox", undefined, paraStyleNames[idx]);
+              cb.preferredSize.width = 150;
+              cb.value = (paraStyleNames[idx] !== "Body text" && paraStyleNames[idx] !== "First paragraph");
+              triggerCheckboxes.push(cb);
+            }
+          }
         }
         
         // Option pour le style cible
@@ -3656,6 +3734,7 @@
         dialogControls.cbEllipsis = cbEllipsis;
         dialogControls.cbReplaceApostrophes = cbReplaceApostrophes;
         dialogControls.applyItalicStyleOpt = applyItalicStyleOpt;
+        dialogControls.cbApplyItalicExpressions = cbApplyItalicExpressions;
         dialogControls.applyExposantStyleOpt = applyExposantStyleOpt;
         dialogControls.cbFormatEspaces = cbFormatEspaces;
         dialogControls.cbFormatSiecles = cbFormatSiecles;
@@ -3802,7 +3881,10 @@
                   CONFIG.SPACE_TYPES[fixDashIncisesOpt.dropdown.selection.index].value : null,
               replaceDashes: cbDashes.value,
               applyItalicStyle: applyItalicStyleOpt.value && cbItalicStyle.checkbox.value,
-              italicStyleName: applyItalicStyleOpt.value && cbItalicStyle.checkbox.value && cbItalicStyle.dropdown.selection ? 
+              italicStyleName: applyItalicStyleOpt.value && cbItalicStyle.checkbox.value && cbItalicStyle.dropdown.selection ?
+                cbItalicStyle.dropdown.selection.text : null,
+              applyItalicExpressions: cbApplyItalicExpressions.value,
+              italicExpressionsStyleName: cbApplyItalicExpressions.value && cbItalicStyle.checkbox.value && cbItalicStyle.dropdown.selection ?
                 cbItalicStyle.dropdown.selection.text : null,
               applyExposantStyle: applyExposantStyleOpt.value && exposantOrdinalStyleOpt.checkbox.value,
               exposantStyleName: applyExposantStyleOpt.value && exposantOrdinalStyleOpt.checkbox.value && exposantOrdinalStyleOpt.dropdown.selection ? 
@@ -3894,6 +3976,7 @@
               if (options.fixIsolatedHyphens) totalSteps++;
               if (options.fixValueRanges) totalSteps++;
               if (options.applyItalicStyle && options.italicStyleName) totalSteps++;
+              if (options.applyItalicExpressions && options.italicExpressionsStyleName) totalSteps++;
               if (options.applyExposantStyle && options.exposantStyleName) totalSteps++;
               if (options.convertEllipsis) totalSteps++;
               if (options.replaceApostrophes) totalSteps++;
@@ -3980,7 +4063,12 @@
                       ProgressBar.update(++progress, I18n.__("progressApplyItalicStyle"));
                       Corrections.applyItalicStyle(doc, options.italicStyleName);
                   }
-                  
+
+                  if (options.applyItalicExpressions && options.italicExpressionsStyleName) {
+                      ProgressBar.update(++progress, I18n.__("progressApplyItalicExpressions"));
+                      Corrections.applyItalicExpressions(doc, options.italicExpressionsStyleName);
+                  }
+
                   if (options.applyExposantStyle && options.exposantStyleName) {
                       ProgressBar.update(++progress, I18n.__("progressApplyExposantStyle"));
                       Corrections.applyExposantStyle(doc, options.exposantStyleName);

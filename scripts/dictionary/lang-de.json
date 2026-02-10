@@ -51,7 +51,7 @@
     "thousandsSeparator": ".",
     "decimalSeparator": ",",
     "replacePointWithComma": false,
-    "addThousandsSpaces": false,
+    "addThousandsSpaces": true,
     "excludeYears": true,
     "yearRange": [0, 2050]
   },
