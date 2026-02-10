@@ -926,10 +926,8 @@
                     removeSpacesBeforePunctuation: controls.cbRemoveSpacesBeforePunctuation.value,
                     fixDoubleSpaces: controls.cbFixSpaces.value,
                     fixTypoSpaces: controls.fixTypoSpacesOpt.checkbox.value,
-                    fixTypoSpacesPunct: (controls.fixTypoSpacesOpt.punctDropdown.selection)
-                        ? controls.fixTypoSpacesOpt.punctDropdown.selection.index : 0,
-                    fixTypoSpacesColon: (controls.fixTypoSpacesOpt.colonDropdown.selection)
-                        ? controls.fixTypoSpacesOpt.colonDropdown.selection.index : 0,
+                    fixTypoSpacesPunct: controls.fixTypoSpacesOpt.getPunctIndex(),
+                    fixTypoSpacesColon: controls.fixTypoSpacesOpt.getColonIndex(),
                     fixDashIncises: controls.fixDashIncisesOpt.checkbox.value,
                     fixDashIncisesType: (controls.fixDashIncisesOpt.dropdown.selection)
                         ? controls.fixDashIncisesOpt.dropdown.selection.index : 0,
@@ -1052,6 +1050,7 @@
                 if (typeof c.fixTypoSpaces === 'boolean') {
                     controls.fixTypoSpacesOpt.checkbox.value = c.fixTypoSpaces;
                     controls.fixTypoSpacesOpt.subGroup.enabled = c.fixTypoSpaces;
+                    controls.fixTypoSpacesOpt.globalDropdown.enabled = c.fixTypoSpaces;
                 }
                 if (typeof c.fixTypoSpacesPunct === 'number' && c.fixTypoSpacesPunct < controls.fixTypoSpacesOpt.punctDropdown.items.length) {
                     controls.fixTypoSpacesOpt.punctDropdown.selection = c.fixTypoSpacesPunct;
@@ -1059,11 +1058,16 @@
                 if (typeof c.fixTypoSpacesColon === 'number' && c.fixTypoSpacesColon < controls.fixTypoSpacesOpt.colonDropdown.items.length) {
                     controls.fixTypoSpacesOpt.colonDropdown.selection = c.fixTypoSpacesColon;
                 }
-                // Backward compat: old fixTypoSpacesType sets both dropdowns
+                // Also set the global dropdown (uniform mode) to the punct value
+                if (typeof c.fixTypoSpacesPunct === 'number' && c.fixTypoSpacesPunct < controls.fixTypoSpacesOpt.globalDropdown.items.length) {
+                    controls.fixTypoSpacesOpt.globalDropdown.selection = c.fixTypoSpacesPunct;
+                }
+                // Backward compat: old fixTypoSpacesType sets all dropdowns
                 if (typeof c.fixTypoSpacesType === 'number' && typeof c.fixTypoSpacesPunct !== 'number') {
                     if (c.fixTypoSpacesType < controls.fixTypoSpacesOpt.punctDropdown.items.length) {
                         controls.fixTypoSpacesOpt.punctDropdown.selection = c.fixTypoSpacesType;
                         controls.fixTypoSpacesOpt.colonDropdown.selection = c.fixTypoSpacesType;
+                        controls.fixTypoSpacesOpt.globalDropdown.selection = c.fixTypoSpacesType;
                     }
                 }
                 if (typeof c.fixDashIncises === 'boolean') {
@@ -1910,18 +1914,23 @@
                         spaceGroups[key].push(punctPairs[i].ch);
                     }
 
+                    // Character class matching any whitespace (must use real Unicode chars,
+                    // not \\uXXXX escapes — InDesign GREP does not support \u escapes)
+                    var spClass = "[ \t\u00A0\u2000-\u200A\u202F\u205F\u3000]";
+                    var notSpClass = "[^ \t\u00A0\u2000-\u200A\u202F\u205F\u3000]";
+
                     for (var sp in spaceGroups) {
                         if (spaceGroups.hasOwnProperty(sp)) {
                             var chars = spaceGroups[sp].join("");
                             // Replace existing wrong-type spaces before these characters
                             Utilities.resetPreferences();
-                            app.findGrepPreferences.findWhat = "[ \\t\\u00A0\\u2000-\\u200A\\u202F\\u205F\\u3000](?=[" + chars + "])";
+                            app.findGrepPreferences.findWhat = spClass + "(?=[" + chars + "])";
                             app.changeGrepPreferences.changeTo = sp;
                             doc.changeGrep();
 
                             // Insert space when character is directly adjacent
                             Utilities.resetPreferences();
-                            app.findGrepPreferences.findWhat = "([^\\s])(?=[" + chars + "])";
+                            app.findGrepPreferences.findWhat = "(" + notSpClass + ")(?=[" + chars + "])";
                             app.changeGrepPreferences.changeTo = "$1" + sp;
                             doc.changeGrep();
                         }
@@ -2986,14 +2995,30 @@
                 uiProfileControls.fixTypoSpaces.group.visible = !!hasAnyPunctSpace;
                 if (hasAnyPunctSpace) {
                     uiProfileControls.fixTypoSpaces.checkbox.value = true;
-                    uiProfileControls.fixTypoSpaces.subGroup.enabled = true;
-                    // Set per-punctuation dropdowns from profile
+                    // Determine uniform vs split mode
                     var punctSpace = profile.punctuation.spaceBeforeSemicolon || "~<";
                     var colonSpace = profile.punctuation.spaceBeforeColon || "~<";
-                    uiProfileControls.fixTypoSpaces.punctDropdown.selection = spaceTypeToIndex(punctSpace);
-                    uiProfileControls.fixTypoSpaces.colonDropdown.selection = spaceTypeToIndex(colonSpace);
+                    var isUniform = (punctSpace === colonSpace);
+                    uiProfileControls.fixTypoSpaces.uniformMode = isUniform;
+                    if (isUniform) {
+                        // Uniform mode: show global dropdown, hide sub-rows
+                        uiProfileControls.fixTypoSpaces.globalDropdown.visible = true;
+                        uiProfileControls.fixTypoSpaces.globalDropdown.enabled = true;
+                        uiProfileControls.fixTypoSpaces.globalDropdown.selection = spaceTypeToIndex(punctSpace);
+                        uiProfileControls.fixTypoSpaces.subGroup.visible = false;
+                    } else {
+                        // Split mode: hide global dropdown, show sub-rows
+                        uiProfileControls.fixTypoSpaces.globalDropdown.visible = false;
+                        uiProfileControls.fixTypoSpaces.subGroup.visible = true;
+                        uiProfileControls.fixTypoSpaces.subGroup.enabled = true;
+                        uiProfileControls.fixTypoSpaces.punctDropdown.selection = spaceTypeToIndex(punctSpace);
+                        uiProfileControls.fixTypoSpaces.colonDropdown.selection = spaceTypeToIndex(colonSpace);
+                    }
                 } else {
                     uiProfileControls.fixTypoSpaces.checkbox.value = false;
+                    uiProfileControls.fixTypoSpaces.uniformMode = false;
+                    uiProfileControls.fixTypoSpaces.globalDropdown.visible = false;
+                    uiProfileControls.fixTypoSpaces.subGroup.visible = false;
                 }
             }
 
@@ -3138,15 +3163,27 @@
         var cbFixValueRanges = addCheckboxOption(tabCorrections, I18n.__("fixValueRangesLabel"), true);
         
         // Ajout des options dans l'onglet Espaces et retours
-        // fixTypoSpaces: main checkbox + 2 sub-dropdowns for per-punctuation space types
+        // fixTypoSpaces: checkbox + global dropdown (uniform mode) OR 2 sub-dropdowns (split mode)
         var fixTypoSpacesGroup = tabSpaces.add("group");
         fixTypoSpacesGroup.orientation = "column";
         fixTypoSpacesGroup.alignChildren = "left";
         fixTypoSpacesGroup.alignment = ["fill", "top"];
 
-        var cbFixTypoSpaces = fixTypoSpacesGroup.add("checkbox", undefined, I18n.__("fixTypoSpacesLabel"));
+        // Top row: checkbox + global dropdown (for uniform mode like FR-CH)
+        var fixTypoTopRow = fixTypoSpacesGroup.add("group");
+        fixTypoTopRow.orientation = "row";
+        fixTypoTopRow.alignChildren = "left";
+        var cbFixTypoSpaces = fixTypoTopRow.add("checkbox", undefined, I18n.__("fixTypoSpacesLabel"));
         cbFixTypoSpaces.value = true;
+        var globalSpaceDropdown = fixTypoTopRow.add("dropdownlist", undefined);
+        globalSpaceDropdown.preferredSize.width = 200;
+        for (var sgi = 0; sgi < CONFIG.SPACE_TYPES.length; sgi++) {
+            globalSpaceDropdown.add("item", I18n.__(CONFIG.SPACE_TYPES[sgi].labelKey));
+        }
+        globalSpaceDropdown.selection = 0;
+        globalSpaceDropdown.visible = false; // hidden by default, shown in uniform mode
 
+        // Sub-group: 2 per-punctuation rows (for split mode like FR-FR)
         var fixTypoSubGroup = fixTypoSpacesGroup.add("group");
         fixTypoSubGroup.orientation = "column";
         fixTypoSubGroup.alignChildren = "left";
@@ -3176,15 +3213,30 @@
 
         cbFixTypoSpaces.onClick = function() {
             fixTypoSubGroup.enabled = cbFixTypoSpaces.value;
+            globalSpaceDropdown.enabled = cbFixTypoSpaces.value;
         };
 
-        // fixTypoSpaces compat object for existing code references
+        // fixTypoSpaces object with uniform/split mode support
         var fixTypoSpacesOpt = {
             checkbox: cbFixTypoSpaces,
             punctDropdown: punctSpaceDropdown,
             colonDropdown: colonSpaceDropdown,
+            globalDropdown: globalSpaceDropdown,
             group: fixTypoSpacesGroup,
-            subGroup: fixTypoSubGroup
+            subGroup: fixTypoSubGroup,
+            uniformMode: false,
+            getPunctIndex: function() {
+                if (this.uniformMode) {
+                    return this.globalDropdown.selection ? this.globalDropdown.selection.index : 0;
+                }
+                return this.punctDropdown.selection ? this.punctDropdown.selection.index : 0;
+            },
+            getColonIndex: function() {
+                if (this.uniformMode) {
+                    return this.globalDropdown.selection ? this.globalDropdown.selection.index : 0;
+                }
+                return this.colonDropdown.selection ? this.colonDropdown.selection.index : 0;
+            }
         };
 
         var fixDashIncisesOpt = addDropdownOption(tabSpaces, I18n.__("fixDashIncisesLabel"), CONFIG.SPACE_TYPES, false);
@@ -3704,10 +3756,10 @@
                 noteStyleOpt.dropdown.selection.text : null,
               fixDoubleSpaces: cbFixSpaces.value,
               fixTypoSpaces: fixTypoSpacesOpt.checkbox.value,
-              spaceBeforePunct: fixTypoSpacesOpt.checkbox.value && fixTypoSpacesOpt.punctDropdown.selection ?
-                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.punctDropdown.selection.index].value : null,
-              spaceBeforeColon: fixTypoSpacesOpt.checkbox.value && fixTypoSpacesOpt.colonDropdown.selection ?
-                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.colonDropdown.selection.index].value : null,
+              spaceBeforePunct: fixTypoSpacesOpt.checkbox.value ?
+                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.getPunctIndex()].value : null,
+              spaceBeforeColon: fixTypoSpacesOpt.checkbox.value ?
+                CONFIG.SPACE_TYPES[fixTypoSpacesOpt.getColonIndex()].value : null,
               fixDashIncises: fixDashIncisesOpt.checkbox.value,
               dashIncisesSpaceType: fixDashIncisesOpt.checkbox.value && fixDashIncisesOpt.dropdown.selection ? 
                   CONFIG.SPACE_TYPES[fixDashIncisesOpt.dropdown.selection.index].value : null,
