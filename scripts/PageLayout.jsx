@@ -6,7 +6,7 @@
  *   - Apply a master page (gabarit) to the last facing page
  *
  * Bilingual UI (FR/EN) via I18n module, auto-detected from InDesign locale.
- * Save/load user preferences via ConfigManager (pagelayout-config.json).
+ * Save/load user preferences via ConfigManager (pagelayout.json).
  *
  * Architecture:
  *   safeJSON       — ES3-compatible JSON stringify/parse
@@ -294,7 +294,7 @@
     // =========================================================================
 
     var ConfigManager = (function() {
-        var CONFIG_FILENAME = "pagelayout-config.json";
+        var CONFIG_FILENAME = "pagelayout.json";
         var CONFIG_VERSION = 1;
 
         /**
@@ -435,7 +435,7 @@
                 if (typeof app !== 'undefined' && app.activeDocument && app.activeDocument.saved) {
                     defaultPath = app.activeDocument.filePath + "/";
                 }
-                var defaultFile = new File(defaultPath + "pagelayout-config");
+                var defaultFile = new File(defaultPath + "pagelayout");
                 var saveFile = defaultFile.saveDlg(
                     I18n.__("saveConfigTitle"),
                     "JSON files:*.json"
@@ -1293,7 +1293,7 @@
 
             var isFromBookCreator = (callerArg === "BookCreator");
 
-            // Priority 1: pagelayout-config.json in config/ subfolder
+            // Priority 1: pagelayout.json in config/ subfolder
             var autoResult = ConfigManager.autoLoad();
             if (autoResult && autoResult.data && (autoResult.inConfigFolder || isFromBookCreator)) {
                 try {
