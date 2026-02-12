@@ -14,7 +14,7 @@ La spec typographique de référence est `docs/typography/guide_micro-typo_multi
 
 ## Fichiers modifiés
 
-- **`SuperScript/scripts/Superscript.jsx`** — script principal (~3940 lignes), toutes les modifications
+- **`SuperScript/src/Superscript.jsx`** — script principal (~3940 lignes), toutes les modifications
 - **`SuperScript/dictionary/lang-fr-FR.json`** — nouveau, profil linguistique français France
 - **`SuperScript/dictionary/lang-fr-CH.json`** — nouveau, profil linguistique français Suisse
 - **`SuperScript/dictionary/lang-en-US.json`** — nouveau, profil linguistique anglais US

@@ -1,7 +1,7 @@
-# Audit detaille — SuperScript/scripts/Superscript.jsx
+# Audit detaille — SuperScript/src/Superscript.jsx
 
 **Date** : 2026-02-09
-**Fichier audite** : `SuperScript/scripts/Superscript.jsx` (4003 lignes)
+**Fichier audite** : `SuperScript/src/Superscript.jsx` (4003 lignes)
 **Version** : 1.0 beta 10
 
 ---
