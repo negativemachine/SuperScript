@@ -331,17 +331,38 @@
          */
         function autoLoad() {
             try {
-                if (typeof app === 'undefined' || !app.activeDocument || !app.activeDocument.saved) {
+                if (typeof app === 'undefined' || !app.activeDocument) {
                     return null;
                 }
+
+                // Use filePath instead of saved — filePath is available even with
+                // unsaved changes, as long as the document was saved at least once.
+                // The strict saved check prevented auto-load when the user had
+                // modified the document before running the script.
                 var docPath = app.activeDocument.filePath;
                 if (!docPath) return null;
 
-                var folder = new Folder(docPath);
-                var files = findConfigFilesRecursively(folder, 3, 0);
+                var docFolder = new Folder(docPath);
+                if (!docFolder.exists) return null;
+
+                // Search downward from the document folder (max 3 levels)
+                var files = findConfigFilesRecursively(docFolder, 3, 0);
+
+                // If nothing found, also search parent directories (up to 3 levels)
+                // This covers layouts like: project/config/pagelayout.json
+                // when the document is in project/build/InDesign/
+                if (!files || files.length === 0) {
+                    var parent = docFolder.parent;
+                    for (var up = 0; up < 3 && parent && parent.exists; up++) {
+                        files = findConfigFilesRecursively(parent, 3, 0);
+                        if (files && files.length > 0) break;
+                        parent = parent.parent;
+                    }
+                }
 
                 if (!files || files.length === 0) return null;
 
+                // Prefer a config file found inside a "config/" subfolder
                 var inConfigFolder = false;
                 var configFile = files[0];
                 for (var fi = 0; fi < files.length; fi++) {
@@ -360,12 +381,19 @@
                         var content = configFile.read();
                         configFile.close();
                         var configData = safeJSON.parse(content);
+                        $.writeln("[PageLayout] Auto-loaded config: " + configFile.fsName
+                            + (inConfigFolder ? " (config/ folder)" : ""));
                         return { data: configData, inConfigFolder: inConfigFolder };
-                    } catch (e) {
+                    } catch (parseErr) {
+                        $.writeln("[PageLayout] Error parsing " + configFile.fsName + ": " + parseErr.message);
                         return null;
                     }
+                } else {
+                    $.writeln("[PageLayout] Cannot open config file: " + configFile.fsName);
                 }
-            } catch (e) {}
+            } catch (e) {
+                $.writeln("[PageLayout] autoLoad error: " + e.message);
+            }
             return null;
         }
 
