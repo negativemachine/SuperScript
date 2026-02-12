@@ -19,7 +19,7 @@
  *   UIBuilder      — Single-tab dialog with config bar
  *   Processor      — Orchestrates corrections on active document
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @license AGPL
  * @author entremonde / Spectral lab
  * @website https://lab.spectral.art

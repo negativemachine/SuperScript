@@ -22,7 +22,7 @@
   *   Processor      — Orchestrates corrections on active document
   *   SieclesModule  — Centuries, ordinals, references, non-breaking spaces
   *
-  * @version 2.0.0
+  * @version 1.0.1
   * @license AGPL
   * @author entremonde / Spectral lab
   * @website https://lab.spectral.art
