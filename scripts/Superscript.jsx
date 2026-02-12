@@ -150,10 +150,6 @@
                 'errorInDesignUnavailable': 'The InDesign application is not accessible',
                 'errorDocumentsUnavailable': 'The documents collection is not accessible',
                 'errorNoDocumentOpen': 'Please open a document before running this script.',
-                'errorInvalidDocument': 'Error: Invalid document',
-                'errorInvalidMasterName': 'Error: Invalid master name',
-                'errorMasterNotFound': "Master '%s' not found in document %s",
-                'errorApplyMaster': 'Error applying master page: %s',
                 'errorRequiredStyles': 'Required character styles are not defined. Please select valid styles.',
 
                 // Dialog
@@ -162,7 +158,6 @@
                 'tabSpaces': 'Spaces & Returns',
                 'tabStyles': 'Styles',
                 'tabFormatting': 'Formatting',
-                'tabPageLayout': 'Page Layout',
 
                 // Corrections tab
                 'moveNotesLabel': 'Move footnote references before punctuation',
@@ -213,13 +208,6 @@
                 'thousandsSepComma': 'Comma (,)',
                 'thousandsSepPeriod': 'Period (.)',
 
-                // Page layout tab
-                'enableStyleAfterLabel': 'Conditional style application',
-                'triggerStylesPanel': 'Trigger styles',
-                'targetStyleLabel': 'Style to apply to the following paragraph:',
-                'applyMasterToLastPageLabel': 'Apply a master to the last facing page',
-                'masterLabel': 'Master to apply:',
-
                 // Space types
                 'spaceTypeFine': 'Thin non-breaking space (~<)',
                 'spaceTypeNonBreaking': 'Non-breaking space (~S)',
@@ -227,7 +215,6 @@
                 // Default/placeholder
                 'defaultStyle': '[Default style]',
                 'noStylesAvailable': '[No styles available]',
-                'noMastersAvailable': '[No masters available]',
 
                 // Buttons
                 'helpTooltip': 'Show SuperScript help',
@@ -255,9 +242,6 @@
                     + '\u2022 Convert ... to ellipsis: Replaces three dots with the typographic ellipsis character.\n'
                     + '\u2022 Replace straight apostrophes: Uses typographic apostrophes.\n'
                     + '\u2022 Format centuries, ordinals and references: Options for formatting Roman numerals.\n\n'
-                    + 'TAB "PAGE LAYOUT"\n\n'
-                    + '\u2022 Conditional style application: Automatically applies a style to the paragraph following selected styles.\n'
-                    + '\u2022 Apply master to last page: Useful for chapter or document endings.\n\n'
                     + 'For more information, visit our website: https://lab.spectral.art',
 
                 // Progress bar
@@ -280,8 +264,6 @@
                 'progressApplyExposantStyle': 'Applying superscript style...',
                 'progressConvertEllipsis': 'Converting ellipsis...',
                 'progressReplaceApostrophes': 'Replacing apostrophes...',
-                'progressApplyConditionalStyles': 'Applying conditional styles...',
-                'progressApplyMasterToLastPage': 'Applying master to last page...',
                 'progressFormatSiecles': 'Formatting centuries and ordinal expressions...',
                 'progressFormatNumbers': 'Formatting numbers...',
                 'progressComplete': 'Done!',
@@ -331,10 +313,6 @@
                 'errorInDesignUnavailable': 'L\'application InDesign n\'est pas accessible',
                 'errorDocumentsUnavailable': 'La collection de documents n\'est pas accessible',
                 'errorNoDocumentOpen': 'Veuillez ouvrir un document avant d\'ex\u00E9cuter ce script.',
-                'errorInvalidDocument': 'Erreur\u2009: Document invalide',
-                'errorInvalidMasterName': 'Erreur\u2009: Nom de gabarit invalide',
-                'errorMasterNotFound': "Gabarit '%s' introuvable dans le document %s",
-                'errorApplyMaster': 'Erreur lors de l\'application du gabarit\u2009: %s',
                 'errorRequiredStyles': 'Les styles de caract\u00E8re requis ne sont pas d\u00E9finis. Veuillez s\u00E9lectionner des styles valides.',
 
                 // Dialog
@@ -343,7 +321,6 @@
                 'tabSpaces': 'Espaces et retours',
                 'tabStyles': 'Styles',
                 'tabFormatting': 'Formatages',
-                'tabPageLayout': 'Mise en page',
 
                 // Corrections tab
                 'moveNotesLabel': 'D\u00E9placer les appels de notes de bas de page',
@@ -394,13 +371,6 @@
                 'thousandsSepComma': 'Virgule (,)',
                 'thousandsSepPeriod': 'Point (.)',
 
-                // Page layout tab
-                'enableStyleAfterLabel': 'Application conditionnelle de styles',
-                'triggerStylesPanel': 'Styles d\u00E9clencheurs',
-                'targetStyleLabel': 'Style \u00E0 appliquer au paragraphe suivant\u2009:',
-                'applyMasterToLastPageLabel': 'Appliquer un gabarit \u00E0 la derni\u00E8re page en vis-\u00E0-vis',
-                'masterLabel': 'Gabarit \u00E0 appliquer\u2009:',
-
                 // Space types
                 'spaceTypeFine': 'Espace fine ins\u00E9cable (~<)',
                 'spaceTypeNonBreaking': 'Espace ins\u00E9cable (~S)',
@@ -408,7 +378,6 @@
                 // Default/placeholder
                 'defaultStyle': '[Style par d\u00E9faut]',
                 'noStylesAvailable': '[Aucun style disponible]',
-                'noMastersAvailable': '[Aucun gabarit disponible]',
 
                 // Buttons
                 'helpTooltip': 'Afficher l\'aide de SuperScript',
@@ -436,9 +405,6 @@
                     + '\u2022 Convertir ... en points de suspension\u2009: Remplace trois points par le caract\u00E8re typographique correspondant.\n'
                     + '\u2022 Remplacer les apostrophes droites\u2009: Utilise des apostrophes typographiques.\n'
                     + '\u2022 Formatage des si\u00E8cles, ordinaux et r\u00E9f\u00E9rences\u2009: Options pour la mise en forme des chiffres romains.\n\n'
-                    + 'ONGLET "MISE EN PAGE"\n\n'
-                    + '\u2022 Application conditionnelle de styles\u2009: Applique automatiquement un style au paragraphe qui suit les styles s\u00E9lectionn\u00E9s.\n'
-                    + '\u2022 Appliquer un gabarit \u00E0 la derni\u00E8re page\u2009: Utile pour la fin des chapitres ou des documents.\n\n'
                     + 'Pour plus d\'informations, visitez notre site web\u2009: https://lab.spectral.art',
 
                 // Progress bar
@@ -461,8 +427,6 @@
                 'progressApplyExposantStyle': 'Application du style aux exposants...',
                 'progressConvertEllipsis': 'Conversion des points de suspension...',
                 'progressReplaceApostrophes': 'Remplacement des apostrophes...',
-                'progressApplyConditionalStyles': 'Application des styles conditionnels...',
-                'progressApplyMasterToLastPage': 'Application du gabarit \u00E0 la derni\u00E8re page...',
                 'progressFormatSiecles': 'Formatage des si\u00E8cles et expressions ordinales...',
                 'progressFormatNumbers': 'Formatage des nombres...',
                 'progressComplete': 'Termin\u00E9\u2009!',
@@ -512,10 +476,6 @@
                 'errorInDesignUnavailable': 'Die InDesign-Anwendung ist nicht verf\u00FCgbar',
                 'errorDocumentsUnavailable': 'Die Dokumentensammlung ist nicht verf\u00FCgbar',
                 'errorNoDocumentOpen': 'Bitte \u00F6ffnen Sie ein Dokument, bevor Sie dieses Skript ausf\u00FChren.',
-                'errorInvalidDocument': 'Fehler: Ung\u00FCltiges Dokument',
-                'errorInvalidMasterName': 'Fehler: Ung\u00FCltiger Musterseiten-Name',
-                'errorMasterNotFound': "Musterseite '%s' nicht gefunden im Dokument %s",
-                'errorApplyMaster': 'Fehler beim Anwenden der Musterseite: %s',
                 'errorRequiredStyles': 'Die erforderlichen Zeichenformate sind nicht definiert. Bitte w\u00E4hlen Sie g\u00FCltige Formate aus.',
 
                 // Dialog
@@ -524,7 +484,6 @@
                 'tabSpaces': 'Leerzeichen & Umbruch',
                 'tabStyles': 'Formate',
                 'tabFormatting': 'Formatierung',
-                'tabPageLayout': 'Seitenlayout',
 
                 // Corrections tab
                 'moveNotesLabel': 'Fu\u00DFnotenverweise vor Satzzeichen verschieben',
@@ -575,13 +534,6 @@
                 'thousandsSepComma': 'Komma (,)',
                 'thousandsSepPeriod': 'Punkt (.)',
 
-                // Page layout tab
-                'enableStyleAfterLabel': 'Bedingte Formatzuweisung',
-                'triggerStylesPanel': 'Ausl\u00F6sende Formate',
-                'targetStyleLabel': 'Auf folgenden Absatz anzuwendendes Format:',
-                'applyMasterToLastPageLabel': 'Musterseite auf letzte Druckbogenseite anwenden',
-                'masterLabel': 'Anzuwendende Musterseite:',
-
                 // Space types
                 'spaceTypeFine': 'Drittelgeviert (~<)',
                 'spaceTypeNonBreaking': 'Gesch\u00FCtztes Leerzeichen (~S)',
@@ -589,7 +541,6 @@
                 // Default/placeholder
                 'defaultStyle': '[Standardformat]',
                 'noStylesAvailable': '[Keine Formate verf\u00FCgbar]',
-                'noMastersAvailable': '[Keine Musterseiten verf\u00FCgbar]',
 
                 // Buttons
                 'helpTooltip': 'SuperScript-Hilfe anzeigen',
@@ -617,9 +568,6 @@
                     + '\u2022 ... in Auslassungspunkte: Ersetzt drei Punkte durch das typografische Zeichen.\n'
                     + '\u2022 Apostrophe ersetzen: Verwendet typografische Apostrophe.\n'
                     + '\u2022 Jahrhunderte, Ordnungszahlen und Verweise formatieren.\n\n'
-                    + 'REGISTER \u201ESEITENLAYOUT\u201C\n\n'
-                    + '\u2022 Bedingte Formatzuweisung: Weist dem Absatz nach den ausgew\u00E4hlten Formaten automatisch ein Format zu.\n'
-                    + '\u2022 Musterseite auf letzte Seite anwenden: N\u00FCtzlich f\u00FCr Kapitel- oder Dokumentenden.\n\n'
                     + 'Weitere Informationen: https://lab.spectral.art',
 
                 // Progress bar
@@ -642,8 +590,6 @@
                 'progressApplyExposantStyle': 'Hochstellungsformat anwenden\u2026',
                 'progressConvertEllipsis': 'Auslassungspunkte umwandeln\u2026',
                 'progressReplaceApostrophes': 'Apostrophe ersetzen\u2026',
-                'progressApplyConditionalStyles': 'Bedingte Formate anwenden\u2026',
-                'progressApplyMasterToLastPage': 'Musterseite auf letzte Seite anwenden\u2026',
                 'progressFormatSiecles': 'Jahrhunderte und Ordnungsausdr\u00FCcke formatieren\u2026',
                 'progressFormatNumbers': 'Zahlen formatieren\u2026',
                 'progressComplete': 'Fertig!',
@@ -692,10 +638,6 @@
                 'errorInDesignUnavailable': 'La aplicaci\u00F3n InDesign no est\u00E1 disponible',
                 'errorDocumentsUnavailable': 'La colecci\u00F3n de documentos no est\u00E1 disponible',
                 'errorNoDocumentOpen': 'Por favor, abra un documento antes de ejecutar este script.',
-                'errorInvalidDocument': 'Error: Documento no v\u00E1lido',
-                'errorInvalidMasterName': 'Error: Nombre de p\u00E1gina maestra no v\u00E1lido',
-                'errorMasterNotFound': "P\u00E1gina maestra '%s' no encontrada en el documento %s",
-                'errorApplyMaster': 'Error al aplicar la p\u00E1gina maestra: %s',
                 'errorRequiredStyles': 'Los estilos de car\u00E1cter requeridos no est\u00E1n definidos. Por favor, seleccione estilos v\u00E1lidos.',
 
                 // Dialog
@@ -704,7 +646,6 @@
                 'tabSpaces': 'Espacios y retornos',
                 'tabStyles': 'Estilos',
                 'tabFormatting': 'Formato',
-                'tabPageLayout': 'Maquetaci\u00F3n',
 
                 // Corrections tab
                 'moveNotesLabel': 'Mover referencias de notas al pie antes de la puntuaci\u00F3n',
@@ -755,13 +696,6 @@
                 'thousandsSepComma': 'Coma (,)',
                 'thousandsSepPeriod': 'Punto (.)',
 
-                // Page layout tab
-                'enableStyleAfterLabel': 'Aplicaci\u00F3n condicional de estilos',
-                'triggerStylesPanel': 'Estilos desencadenantes',
-                'targetStyleLabel': 'Estilo a aplicar al p\u00E1rrafo siguiente:',
-                'applyMasterToLastPageLabel': 'Aplicar p\u00E1gina maestra a la \u00FAltima p\u00E1gina del pliego',
-                'masterLabel': 'P\u00E1gina maestra a aplicar:',
-
                 // Space types
                 'spaceTypeFine': 'Espacio fino irrompible (~<)',
                 'spaceTypeNonBreaking': 'Espacio irrompible (~S)',
@@ -769,7 +703,6 @@
                 // Default/placeholder
                 'defaultStyle': '[Estilo predeterminado]',
                 'noStylesAvailable': '[No hay estilos disponibles]',
-                'noMastersAvailable': '[No hay p\u00E1ginas maestras disponibles]',
 
                 // Buttons
                 'helpTooltip': 'Mostrar ayuda de SuperScript',
@@ -797,9 +730,6 @@
                     + '\u2022 Convertir ... en puntos suspensivos: Reemplaza tres puntos por el car\u00E1cter tipogr\u00E1fico.\n'
                     + '\u2022 Reemplazar ap\u00F3strofos rectos: Usa ap\u00F3strofos tipogr\u00E1ficos.\n'
                     + '\u2022 Formatear siglos, ordinales y referencias.\n\n'
-                    + 'PESTA\u00D1A \u201CMAQUETACI\u00D3N\u201D\n\n'
-                    + '\u2022 Aplicaci\u00F3n condicional: Aplica autom\u00E1ticamente un estilo al p\u00E1rrafo que sigue a los estilos seleccionados.\n'
-                    + '\u2022 Aplicar p\u00E1gina maestra a la \u00FAltima p\u00E1gina: \u00DAtil para finales de cap\u00EDtulo o documento.\n\n'
                     + 'M\u00E1s informaci\u00F3n: https://lab.spectral.art',
 
                 // Progress bar
@@ -822,8 +752,6 @@
                 'progressApplyExposantStyle': 'Aplicando estilo super\u00EDndice\u2026',
                 'progressConvertEllipsis': 'Convirtiendo puntos suspensivos\u2026',
                 'progressReplaceApostrophes': 'Reemplazando ap\u00F3strofos\u2026',
-                'progressApplyConditionalStyles': 'Aplicando estilos condicionales\u2026',
-                'progressApplyMasterToLastPage': 'Aplicando p\u00E1gina maestra a la \u00FAltima p\u00E1gina\u2026',
                 'progressFormatSiecles': 'Formateando siglos y expresiones ordinales\u2026',
                 'progressFormatNumbers': 'Formateando n\u00FAmeros\u2026',
                 'progressComplete': '\u00A1Hecho!',
@@ -872,10 +800,6 @@
                 'errorInDesignUnavailable': 'L\'applicazione InDesign non \u00E8 disponibile',
                 'errorDocumentsUnavailable': 'La raccolta documenti non \u00E8 disponibile',
                 'errorNoDocumentOpen': 'Aprire un documento prima di eseguire questo script.',
-                'errorInvalidDocument': 'Errore: Documento non valido',
-                'errorInvalidMasterName': 'Errore: Nome della pagina mastro non valido',
-                'errorMasterNotFound': "Pagina mastro '%s' non trovata nel documento %s",
-                'errorApplyMaster': 'Errore nell\'applicazione della pagina mastro: %s',
                 'errorRequiredStyles': 'Gli stili carattere richiesti non sono definiti. Selezionare stili validi.',
 
                 // Dialog
@@ -884,7 +808,6 @@
                 'tabSpaces': 'Spazi e a capo',
                 'tabStyles': 'Stili',
                 'tabFormatting': 'Formattazione',
-                'tabPageLayout': 'Layout pagina',
 
                 // Corrections tab
                 'moveNotesLabel': 'Spostare i riferimenti delle note a pi\u00E8 di pagina prima della punteggiatura',
@@ -935,13 +858,6 @@
                 'thousandsSepComma': 'Virgola (,)',
                 'thousandsSepPeriod': 'Punto (.)',
 
-                // Page layout tab
-                'enableStyleAfterLabel': 'Applicazione condizionale di stili',
-                'triggerStylesPanel': 'Stili attivatori',
-                'targetStyleLabel': 'Stile da applicare al paragrafo successivo:',
-                'applyMasterToLastPageLabel': 'Applicare pagina mastro all\'ultima pagina del foglio',
-                'masterLabel': 'Pagina mastro da applicare:',
-
                 // Space types
                 'spaceTypeFine': 'Spazio sottile protetto (~<)',
                 'spaceTypeNonBreaking': 'Spazio protetto (~S)',
@@ -949,7 +865,6 @@
                 // Default/placeholder
                 'defaultStyle': '[Stile predefinito]',
                 'noStylesAvailable': '[Nessuno stile disponibile]',
-                'noMastersAvailable': '[Nessuna pagina mastro disponibile]',
 
                 // Buttons
                 'helpTooltip': 'Mostrare la guida di SuperScript',
@@ -977,9 +892,6 @@
                     + '\u2022 Convertire ... in puntini di sospensione: Sostituisce tre punti con il carattere tipografico.\n'
                     + '\u2022 Sostituire gli apostrofi dritti: Utilizza apostrofi tipografici.\n'
                     + '\u2022 Formattare secoli, ordinali e riferimenti.\n\n'
-                    + 'SCHEDA \u201CLAYOUT PAGINA\u201D\n\n'
-                    + '\u2022 Applicazione condizionale: Applica automaticamente uno stile al paragrafo che segue gli stili selezionati.\n'
-                    + '\u2022 Applicare pagina mastro all\'ultima pagina: Utile per la fine di capitoli o documenti.\n\n'
                     + 'Per maggiori informazioni: https://lab.spectral.art',
 
                 // Progress bar
@@ -1002,8 +914,6 @@
                 'progressApplyExposantStyle': 'Applicazione stile apice\u2026',
                 'progressConvertEllipsis': 'Conversione puntini di sospensione\u2026',
                 'progressReplaceApostrophes': 'Sostituzione apostrofi\u2026',
-                'progressApplyConditionalStyles': 'Applicazione stili condizionali\u2026',
-                'progressApplyMasterToLastPage': 'Applicazione pagina mastro all\'ultima pagina\u2026',
                 'progressFormatSiecles': 'Formattazione secoli ed espressioni ordinali\u2026',
                 'progressFormatNumbers': 'Formattazione numeri\u2026',
                 'progressComplete': 'Fatto!',
@@ -1408,7 +1318,6 @@
             var c = configData.corrections || {};
             var f = configData.formatting || {};
             var s = configData.styles || {};
-            var l = configData.layout || {};
 
             // Helper to find a character style by name
             function findCharStyle(name) {
@@ -1443,17 +1352,6 @@
                 return result;
             }
 
-            // Helper to find a master spread by name
-            function findMaster(name) {
-                if (!name) return null;
-                try {
-                    for (var i = 0; i < doc.masterSpreads.length; i++) {
-                        if (doc.masterSpreads[i].name === name) return doc.masterSpreads[i];
-                    }
-                } catch (e) {}
-                return null;
-            }
-
             // Resolve space type values from config indices
             var spaceBeforePunct = null;
             var spaceBeforeColon = null;
@@ -1476,15 +1374,6 @@
                 var sepIdx = (typeof f.thousandsSepType === 'number') ? f.thousandsSepType : 0;
                 if (sepIdx < CONFIG.THOUSANDS_SEPARATOR_TYPES.length) {
                     thousandsSeparator = CONFIG.THOUSANDS_SEPARATOR_TYPES[sepIdx].value;
-                }
-            }
-
-            // Resolve trigger styles
-            var triggerStyles = [];
-            if (l.enableStyleAfter && l.triggerStyles) {
-                for (var ti = 0; ti < l.triggerStyles.length; ti++) {
-                    var ts = findParaStyle(l.triggerStyles[ti]);
-                    if (ts) triggerStyles.push(ts);
                 }
             }
 
@@ -1519,11 +1408,6 @@
                 removeSpacesStartParagraph: !!c.removeSpacesStartParagraph,
                 removeSpacesEndParagraph: !!c.removeSpacesEndParagraph,
                 removeTabs: !!c.removeTabs,
-                enableStyleAfter: !!l.enableStyleAfter,
-                triggerStyles: triggerStyles,
-                targetStyle: findParaStyle(l.targetStyle),
-                applyMasterToLastPage: !!l.applyMasterToLastPage,
-                selectedMaster: findMaster(l.masterName),
                 sieclesOptions: {
                     formaterSiecles: !!f.formatSiecles,
                     formaterOrdinaux: !!f.formatOrdinaux,
@@ -1677,25 +1561,7 @@
                     useComma: controls.cbUseComma.value,
                     excludeYears: controls.cbExcludeYears.value
                 },
-                layout: {
-                    enableStyleAfter: controls.cbEnableStyleAfter.value,
-                    triggerStyles: [],
-                    targetStyle: (controls.targetStyleDropdown.selection)
-                        ? controls.targetStyleDropdown.selection.text : null,
-                    applyMasterToLastPage: controls.cbApplyMasterToLastPage.value,
-                    masterName: (controls.masterDropdown.selection)
-                        ? controls.masterDropdown.selection.text : null
-                }
             };
-
-            // Collect trigger style names from checkboxes
-            if (controls.triggerCheckboxes) {
-                for (var i = 0; i < controls.triggerCheckboxes.length; i++) {
-                    if (controls.triggerCheckboxes[i].value) {
-                        config.layout.triggerStyles.push(controls.triggerCheckboxes[i].text);
-                    }
-                }
-            }
 
             return config;
         }
@@ -1844,52 +1710,6 @@
                 if (typeof f.excludeYears === 'boolean') controls.cbExcludeYears.value = f.excludeYears;
             }
 
-            // Layout
-            if (configData.layout) {
-                var l = configData.layout;
-                if (typeof l.enableStyleAfter === 'boolean') controls.cbEnableStyleAfter.value = l.enableStyleAfter;
-                if (typeof l.applyMasterToLastPage === 'boolean') {
-                    controls.cbApplyMasterToLastPage.value = l.applyMasterToLastPage;
-                    controls.masterDropdown.enabled = l.applyMasterToLastPage;
-                }
-
-                // Trigger styles — restore checkboxes
-                if (l.triggerStyles && controls.triggerCheckboxes) {
-                    // Uncheck all first
-                    for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
-                        controls.triggerCheckboxes[tc].value = false;
-                    }
-                    // Check matching items
-                    for (var ts = 0; ts < l.triggerStyles.length; ts++) {
-                        for (var tc = 0; tc < controls.triggerCheckboxes.length; tc++) {
-                            if (controls.triggerCheckboxes[tc].text === l.triggerStyles[ts]) {
-                                controls.triggerCheckboxes[tc].value = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // Target style
-                if (l.targetStyle && controls.targetStyleDropdown) {
-                    for (var tsi = 0; tsi < controls.targetStyleDropdown.items.length; tsi++) {
-                        if (controls.targetStyleDropdown.items[tsi].text === l.targetStyle) {
-                            controls.targetStyleDropdown.selection = tsi;
-                            break;
-                        }
-                    }
-                }
-
-                // Master
-                if (l.masterName && controls.masterDropdown) {
-                    for (var mi = 0; mi < controls.masterDropdown.items.length; mi++) {
-                        if (controls.masterDropdown.items[mi].text === l.masterName) {
-                            controls.masterDropdown.selection = mi;
-                            break;
-                        }
-                    }
-                }
-            }
         }
 
         return {
@@ -3061,88 +2881,7 @@
                 return 0;
             }
         },
-        
-        /**
-         * Applique un style de paragraphe après les paragraphes déclencheurs
-         * @param {Document} doc - Document InDesign
-         * @param {Array} triggerStyles - Styles déclencheurs
-         * @param {ParagraphStyle} targetStyle - Style à appliquer
-         */
-        applyStyleAfterTriggers: function(doc, triggerStyles, targetStyle) {
-            try {
-                if (!ErrorHandler.ensureDefined(doc, "document", true)) return;
-                if (!ErrorHandler.ensureDefined(triggerStyles, "triggerStyles", true)) return;
-                if (!ErrorHandler.ensureDefined(targetStyle, "targetStyle", true)) return;
-                
-                // Vérifier que les collections d'objets sont accessibles
-                if (!ErrorHandler.ensureDefined(doc.stories, "document.stories", true)) return;
-                
-                // Parcourir les articles du document
-                var stories = doc.stories;
-                for (var s = 0; s < stories.length; s++) {
-                    try {
-                        var story = stories[s];
-                        
-                        if (!ErrorHandler.ensureDefined(story, "story at index " + s, false)) {
-                            continue;
-                        }
-                        
-                        if (!ErrorHandler.ensureDefined(story.paragraphs, "story.paragraphs at index " + s, false)) {
-                            continue;
-                        }
-                        
-                        var paras = story.paragraphs;
-                        var justLeftTriggerBlock = false;
-                        
-                        // Parcourir les paragraphes de l'article
-                        for (var p = 0; p < paras.length; p++) {
-                            try {
-                                var para = paras[p];
-                                
-                                if (!ErrorHandler.ensureDefined(para, "paragraph at index " + p, false)) {
-                                    continue;
-                                }
-                                
-                                if (!ErrorHandler.ensureDefined(para.appliedParagraphStyle, "para.appliedParagraphStyle at index " + p, false)) {
-                                    continue;
-                                }
-                                
-                                var style = para.appliedParagraphStyle;
-                                var isTriggerStyle = false;
-                                
-                                // Vérifier si le style actuel est un déclencheur
-                                for (var t = 0; t < triggerStyles.length; t++) {
-                                    if (style.id === triggerStyles[t].id) {
-                                        isTriggerStyle = true;
-                                        break;
-                                    }
-                                }
-                                
-                                if (isTriggerStyle) {
-                                    justLeftTriggerBlock = true;
-                                } else if (justLeftTriggerBlock) {
-                                    // Si on vient de quitter un bloc de déclencheurs et que le paragraphe n'est pas vide
-                                    if (!Utilities.isEmptyParagraph(para)) {
-                                        // Appliquer le style cible
-                                        para.appliedParagraphStyle = targetStyle;
-                                        justLeftTriggerBlock = false; // Réinitialiser pour ne pas affecter plusieurs paragraphes consécutifs
-                                    }
-                                }
-                            } catch (paraError) {
-                                ErrorHandler.handleError(paraError, "traitement du paragraphe " + p, false);
-                                // Continuer avec le paragraphe suivant
-                            }
-                        }
-                    } catch (storyError) {
-                        ErrorHandler.handleError(storyError, "traitement de l'article " + s, false);
-                        // Continuer avec l'article suivant
-                    }
-                }
-            } catch (error) {
-                ErrorHandler.handleError(error, "applyStyleAfterTriggers", false);
-            }
-        },
-        
+
         /**
          * Corrige les espaces autour des incises avec tirets demi-cadratins
          * @param {Document} doc - Document InDesign
@@ -3698,6 +3437,8 @@
           characterStyles = [I18n.__("defaultStyle")];
         }
         
+        var doc = app.activeDocument;
+
         // Création du dialogue principal
         var dialog = new Window("dialog", CONFIG.SCRIPT_TITLE);
         dialog.orientation = "column";
@@ -3920,10 +3661,6 @@
         tabOther.orientation = "column";
         tabOther.alignChildren = "left";
 
-        var tabStyles = tpanel.add("tab", undefined, I18n.__("tabPageLayout"));
-        tabStyles.orientation = "column";
-        tabStyles.alignChildren = "left";
-        
         // Sélection de l'onglet par défaut
         tpanel.selection = tabCorrections;
         
@@ -4269,152 +4006,6 @@
         // Apply initial profile-based state
         updateUIForProfile();
 
-        // Ajout des options dans le nouvel onglet Styles de paragraphe
-        var cbEnableStyleAfter = addCheckboxOption(tabStyles, I18n.__("enableStyleAfterLabel"), true);
-        
-        // Récupérer les styles de paragraphe du document actif
-        var doc = app.activeDocument;
-        var allParaStyles = [];
-        var paraStyleNames = [];
-        
-        try {
-          // Fonction récursive pour collecter les styles
-          function collectParagraphStyles(group) {
-            var styles = [];
-            
-            try {
-              if (group && group.paragraphStyles) {
-                for (var i = 0; i < group.paragraphStyles.length; i++) {
-                  var style = group.paragraphStyles[i];
-                  if (style && style.name && !style.name.match(/^\[/)) {
-                    styles.push(style);
-                  }
-                }
-              }
-              
-              if (group && group.paragraphStyleGroups) {
-                for (var j = 0; j < group.paragraphStyleGroups.length; j++) {
-                  var subgroup = group.paragraphStyleGroups[j];
-                  if (subgroup) {
-                    styles = styles.concat(collectParagraphStyles(subgroup));
-                  }
-                }
-              }
-            } catch (e) {
-              // Ignorer les erreurs silencieusement
-            }
-            
-            return styles;
-          }
-          
-          allParaStyles = collectParagraphStyles(doc);
-          
-          for (var i = 0; i < allParaStyles.length; i++) {
-            paraStyleNames.push(allParaStyles[i].name);
-          }
-        } catch (e) {
-          paraStyleNames = [I18n.__("noStylesAvailable")];
-          allParaStyles = [];
-        }
-
-        if (paraStyleNames.length === 0) {
-          paraStyleNames = [I18n.__("noStylesAvailable")];
-        }
-
-        var styleGroupPanel = tabStyles.add("panel", undefined, I18n.__("triggerStylesPanel"));
-        styleGroupPanel.orientation = "column";
-        styleGroupPanel.alignChildren = "fill";
-
-        // 3-column layout for trigger style checkboxes
-        var triggerCheckboxes = [];
-        var colCount = 3;
-        var rowCount = Math.ceil(paraStyleNames.length / colCount);
-        for (var ri = 0; ri < rowCount; ri++) {
-          var row = styleGroupPanel.add("group");
-          row.orientation = "row";
-          row.alignChildren = "left";
-          row.alignment = ["fill", "top"];
-          for (var ci = 0; ci < colCount; ci++) {
-            var idx = ri * colCount + ci;
-            if (idx < paraStyleNames.length) {
-              var cb = row.add("checkbox", undefined, paraStyleNames[idx]);
-              cb.preferredSize.width = 150;
-              cb.value = (paraStyleNames[idx] !== "Body text" && paraStyleNames[idx] !== "First paragraph");
-              triggerCheckboxes.push(cb);
-            }
-          }
-        }
-        
-        // Option pour le style cible
-        var targetStyleGroup = tabStyles.add("group");
-        targetStyleGroup.orientation = "row";
-        targetStyleGroup.alignChildren = "center";
-        targetStyleGroup.add("statictext", undefined, I18n.__("targetStyleLabel"));
-        var targetStyleDropdown = targetStyleGroup.add("dropdownlist", undefined, paraStyleNames);
-        targetStyleDropdown.preferredSize.width = 150;
-        
-        // Sélectionner "First paragraph" par défaut s'il existe
-        var firstParaIndex = -1;
-        for (var i = 0; i < paraStyleNames.length; i++) {
-          if (paraStyleNames[i] === "First paragraph") {
-            firstParaIndex = i;
-            break;
-          }
-        }
-        
-        if (firstParaIndex !== -1) {
-          targetStyleDropdown.selection = firstParaIndex;
-        } else if (paraStyleNames.length > 0) {
-          targetStyleDropdown.selection = 0;
-        }
-        
-        // Option pour appliquer un gabarit à la dernière page
-        var cbApplyMasterToLastPage = addCheckboxOption(tabStyles, I18n.__("applyMasterToLastPageLabel"), true);
-        
-        // Récupérer les gabarits du document
-        var masterNames = [];
-        var allMasters = [];
-        
-        try {
-          if (ErrorHandler.ensureDefined(doc.masterSpreads, "doc.masterSpreads", false)) {
-            for (var i = 0; i < doc.masterSpreads.length; i++) {
-              var master = doc.masterSpreads[i];
-              if (ErrorHandler.ensureDefined(master, "master at index " + i, false) && 
-                ErrorHandler.ensureDefined(master.name, "master.name at index " + i, false)) {
-                masterNames.push(master.name);
-                allMasters.push(master);
-              }
-            }
-          }
-        } catch (e) {
-          masterNames = [I18n.__("noMastersAvailable")];
-          allMasters = [];
-        }
-
-        if (masterNames.length === 0) {
-          masterNames = [I18n.__("noMastersAvailable")];
-          cbApplyMasterToLastPage.enabled = false;
-        }
-        
-        // Menu déroulant pour sélectionner le gabarit
-        var masterGroup = tabStyles.add("group");
-        masterGroup.orientation = "row";
-        masterGroup.alignChildren = "center";
-        masterGroup.add("statictext", undefined, I18n.__("masterLabel"));
-        var masterDropdown = masterGroup.add("dropdownlist", undefined, masterNames);
-        masterDropdown.preferredSize.width = 150;
-        masterDropdown.enabled = cbApplyMasterToLastPage.value;
-        
-        // Activer/désactiver le menu déroulant selon la case à cocher
-        cbApplyMasterToLastPage.onClick = function() {
-          masterDropdown.enabled = cbApplyMasterToLastPage.value;
-        };
-        
-        // Sélectionner le premier gabarit par défaut
-        if (masterNames.length > 0) {
-          masterDropdown.selection = 0;
-        }
-        
         // Populate dialogControls with references to all dialog controls
         dialogControls.profileDropdown = profileDropdown;
         dialogControls.noteStyleOpt = noteStyleOpt;
@@ -4449,11 +4040,6 @@
         dialogControls.addThousandsSepOpt = addThousandsSepOpt;
         dialogControls.cbUseComma = cbUseComma;
         dialogControls.cbExcludeYears = cbExcludeYears;
-        dialogControls.cbEnableStyleAfter = cbEnableStyleAfter;
-        dialogControls.triggerCheckboxes = triggerCheckboxes;
-        dialogControls.targetStyleDropdown = targetStyleDropdown;
-        dialogControls.cbApplyMasterToLastPage = cbApplyMasterToLastPage;
-        dialogControls.masterDropdown = masterDropdown;
 
         // Helper to get current language profile ID from dropdown
         function getSelectedProfileId() {
@@ -4549,14 +4135,6 @@
 
         if (dialogResult == 1) {
           try {
-            // Collecter les styles déclencheurs sélectionnés
-            var selectedTriggerStyles = [];
-            for (var i = 0; i < triggerCheckboxes.length; i++) {
-              if (triggerCheckboxes[i].value && i < allParaStyles.length) {
-                selectedTriggerStyles.push(allParaStyles[i]);
-              }
-            }
-            
             // Récupérer les options du module SieclesModule
             var sieclesOptions = {
               formaterSiecles: cbFormatSiecles.value,
@@ -4605,17 +4183,7 @@
               removeSpacesStartParagraph: cbRemoveSpacesStartParagraph.value,
               removeSpacesEndParagraph: cbRemoveSpacesEndParagraph.value,
               removeTabs: cbRemoveTabs.value,
-              
-              // Nouvelles options pour les styles
-              enableStyleAfter: cbEnableStyleAfter.value,
-              triggerStyles: selectedTriggerStyles,
-              targetStyle: targetStyleDropdown.selection && allParaStyles.length > 0 ? 
-                allParaStyles[targetStyleDropdown.selection.index] : null,
-                
-              applyMasterToLastPage: cbApplyMasterToLastPage.value,
-              selectedMaster: masterDropdown.selection && allMasters.length > 0 ? 
-                allMasters[masterDropdown.selection.index] : null,
-              
+
               // Options pour le module SieclesModule
               sieclesOptions: sieclesOptions,
               
@@ -4688,8 +4256,6 @@
               if (options.applyExposantStyle && options.exposantStyleName) totalSteps++;
               if (options.convertEllipsis) totalSteps++;
               if (options.replaceApostrophes) totalSteps++;
-              if (options.enableStyleAfter && options.triggerStyles && options.triggerStyles.length > 0 && options.targetStyle) totalSteps++;
-              if (options.applyMasterToLastPage && options.selectedMaster) totalSteps++;
               if (options.sieclesOptions && (options.sieclesOptions.formaterSiecles || options.sieclesOptions.formaterOrdinaux || options.sieclesOptions.formaterReferences || options.sieclesOptions.formaterEspaces)) totalSteps++;
               if (options.formatNumbers) totalSteps++;
 
@@ -4792,25 +4358,6 @@
                   if (options.replaceApostrophes) {
                       ProgressBar.update(++progress, I18n.__("progressReplaceApostrophes"));
                       Corrections.replaceApostrophes(doc);
-                  }
-                  
-                  // Nouvelle correction : application de style après déclencheurs
-                  if (options.enableStyleAfter && 
-                      options.triggerStyles && 
-                      options.triggerStyles.length > 0 && 
-                      options.targetStyle) {
-                      ProgressBar.update(++progress, I18n.__("progressApplyConditionalStyles"));
-                      Corrections.applyStyleAfterTriggers(doc, options.triggerStyles, options.targetStyle);
-                  }
-                  
-                  // Application du gabarit à la dernière page
-                  if (options.applyMasterToLastPage && options.selectedMaster) {
-                      ProgressBar.update(++progress, I18n.__("progressApplyMasterToLastPage"));
-                      // Stocker le nom du gabarit plutôt que l'objet gabarit lui-même
-                      var masterName = options.selectedMaster.name;
-                      
-                      // Appliquer en utilisant le nom du gabarit
-                      applyMasterToLastPageStandalone(doc, masterName);
                   }
                   
                   // Intégration du module SieclesModule
@@ -5964,11 +5511,6 @@
                         removeSpacesStartParagraph: true,
                         removeSpacesEndParagraph: true,
                         removeTabs: true,
-                        enableStyleAfter: false,
-                        triggerStyles: [],
-                        targetStyle: null,
-                        applyMasterToLastPage: false,
-                        selectedMaster: null,
                         sieclesOptions: {
                             formaterSiecles: hasSieclesStyles && !!(centuries.enabled),
                             formaterOrdinaux: hasSieclesStyles && !!(centuries.enabled),
@@ -6067,54 +5609,6 @@
             }
         } catch (e) {
             alert(I18n.__("errorUnrecoverable"));
-        }
-    }
-    
-    /**
-     * Fonction autonome pour appliquer un gabarit à la dernière page
-     */
-    function applyMasterToLastPageStandalone(document, masterName) {
-        try {
-            if (!document) {
-                alert(I18n.__("errorInvalidDocument"));
-                return false;
-            }
-
-            if (!masterName) {
-                alert(I18n.__("errorInvalidMasterName"));
-                return false;
-            }
-            
-            // Accéder à la dernière page 
-            var pageCount = document.pages.length;
-            if (pageCount <= 0) {
-                return false;
-            }
-            
-            var lastPage = document.pages.item(pageCount - 1);
-            if (!lastPage || !lastPage.isValid) {
-                return false;
-            }
-            
-            // Trouver le gabarit correspondant DANS CE DOCUMENT
-            var targetMaster = null;
-            for (var i = 0; i < document.masterSpreads.length; i++) {
-                if (document.masterSpreads[i].name === masterName) {
-                    targetMaster = document.masterSpreads[i];
-                    break;
-                }
-            }
-            
-            if (!targetMaster) {
-                alert(I18n.__("errorMasterNotFound", masterName, document.name));
-                return false;
-            }
-
-            lastPage.appliedMaster = targetMaster;
-            return true;
-        } catch (error) {
-            alert(I18n.__("errorApplyMaster", error.message));
-            return false;
         }
     }
 })();
